@@ -338,12 +338,21 @@ $W(\us,u)$ is
 \be
 W(\us,u)=u(b)\varphi_\us(b)-u(a)\varphi_\us(a) -\left( \us(b)\varphi_u(b) -\us(a)\varphi_u(a)\right)
 \ee
-where we recall that
-\begin{align}
-\varphi_u   &= - k \grad u   \cdot \vec{n} \\
-\varphi_\us &= + k \grad \us \cdot \vec{n} 
-\end{align}
-[{\bf caveat:} change of sign]. 
+%where we recall that
+%\begin{align}
+%\varphi_u   &= - k \grad u   \cdot \vec{n} \\
+%\varphi_\us &= + k \grad \us \cdot \vec{n} 
+%\end{align}
+%[{\bf caveat:} change of sign]. 
+I prefer a more concise notation. Introduction
+\be
+\mc{L} = n \cdot D\grad
+\ee where $n$ is the {\bf outward} unit normal vector on the boundary, 
+we have
+\be
+(\us, \O(u,p)u) + \langle \us, \mc{L} u \rangle = (u, \O^\ast(u,p)\us) + \langle u, \mc{L} \us \rangle 
+\ee
+with $\langle \  , \, \rangle = \int_{\Gamma}\ $.
 
 Thus,
 \be
@@ -356,7 +365,58 @@ because $W$ only needs boundary values, which should be known.
 \subsubsection{Coupled nonlinear problem: radiation diffusion and material temperature}
 %----------------------
 
-A ``tad'' more complex. Take a stab at it.
+% A ``tad'' more complex. Take a stab at it.
+
+The operators of the forward equation are
+\be
+\mc{A} = 
+\begin{pmatrix}
+\frac{1}{c} &  0 \\
+0           &   C_p
+\end{pmatrix}
+\qquad
+\mc{B} = 
+\begin{pmatrix}
+\mc{B}_E      &  \mc{B}_{ET} \\
+\mc{B}_{TE}   &  \mc{B}_{T} 
+\end{pmatrix}
+\ee
+with 
+\begin{align}
+\mc{B}_{E}  &= -\div D_E \grad + \sigma_a \\
+\mc{B}_{ET} &= -\sigma_a acT^3 \\
+\mc{B}_{T}  &= -\div D_T \grad + \sigma_a acT^3 \\
+\mc{B}_{TE} &= \sigma_a  
+\end{align}
+
+The duality expressions are:
+\begin{itemize}
+
+\item
+\be
+(E^\ast, \mc{B}_{E}E) + \langle E^\ast, \mc{L}_E E \rangle = (E, \mc{B}_{E}^\ast E^\ast) + \langle E, \mc{L}_E E^\ast \rangle 
+\ee
+with $\mc{B}_{E}^\ast = \mc{B}_{E}$ and $\mc{L}_E = n \cdot D_E \grad$.
+
+\item
+\be
+(T^\ast, \mc{B}_{T}T) + \langle T^\ast, \mc{L}_T T \rangle = (T, \mc{B}_{T}^\ast T^\ast) + \langle T, \mc{L}_T T^\ast \rangle 
+\ee
+with $\mc{B}_{T}^\ast = \mc{B}_{T}$ and $\mc{L}_T = n \cdot D_T \grad$.
+
+\item
+\be
+(E^\ast, \mc{B}_{ET}T)  = (T, \mc{B}_{TE}^\ast E^\ast) 
+\ee
+with $\mc{B}_{TE}^\ast = \mc{B}_{ET}$
+
+\item
+\be
+(T^\ast, \mc{B}_{TE}E)  = (E, \mc{B}_{ET}^\ast T^\ast) 
+\ee
+with $\mc{B}_{ET}^\ast = \mc{B}_{TE}$
+
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,566 @@
+\documentclass[11pt]{article}
+% PACKAGES
+\usepackage{graphicx}
+\usepackage{tabls}
+\usepackage{afterpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsbsy}
+\usepackage{epsfig}
+%\usepackage{cites}
+\usepackage{epsf}
+\usepackage{float} 
+\usepackage{color} 
+
+\usepackage{array}
+\usepackage[section]{placeins} % force à mettre l'image où on veut
+\usepackage{lscape} %utilisation du mode paysage
+\usepackage{xspace}
+
+%\usepackage[pdftex,bookmarks=true]{hyperref}
+%\usepackage{hyperref}
+\usepackage{url}
+\usepackage{verbatim}
+%\usepackage[all]{hypcap}
+
+\usepackage[labelsep=quad]{caption} % needed by the breakalgo environment
+
+\usepackage{ifthen}
+\usepackage{subfig}
+
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{listings}
+%\usepackage[noprefix]{nomencl}  % for nomenclature
+
+%-----------------------------------------------------------
+% NEW  DEFINITIONS
+% margin par
+\newcommand{\mt}[1]{\marginpar{ {\footnotesize #1} }}
+% vector shortcuts
+\newcommand{\vo}{\vec{\Omega}}
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\vnk}{\vec{\mathbf{n}}}
+
+% More Quick Commands
+% 
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+
+\renewcommand{\div}{\vec{\nabla}\! \cdot \!}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\oa}[1]{\fn{\frac{1}{3}\hat{\Omega}\!\cdot\!\overrightarrow{A_{#1}}}}
+
+% common reference commands
+\newcommand{\eqt}[1]{Eq.~(\ref{#1})}                     % equation
+\newcommand{\fig}[1]{Fig.~\ref{#1}}                      % figure
+\newcommand{\tbl}[1]{Table~\ref{#1}}                     % table
+
+%
+% Equation beginnings and endings
+%
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\beas}{\begin{eqnarray*}}
+\newcommand{\eeas}{\end{eqnarray*}}
+\newcommand{\bdm}{\begin{displaymath}}
+\newcommand{\edm}{\end{displaymath}}
+%
+\newcommand{\vj}{\vec{J}}
+\newcommand{\sa}[1]{\sigma_{a #1}}
+\newcommand{\vl}{\vec{\lambda}}
+\newcommand{\vdj}{\delta \vec{J}}
+\newcommand{\dphi}{\delta \Phi}
+\newcommand{\lmax}{\ensuremath{L_{\textit{max}}}\xspace}
+\newcommand{\pmax}{\ensuremath{p_{\textit{max}}}\xspace}
+\newcommand{\sddx}{\frac{d}{dx}}
+\newcommand{\sddt}{\frac{d}{dt}}
+\newcommand{\der}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\vF}{\vec{F}}
+
+\renewcommand{\O}{\mathcal{O}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\us}{{u^\ast}}
+
+\newcommand{\ti}{ {t^{\text{init}}} }
+\newcommand{\te}{ {t^{\text{end }}} }
+
+%-----------------------------------------------------------
+\addtolength{\hoffset}{-2.0cm}
+\addtolength{\textwidth}{4cm}
+\addtolength{\textheight}{4.0cm}
+\addtolength{\voffset}{-1.8cm}
+\addtolength{\headsep}{-0.3cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.8ex plus 0.5ex minus 0.2ex}
+
+\linespread{1.1}
+%-----------------------------------------------------------
+\begin{document}
+%-----------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+{\huge Adjoint-based sensitivity coefficients for nonlinear problems}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Governing PDE}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------
+\subsubsection{General Case}
+%----------------------
+
+Consider an operator $\O$ dependent on a set of parameters $p$. The operator is assumed
+to be nonlinear, so it also depend on the solution $u$. Let $X$ be the domain and $\partial X=\Gamma$
+its boundary. We denote by the subscript $0$ the unperturbed state. $u_0$ is solution of the following
+sets of equations:
+\begin{align}
+\O(u_0,p_0) u_0 &= Q(p_0), \qquad x\in X \label{eq:gov} \\
+\mc{C}(u_0,p_0) u_0 &=u_\Gamma(p_0), \qquad x \in \partial X=\Gamma \label{eq:BCgov}
+\end{align}
+
+When dealing with transient problems, I still single out the time derivative as follows:
+\be
+\O(u,p) = \mc{A}(u,p)\partial_t + \mc{B}(u,p)
+\ee
+
+Later, we will consider a perturbation of the form
+\be
+p = p_0 + \epsilon p_1
+\ee
+that leads to a perturbation in $u$
+\be
+u=u_0 + \epsilon u_1 + \ldots
+\ee
+
+%----------------------
+\subsubsection{Linear diffusion}
+%----------------------
+
+For simplicity, consider the linear 1-g neutron diffusion (in a 1-D slab for the numerical results)
+
+\be
+-\div D(p) \grad u  + \Sigma_a(p) u = Q(p) \qquad \text{for } a<x<b
+\ee
+with vacuum BC
+\be
+u(a)=u(b)=0
+\ee
+
+A transient version of this problem is
+\be
+\frac{1}{v(p)} \partial_t u -\div D(p) \grad u  + \Sigma_a(p) u = Q(p) \qquad \text{for } a \le x \le b
+\ee
+with given initial conditions $u^{\text{init}}(x,0)$.
+
+%----------------------
+\subsubsection{Nonlinear heat conduction}
+%----------------------
+
+For simplicity, consider the nonlinear heat conduction (in a 1-D slab for the numerical results)
+\be
+-\div k(u,p)  \grad u = q \qquad \text{for } a<x<b
+\label{eq:heat_conduction}
+\ee
+with boundary conditions
+\begin{align}
+u(a) &= u^D \\
+\varphi_u(b) &=  -k \grad u \cdot \vec{n} |_{x=b}= -k \partial_n u |_{x=b} = \phi^N
+\end{align}
+(a Dirichlet BC at $a$ and a Neumann BC at $b$).
+
+Let the operator $\O$ be such that
+\be
+\O(u,p) u = -\div k(u)  \grad u
+\ee
+that is, $\O=-\div k(u)  \grad \cdot$, and $p$ be an uncertain parameter (here, the conductivity 
+$\longrightarrow k(u,p)$). To give an idea, we can take as an example 
+\be
+k(u,\alpha,\,\beta,\gamma) = \frac{\alpha}{\beta + \gamma u}
+\ee
+where the coefficients $\alpha,\,\beta,$ and $\gamma$ are the ``uncertain'' parameters.
+
+
+A transient version of this problem is
+\be
+\rho C_p(p) \partial_t u -\div k(u,p)  \grad u = q \qquad \text{for } a \le x \le b
+\label{eq:heat_conduction_transient}
+\ee
+with boundary conditions
+\begin{align}
+u(a,t) &= u^D(t) \\
+\varphi_u(b,t) &=  -k \grad u \cdot \vec{n} |_{x=b}= -k \partial_n u |_{x=b} = \phi^N(t)
+\end{align}
+
+
+and a given initial condition $u^{\text{init}}(x,0)$.
+
+%----------------------
+\subsubsection{Coupled nonlinear problem: radiation diffusion and material temperature}
+%----------------------
+
+\begin{align}
+\frac{1}{c} \partial_t E - \div D_E(T,E) \grad E + \sigma_a(T)(E-acT^4) &= 0 \\
+C_p \partial_t T -\div D_T(T) \grad T +\sigma_a(T)(acT^4-E)            &= 0
+\end{align}
+
+supplemented with appropriate boundary and initial conditions.
+
+I have omitted to explicitly mention at possible dependence on a generic parameter $p$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quantity of interest: QoI}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------
+\subsubsection{Steady-state QoI}
+%----------------------
+
+We are interested in the following quantity of interest
+\be
+QoI[u,p] = (\sigma, u) = \int_X  dx \, \sigma(x)u(x)
+\ee
+
+Examples of $\sigma(x)$:
+\begin{table*}[!h]
+	
+	\begin{center}
+		\begin{tabular}{|l||c|}
+		\hline
+	local value at $x_0$ & $\delta(x-x_0)$ \\ \hline
+	derivative value at $x_0$ & $\delta(x-x_0) \frac{\partial}{\partial x}$ \\ \hline
+	average over region of interest $\mathcal{R}$ & $\frac{1}{\tt{meas}(\mathcal{R})} \chi(x)$ with $\chi(x)=1$ if $x\in\mathcal{R}$ and 0 otherwise \\ \hline
+		\end{tabular}
+	\end{center}
+	\caption{Examples of response functions}
+	\label{tab:ExamplesOfResponseFunctions}
+\end{table*}
+
+%----------------------
+\subsubsection{Transient QoI}
+%----------------------
+
+For transient problems, this becomes
+\be
+QoI[u,p] = (\sigma, u) = \int_\ti ^\te dt \int_X  dx \, \sigma(x,t)u(x,t)
+\ee
+
+The time dependence of $\sigma(x,t)$ can be 
+\begin{itemize}
+\item $\frac{1}{t^{\text{end}}-t^{\text{init}}}$: i.e., time average over the entire simulation time 
+\item $\frac{1}{t_2-t_1}$: i.e., time average over a subset over the simulation period
+\item $\delta(t-t_0)$: i.e., an instantaneous quantity at time $t_0$
+\item \ldots
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adjoint operator}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------
+\subsubsection{General Case}
+%----------------------
+
+Multiply \eqt{eq:gov} by $\us(x,t)$ and integrate over space (and time if transient)
+\be
+(\us,\O(u,p)u) = (\O^\ast(u,p)\us,u) + W(\us,u)
+\ee
+where the adjoint (linear) problem is {\bf defined} as
+\be
+\O^\ast(u,p)\us = \sigma
+\ee
+%
+$W(\us,u)$ is the result of integration by parts in space (and time, if transient). 
+
+%----------------------
+\paragraph{Temporal portion of the operator:}
+%----------------------
+
+\be
+(\us,\mc{A} \partial_t u ) 
+=  \int_\ti^\te dt \int_X dx \, \us \mc{A} \partial_t u
+= -\int_\ti^\te dt \int_X dx \, u  \partial_t (\mc{A}\us) + 
+\left. \int_X dx \, u \mc{A} \us \right|_\ti^\te 
+\ee
+
+Note the time reversal.
+If $\mc{A}$ is independent of time, then we also have 
+\be
+(\us,\mc{A} \partial_t u )  
+= -(u , \mc{A} \partial_t \us ) + 
+\left. \int_X dx \, u \mc{A} \us \right|_\ti^\te 
+\ee
+
+%----------------------
+\subsubsection{Linear diffusion}
+%----------------------
+Do it (see below for a worked out example)
+
+%----------------------
+\subsubsection{Nonlinear heat conduction}
+%----------------------
+
+
+Multiply \eqt{eq:gov} by $\us(x)$ and integrate by parts (twice)
+\be
+(\us,\O(u,p)u) = (\O^\ast(u,p)\us,u) + W(\us,u)
+\ee
+where the adjoint (linear) problem is
+\be
+\O^\ast(u,p)\us = -\div k(u)  \grad \us = \sigma
+\ee
+%
+$W(\us,u)$ is
+\be
+W(\us,u)=u(b)\varphi_\us(b)-u(a)\varphi_\us(a) -\left( \us(b)\varphi_u(b) -\us(a)\varphi_u(a)\right)
+\ee
+where we recall that
+\begin{align}
+\varphi_u   &= - k \grad u   \cdot \vec{n} \\
+\varphi_\us &= + k \grad \us \cdot \vec{n} 
+\end{align}
+[{\bf caveat:} change of sign]. 
+
+Thus,
+\be
+QoI[u,p] = (\sigma, u) = (\O^\ast(u,p)\us, u) = (\us,\O(u,p)u) - W(\us,u) = (\us,Q(p)) - W(\us,u)
+\ee
+{\bf Note:} the QoI can be evaluated using $\us$. The fact that $u$ and $\us$ appear in $W$ is ok 
+because $W$ only needs boundary values, which should be known.
+
+%----------------------
+\subsubsection{Coupled nonlinear problem: radiation diffusion and material temperature}
+%----------------------
+
+A ``tad'' more complex. Take a stab at it.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sensitivity coefficients}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Let the ``unperturbed'' state be
+\begin{align}
+\O(u_0,p_0) u_0 &= Q(p_0), \qquad x\in X \\
+\mc{C}(u_0,p_0) u_0 &=u_\Gamma(p_0), \qquad x \in \partial X=\Gamma
+\end{align}
+
+We consider a perturbation
+\be
+p = p_0 + \epsilon p_1
+\ee
+that leads to a perturbation in $u$
+\be
+u=u_0 + \epsilon u_1 + O(\epsilon ^2)
+\ee
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Direct approach}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A solution consists in directly solving
+the perturbed system
+\begin{align}
+\O(u,p) u &= Q(p), \qquad x\in X \\
+\mc{C}(u,p) u &=u_\Gamma(p), \qquad x \in \partial X=\Gamma
+\end{align}
+
+and then an expression for the sensitivity coefficient is:
+\be
+S_p  = \lim_{\epsilon \rightarrow 0^+} \frac{ (\sigma, u_0+\epsilon u_1) - (\sigma, u_0)}{\epsilon} = (\sigma,u_1)
+\ee
+(assuming $\sigma$ independent of $p$). 
+
+If $\sigma$ is {\bf not} independent of $p$, we have
+\be
+S_p  = \lim_{\epsilon \rightarrow 0^+} \frac{ (\sigma(p_0) + \epsilon \partial _p \sigma |_{p_0} p_1, u_0+\epsilon u_1) - (\sigma(p_0), u_0)}{\epsilon} = (\sigma,u_1) +  (\partial _p \sigma p_1, u_0)
+\ee
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adjoint magic}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+From the sensitivity coefficient expression, we would like to have an adjoint operator such that
+\be
+\O^\ast \us = \sigma
+\ee
+so that
+\be
+(\sigma,u_1) = (\O_1^\ast \us , u_1 ) =  ( \us , \O_1 u_1 ) - W_1(\us,u_1)   =  ( \us ,rhs_1 ) - W_1(\us,u_1)  
+\ee
+where $W_1$ will denote the concomitant associated with $\O_1$.\\
+
+What is that special equation for the forward perturbation $u_1$ whose adjoint operator we need?
+Note $u_1$ satisfies $\O_1 u_1=rhs_1$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Equation for the perturbation $u_1=D_pu$}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+The equation for the perturbation in $u$, i.e., the $u_1$ unknown, is simply obtained by
+taking the difference of the perturbed and unperturbed systems, dividing it by $\epsilon$, and 
+letting $\epsilon \rightarrow 0$. This yields:
+\begin{align}
+\O(u_0,p_0) u_1 + \partial_u\O(u_0,p_0;u_1)u_0 + \partial_p \O(u_0,p_0;p_1) u_0 &= \partial_p Q p_1  \\
+\mc{C}(u_0,p_0) u_1 +  \partial_u \mc{C}(u_0,p_0;u_1)u_0 + \partial_p \mc{C}(u_0,p_0;p_1)u_0  &=\partial_p u_\Gamma p_1
+\end{align}
+%
+where the notation $\partial_u\O(u_0,p_0;u_1)$ means that the operator $\partial_u\O$ is evaluated at
+$(u_0,p_0)$ and acts on $u_1$. 
+
+We have defined:
+\be
+\partial_u\O(u_0,p_0;u_1) 
+\equiv \lim_{\epsilon \rightarrow 0} \frac{\O(u_0+\epsilon u_1,p_0) - \O(u_0,p_0)}{\epsilon} 
+\ee
+and
+\be
+\partial_p\O(u_0,p_0;p_1) 
+\equiv \lim_{\epsilon \rightarrow 0} \frac{\O(u_0,p_0+\epsilon p_1) - \O(u_0,p_0)}{\epsilon} 
+\ee
+
+%----------------------
+\subsubsection{Linear case (linear diffusion)}
+%----------------------
+TO DO. It's simple.
+
+%----------------------
+\subsubsection{Nonlinear case (heat conduction)}
+%----------------------
+Let us go back to our example to try to clarify a bit. What is $\partial_u\O(u_0,p_0;u_1)u_0$?
+From the definition, we have
+\begin{align}
+\partial_u\O(u_0,p_0;u_1) 
+&\equiv \lim_{\epsilon \rightarrow 0} \frac{\O(u_0+\epsilon u_1,p_0) - \O(u_0,p_0)}{\epsilon} \notag \\
+&= \lim_{\epsilon \rightarrow 0} \frac{-\div k(u_0+\epsilon u_1,p_0)\grad \cdot +\div k(u_0,p_0)\grad \cdot}{\epsilon} \notag \\
+&= -\div \partial_u k(u_0,p_0) u_1\grad \cdot 
+\end{align}
+So,
+\be
+\partial_u\O(u_0,p_0;u_1)u_0 =  -\div \left( \partial_u k(u_0,p_0) u_1\grad u_0 \right)
+\ee
+
+Next term: What is $\partial_p\O(u_0,p_0;u_1)u_0$?
+\begin{align}
+\partial_p\O(u_0,p_0;p_1) 
+&\equiv \lim_{\epsilon \rightarrow 0} \frac{\O(u_0,p_0+\epsilon p_1) - \O(u_0,p_0)}{\epsilon} \notag \\
+&= \lim_{\epsilon \rightarrow 0} \frac{-\div k(u_0,p_0+\epsilon p_1)\grad \cdot +\div k(u_0,p_0)\grad \cdot}{\epsilon} \notag \\
+&= -\div \partial_p k(u_0,p_0) p_1\grad \cdot 
+\end{align}
+So,
+\be
+\partial_p\O(u_0,p_0;u_1)u_0 =  -\div \left( \partial_p k(u_0,p_0) p_1\grad u_0 \right)
+\ee
+
+
+%----------------------
+\subsubsection{Closing on the adjoint magic}
+%----------------------
+
+Going back to the general problem and using the $\O_1$ notation to simplify the 
+expressions, we have the following {\bf linear} system for $u_1$
+\begin{align}
+\O_1(u_0,p_0) u_1 &= -\partial_p \O(u_0,p_0;p_1) u_0 +\partial_p Q p_1 \label{eq:pertsystV}\\
+\mc{C}_1(u_0,p_0) u_1 &= -\partial_p \mc{C}(u_0,p_0;p_1) u_0 +\partial_p u_\Gamma p_1 \label{eq:pertsystBD}
+\end{align}
+with
+\be
+\O_1(u_0,p_0) u_1 \equiv \O(u_0,p_0) u_1 + \partial_u \O(u_0,p_0;u_1)  u_0
+\ee
+\be
+\mc{C}_1(u_0,p_0) u_1 \equiv \mc{C}(u_0,p_0) u_1 + \partial_u \mc{C}(u_0,p_0;u_1)  u_0
+\ee
+
+%----------------------
+\subsection{Back to the adjoint}
+%----------------------
+
+The adjoint equations of \eqt{eq:pertsystV} and \eqt{eq:pertsystBD}  are
+%
+\begin{align}
+\O_1^\ast(u_0,p_0) u^\ast     &= \sigma  \label{eq:adjV} \\ % e_u
+\mc{C}^\ast_1(u_0,p_0) u^\ast &= u^\ast_\Gamma \label{eq:adjBD} 
+\end{align}
+%with $u^\ast_\Gamma(p)$.
+
+Since the $\O_1$ and $\mc{C}_1$ operators are linear, their transpose versions are easy to obtain. 
+We also have a duality relation for these operators:
+\be
+(\us,\O_1(u,p)u) = (\O_1^\ast(u,p)\us,u) + W_1(\us,u)
+\ee
+Note, the concomitant is denoted by $W_1$ and $W_1 \ne W$.
+
+The sensitivity coefficient is 
+%
+\begin{align}
+S_p &= (\sigma, u_1) \notag \\
+&= (\O_1^\ast(u_0,p_0) \us, u_1)  \notag \\
+&= ( \us, \O_1(u_0,p_0) u_1) -W_1(\us,u_1) \notag \\
+&= ( \us, -\partial_p \O(u_0,p_0;p_1) u_0 +\partial_p Q p_1) -W_1(\us,u_1) 
+\end{align}
+
+With our heat conduction example, we have
+\be
+S_p = \left( \us,  -\div \left( \partial_p k(u_0,p_0) p_1\grad u_0 \right) +\partial_p Q p_1 \right) -W_1(\us,u_1) 
+\label{eq:dotprod}
+\ee
+
+Evaluating $S_p$ requires, therefore,
+\ben
+\item
+computing $\us$ from \eqt{eq:adjV}  and \eqt{eq:adjBD} 
+\item
+evaluating scalar products in \eqt{eq:dotprod}
+\item
+what about $u_1$ at the boundary? (it is used in $W_1$ but it is 
+also part of the specifications of the problem, so it must be known!)
+\item
+practically, $p_1$ is user-specified.
+\een
+
+%\begin{align}
+%S_p = D_p\mc{F}[u_0,p_0;u_1,p_1] &= \lim_{\epsilon \rightarrow 0^+} \frac{\mc{F}[u+\epsilon u_1,p_0+\epsilon p_1] - \mc{F}[u_0,p_0] }{\epsilon} \notag \\
+%&= \partial_u \mc{F}[u_0,p_0;u_1] + \partial_p \mc{F}[u_0,p_0;p_1] 
+%\end{align}
+%$\partial_u \mc{F}[u_0,p_0;u_1]$ acts on $u_1$ and is evaluated at $u_0,p_0$.\\
+%$\partial_p \mc{F}[u_0,p_0;p_1]$ acts on $p_1$ and is evaluated at $u_0,p_0$.
+%
+%By definition of $\mc{F}$, we have
+%\begin{align}
+%S_p = (\B^\ast(u,p)\us, u) &= \left(\us,D_p(\B(u,p)u)\right) - W(\us,u_1) \notag\\
+%&= \left(\us,D_p \B(u,p)u_0\right) + \left(\us,\B(u_0,p_0)u_1\right) - W(\us,u_1) \notag\\
+%&= \left(\us,(\partial_u \B(u,p))u_0\right) + \left(\us,(\partial_p \B(u,p))u_0\right) + \left(\us,\B(u_0,p_0)u_1\right) - W(\us,u_1) \notag\\
+%\end{align}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------
+\end{document}

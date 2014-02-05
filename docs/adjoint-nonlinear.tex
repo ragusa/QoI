@@ -238,7 +238,7 @@ where the coefficients $\alpha,\,\beta,$ and $\gamma$ are the ``uncertain'' para
 
 \begin{align}
 \frac{1}{c} \partial_t E - \div D_E(T,E) \grad E + \sigma_a(T)(E-acT^4) &= 0 \\
-C_p \partial_t T -\div D_T(T) \grad T +\sigma_a(T)(acT^4-E)            &= 0
+C_v \partial_t T -\div D_T(T) \grad T +\sigma_a(T)(acT^4-E)            &= 0
 \end{align}
 
 supplemented with appropriate boundary and initial conditions.
@@ -427,7 +427,7 @@ The operators of the forward equation are
 \mc{A} = 
 \begin{pmatrix}
 \frac{1}{c} &  0 \\
-0           &   C_p
+0           &   C_v
 \end{pmatrix}
 \qquad
 \mc{B} = 
@@ -477,9 +477,9 @@ Finally, the adjoint equations are:
 
 \begin{align}
 -\frac{1}{c} \partial_t E^\ast - \div D_E(T,E) \grad E^\ast + \sigma_a(T)(E^\ast-T^\ast) &= 0 \\
--C_p \partial_t T^\ast -\div D_T(T) \grad T^\ast +\sigma_a(T)acT^3(T^\ast-E^\ast)            &= 0
+-C_v \partial_t T^\ast -\div D_T(T) \grad T^\ast +\sigma_a(T)acT^3(T^\ast-E^\ast)            &= 0
 \end{align}
-(assuming $C_p$ constant)
+(assuming $C_v$ constant)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

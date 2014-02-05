@@ -154,7 +154,7 @@ Later, we will consider a perturbation of the form
 \be
 p = p_0 + \epsilon p_1
 \ee
-that leads to a perturbation in $u$
+that will lead to a perturbation in $u$
 \be
 u=u_0 + \epsilon u_1 + \ldots
 \ee
@@ -163,7 +163,7 @@ u=u_0 + \epsilon u_1 + \ldots
 \subsubsection{Linear diffusion}
 %----------------------
 
-For simplicity, consider the linear 1-g neutron diffusion (in a 1-D slab for the numerical results)
+Consider the linear 1-g neutron diffusion (in a 1-D slab for the numerical results)
 
 \be
 -\div D(p) \grad u  + \Sigma_a(p) u = Q(p) \qquad \text{for } a<x<b
@@ -179,13 +179,18 @@ A transient version of this problem is
 \ee
 with given initial conditions $u^{\text{init}}(x,0)$.
 
+Here, we have
+\be 
+\mc{A} = \frac{1}{v} \qquad  \mc{B} =  -\div D \grad   + \Sigma_a 
+\ee
+
 %----------------------
 \subsubsection{Nonlinear heat conduction}
 %----------------------
 
-For simplicity, consider the nonlinear heat conduction (in a 1-D slab for the numerical results)
+Consider the nonlinear heat conduction (in a 1-D slab for the numerical results)
 \be
--\div k(u,p)  \grad u = q \qquad \text{for } a<x<b
+-\div k(u,p)  \grad u = q \qquad \text{for } a \le x \le b
 \label{eq:heat_conduction}
 \ee
 with boundary conditions
@@ -194,18 +199,6 @@ u(a) &= u^D \\
 \varphi_u(b) &=  -k \grad u \cdot \vec{n} |_{x=b}= -k \partial_n u |_{x=b} = \phi^N
 \end{align}
 (a Dirichlet BC at $a$ and a Neumann BC at $b$).
-
-Let the operator $\O$ be such that
-\be
-\O(u,p) u = -\div k(u)  \grad u
-\ee
-that is, $\O=-\div k(u)  \grad \cdot$, and $p$ be an uncertain parameter (here, the conductivity 
-$\longrightarrow k(u,p)$). To give an idea, we can take as an example 
-\be
-k(u,\alpha,\,\beta,\gamma) = \frac{\alpha}{\beta + \gamma u}
-\ee
-where the coefficients $\alpha,\,\beta,$ and $\gamma$ are the ``uncertain'' parameters.
-
 
 A transient version of this problem is
 \be
@@ -218,8 +211,26 @@ u(a,t) &= u^D(t) \\
 \varphi_u(b,t) &=  -k \grad u \cdot \vec{n} |_{x=b}= -k \partial_n u |_{x=b} = \phi^N(t)
 \end{align}
 
-
 and a given initial condition $u^{\text{init}}(x,0)$.
+
+Here, we have
+\be 
+\mc{A} = \rho C_p \qquad  \mc{B} =  -\div k(u)  \grad
+\ee
+
+%Let the operator $\O$ be such that
+%\be
+%\O(u,p) u = -\div k(u)  \grad u
+%\ee
+%that is, $\O=-\div k(u)  \grad \cdot$, and $p$ be an uncertain parameter (here, 
+Say the conductivity is the uncertain parameter ($\longrightarrow k(u,p)$). 
+To give an idea, we can take, for example, 
+\be
+k(u,\alpha,\,\beta,\gamma) = \frac{\alpha}{\beta + \gamma u}
+\ee
+where the coefficients $\alpha,\,\beta,$ and $\gamma$ are the ``uncertain'' parameters.
+
+
 
 %----------------------
 \subsubsection{Coupled nonlinear problem: radiation diffusion and material temperature}
@@ -289,14 +300,20 @@ The time dependence of $\sigma(x,t)$ can be
 
 Multiply \eqt{eq:gov} by $\us(x,t)$ and integrate over space (and time if transient)
 \be
+\label{eq:duality}
 (\us,\O(u,p)u) = (\O^\ast(u,p)\us,u) + W(\us,u)
 \ee
-where the adjoint (linear) problem is {\bf defined} as
+This defines how to construct the adjoint problem.
+$W(\us,u)$ is the concomitant and is the result of integration by parts in space (and time, if transient). 
+\eqt{eq:duality} is called a duality relation.
+
+
+Later, when it will be time to actually solve for the adjoint solution, $\us$, the following problem will be
+posed, where the rhs will be the characteristic function appearing in the QoI:
 \be
 \O^\ast(u,p)\us = \sigma
 \ee
 %
-$W(\us,u)$ is the result of integration by parts in space (and time, if transient). 
 
 %----------------------
 \paragraph{Temporal portion of the operator:}
@@ -320,12 +337,35 @@ If $\mc{A}$ is independent of time, then we also have
 %----------------------
 \subsubsection{Linear diffusion}
 %----------------------
-Do it (see below for a worked out example)
+
+Recall that $ \mc{B} =  -\div D \grad   + \Sigma_a $. We have for the steady-state case:
+\be
+(\us,\mc{B}u) = (\mc{B}^\ast\us,u) + W(\us,u)
+\ee
+where
+\be
+\mc{B}^\ast= \mc{B} =  -\div D \grad   + \Sigma_a 
+\ee
+\be
+W(\us,u) = \langle u, \mc{L} \us \rangle  -  \langle \us, \mc{L} u \rangle
+\ee
+with $\mc{L} = n \cdot D\grad$ and $\langle \  , \, \rangle = \int_{\Gamma}\ $.
+
+
+For the transient case (recall that $\mc{A} = \frac{1}{v}$), we have the following duality relation
+\be
+(\us,\mc{A}\partial_t u + \mc{B}u) = (-\mc{A}\partial_t \us +\mc{B}^\ast\us,u) + W(\us,u) + \left. \int_X \, u \mc{A} \us \right|_\ti^\te 
+\ee
+and the adjoint operator is:
+\be
+\O^\ast \us = -\frac{1}{v} \partial_t \us  -\div D \grad \us  + \Sigma_a \us 
+\ee
 
 %----------------------
 \subsubsection{Nonlinear heat conduction}
 %----------------------
 
+\paragraph{Steady state} 
 
 Multiply \eqt{eq:gov} by $\us(x)$ and integrate by parts (twice)
 \be
@@ -338,7 +378,7 @@ where the adjoint (linear) problem is
 %
 $W(\us,u)$ is
 \be
-W(\us,u)=u(b)\varphi_\us(b)-u(a)\varphi_\us(a) -\left( \us(b)\varphi_u(b) -\us(a)\varphi_u(a)\right)
+W(\us,u) = u(b)\varphi_\us(b)-u(a)\varphi_\us(a) -\left( \us(b)\varphi_u(b) -\us(a)\varphi_u(a)\right)
 \ee
 %where we recall that
 %\begin{align}
@@ -346,7 +386,7 @@ W(\us,u)=u(b)\varphi_\us(b)-u(a)\varphi_\us(a) -\left( \us(b)\varphi_u(b) -\us(a
 %\varphi_\us &= + k \grad \us \cdot \vec{n} 
 %\end{align}
 %[{\bf caveat:} change of sign]. 
-I prefer a more concise notation. Introduction
+I prefer a more concise notation. Introducing
 \be
 \mc{L} = n \cdot D\grad
 \ee where $n$ is the {\bf outward} unit normal vector on the boundary, 
@@ -358,11 +398,24 @@ with $\langle \  , \, \rangle = \int_{\Gamma}\ $.
 
 Thus,
 \be
+W(\us,u) = \langle u, \mc{L} \us \rangle  -  \langle \us, \mc{L} u \rangle
+\ee
+and the steady state QoI is given by 
+\be
 QoI[u,p] = (\sigma, u) = (\O^\ast(u,p)\us, u) = (\us,\O(u,p)u) - W(\us,u) = (\us,Q(p)) - W(\us,u)
 \ee
 {\bf Note:} the QoI can be evaluated using $\us$. The fact that $u$ and $\us$ appear in $W$ is ok 
 because $W$ only needs boundary values, which should be known.
 
+\paragraph{Transient} 
+For the transient case (recall that $\mc{A} = \rho C_p$), we have the following duality relation
+\be
+(\us,\mc{A}\partial_t u + \mc{B}u) = (-\partial_t (\mc{A}\us) +\mc{B}^\ast\us,u) + W(\us,u) + \left. \int_X \, u \mc{A} \us \right|_\ti^\te 
+\ee
+and the adjoint operator is:
+\be
+\O^\ast \us = - \partial_t (\rho C_p \us )  -\div k(u) \grad \us  
+\ee
 %----------------------
 \subsubsection{Coupled nonlinear problem: radiation diffusion and material temperature}
 %----------------------
@@ -388,7 +441,7 @@ with
 \mc{B}_{E}  &= -\div D_E \grad + \sigma_a \\
 \mc{B}_{ET} &= -\sigma_a acT^3 \\
 \mc{B}_{T}  &= -\div D_T \grad + \sigma_a acT^3 \\
-\mc{B}_{TE} &= \sigma_a  
+\mc{B}_{TE} &= -\sigma_a  
 \end{align}
 
 The duality expressions are:
@@ -419,6 +472,14 @@ with $\mc{B}_{TE}^\ast = \mc{B}_{ET}$
 with $\mc{B}_{ET}^\ast = \mc{B}_{TE}$
 
 \end{itemize}
+
+Finally, the adjoint equations are:
+
+\begin{align}
+-\frac{1}{c} \partial_t E^\ast - \div D_E(T,E) \grad E^\ast + \sigma_a(T)(E^\ast-T^\ast) &= 0 \\
+-C_p \partial_t T^\ast -\div D_T(T) \grad T^\ast +\sigma_a(T)acT^3(T^\ast-E^\ast)            &= 0
+\end{align}
+(assuming $C_p$ constant)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -469,7 +530,7 @@ S_p  = \lim_{\epsilon \rightarrow 0^+} \frac{ (\sigma(p_0) + \epsilon \partial _
 
 From the sensitivity coefficient expression, we would like to have an adjoint operator such that
 \be
-\O^\ast \us = \sigma
+\O^\ast_1 \us = \sigma
 \ee
 so that
 \be

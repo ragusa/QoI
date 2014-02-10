@@ -1,0 +1,163 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.0'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      2925,        104]*)
+(*NotebookOutlinePosition[      3573,        126]*)
+(*  CellTagsIndexPosition[      3529,        122]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[{
+    \(\(Clear[q, Le, uL, uR];\)\), "\[IndentingNewLine]", 
+    \(\[Alpha] = \(-q\)/2; \[Beta] = \((uR - uL - Le*Le*\[Alpha])\)/
+        Le; \[Gamma] = uL;\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(qoi = 
+      Simplify[\[Integral]\_0\%Le\((\[Alpha]*x*x + \[Beta]*
+                  x + \[Gamma])\) \[DifferentialD]x]\)], "Input"],
+
+Cell[BoxData[
+    \(1\/12\ Le\ \((Le\^2\ q + 6\ \((uL + uR)\))\)\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Simplify[\[Alpha]*Le*Le/3 + \[Beta]*Le/2 + \[Gamma]]\)], "Input"],
+
+Cell[BoxData[
+    \(1\/12\ \((Le\^2\ q + 6\ \((uL + uR)\))\)\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\(q = 3; Le = 10; uL = 0; uR = 0; qoi\)\(\[IndentingNewLine]\)
+    \)\)], "Input"],
+
+Cell[BoxData[
+    \(250\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Clear[q, Le, uL, uR]; q = 3; Le = 10; uL = 1; uR = 1; qoi\)], "Input"],
+
+Cell[BoxData[
+    \(260\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Clear[q, Le, uL, uR]; q = 3; Le = 10; uL = 1; uR = 0; qoi\)], "Input"],
+
+Cell[BoxData[
+    \(255\)], "Output"]
+}, Open  ]]
+},
+FrontEndVersion->"5.0 for Microsoft Windows",
+ScreenRectangle->{{0, 1920}, {0, 1103}},
+WindowSize->{487, 740},
+WindowMargins->{{Automatic, 332}, {151, Automatic}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1754, 51, 183, 3, 70, "Input"],
+
+Cell[CellGroupData[{
+Cell[1962, 58, 152, 3, 42, "Input"],
+Cell[2117, 63, 78, 1, 42, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2232, 69, 85, 1, 30, "Input"],
+Cell[2320, 72, 74, 1, 42, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2431, 78, 104, 2, 50, "Input"],
+Cell[2538, 82, 37, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2612, 88, 90, 1, 50, "Input"],
+Cell[2705, 91, 37, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2779, 97, 90, 1, 50, "Input"],
+Cell[2872, 100, 37, 1, 29, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

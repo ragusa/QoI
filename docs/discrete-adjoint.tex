@@ -1,0 +1,262 @@
+\documentclass[11pt]{article}
+% PACKAGES
+\usepackage{graphicx}
+\usepackage{tabls}
+\usepackage{afterpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{amstext}
+\usepackage{amsbsy}
+\usepackage{epsfig}
+%\usepackage{cites}
+\usepackage{epsf}
+\usepackage{float} 
+\usepackage{color} 
+
+\usepackage{array}
+\usepackage[section]{placeins} % force à mettre l'image où on veut
+\usepackage{lscape} %utilisation du mode paysage
+\usepackage{xspace}
+
+%\usepackage[pdftex,bookmarks=true]{hyperref}
+%\usepackage{hyperref}
+\usepackage{url}
+\usepackage{verbatim}
+%\usepackage[all]{hypcap}
+
+\usepackage[labelsep=quad]{caption} % needed by the breakalgo environment
+
+\usepackage{ifthen}
+\usepackage{subfig}
+
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{listings}
+%\usepackage[noprefix]{nomencl}  % for nomenclature
+
+%-----------------------------------------------------------
+% NEW  DEFINITIONS
+% margin par
+\newcommand{\mt}[1]{\marginpar{ {\footnotesize #1} }}
+% vector shortcuts
+\newcommand{\vo}{\vec{\Omega}}
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\vnk}{\vec{\mathbf{n}}}
+
+% More Quick Commands
+% 
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+
+\renewcommand{\div}{\vec{\nabla}\! \cdot \!}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\oa}[1]{\fn{\frac{1}{3}\hat{\Omega}\!\cdot\!\overrightarrow{A_{#1}}}}
+
+% common reference commands
+\newcommand{\eqt}[1]{Eq.~(\ref{#1})}                     % equation
+\newcommand{\fig}[1]{Fig.~\ref{#1}}                      % figure
+\newcommand{\tbl}[1]{Table~\ref{#1}}                     % table
+
+%
+% Equation beginnings and endings
+%
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\beas}{\begin{eqnarray*}}
+\newcommand{\eeas}{\end{eqnarray*}}
+\newcommand{\bdm}{\begin{displaymath}}
+\newcommand{\edm}{\end{displaymath}}
+%
+\newcommand{\vj}{\vec{J}}
+\newcommand{\sa}[1]{\sigma_{a #1}}
+\newcommand{\vl}{\vec{\lambda}}
+\newcommand{\vdj}{\delta \vec{J}}
+\newcommand{\dphi}{\delta \Phi}
+\newcommand{\lmax}{\ensuremath{L_{\textit{max}}}\xspace}
+\newcommand{\pmax}{\ensuremath{p_{\textit{max}}}\xspace}
+\newcommand{\sddx}{\frac{d}{dx}}
+\newcommand{\sddt}{\frac{d}{dt}}
+\newcommand{\der}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\vF}{\vec{F}}
+
+\renewcommand{\O}{\mathcal{O}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\us}{{u^\ast}}
+
+\newcommand{\ti}{ {t^{\text{init}}} }
+\newcommand{\te}{ {t^{\text{end }}} }
+
+%-----------------------------------------------------------
+\addtolength{\hoffset}{-2.0cm}
+\addtolength{\textwidth}{4cm}
+\addtolength{\textheight}{4.0cm}
+\addtolength{\voffset}{-1.8cm}
+\addtolength{\headsep}{-0.3cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.8ex plus 0.5ex minus 0.2ex}
+
+\linespread{1.1}
+%-----------------------------------------------------------
+\begin{document}
+%-----------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+I would like to understand the connection between the continuum and discrete form of adjoint-based quantities
+of interest.\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Governing law}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the following linear diffusion operator (in a 1-D slab for the numerical results)
+\be
+\mc{B}(p)u = -\div D(p) \grad u  = q(p) \qquad \text{for } x \in X=[a,b]
+\ee
+with vacuum BC on $\Gamma=\partial X$
+\be
+u(a)=u_{left} \quad u(b)=u_{right}
+\ee
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Duality}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Duality relationship for our problem:
+\be
+(\us,\mc{B}u) = (\mc{B}^\ast\us,u) + W(\us,u)
+\ee
+where
+\be
+\mc{B}^\ast= \mc{B} =  -\div D \grad  
+\ee
+\be
+W(\us,u) = \langle u, \mc{L} \us \rangle  -  \langle \us, \mc{L} u \rangle
+\ee
+with $\mc{L} = n \cdot D\grad$ and $\langle \  , \, \rangle = \int_{\Gamma}\ $.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Quantity of interest}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+Say I am interested in the integral of $u$ over the domain, that is, in the following quantity of interest
+\be
+QoI[u,p] = \left(\mathds{1}, u \right) = \int_X  dx \, u(x) = \int_a^b dx \, u(x)
+\ee
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{1D simplistic example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%------------------------------------------------------
+\subsection{Analytical answers}
+%------------------------------------------------------
+We use $a=0$, $b=L$,$D=1$, $q$ uniform in space. Thus the analytical solution is:
+\begin{equation}
+u(x)= \alpha x^2 + \beta x + \gamma
+\end{equation}
+with $\alpha = -q/2$, $\gamma=u_{left}$, $\beta=\frac{u_{right}-u_{left}+qL^2/2}{L}$.\\
+The analytical QoI is
+\begin{equation}
+\int_a^b dx \, u(x) =\frac{6(u_{right}+u_{left})L+qL^3}{12}
+\end{equation}
+
+%------------------------------------------------------
+\subsection{FEM formalism}
+%------------------------------------------------------
+We discretize the governing law with standard continuous FEM and strongly enforced the Dirichlet boundary conditions. 
+The resulting linear system is:
+\be
+Au=b
+\ee
+where
+\begin{align}
+A_{ij} &= \int_X \grad \varphi_i D \grad \varphi_j  - \int_{\partial X} \varphi_i D \grad \varphi_j \cdot \vn \\
+b_i    &=  \int_X \varphi_i q 
+\end{align}
+and
+\begin{align}
+A_{1j} &= \delta_{1j}  \\
+A_{nj} &= \delta_{nj}  \\
+b_1    &=  u_{left}    \\
+b_n    &=  u_{right}
+\end{align}
+
+The adjoint problem is
+\be
+A^\ast\us=b^\ast
+\ee
+where
+\begin{align}
+A^\ast_{ij} &= \int_X \grad \varphi_i D \grad \varphi_j  - \int_{\partial X} \varphi_i D \grad \varphi_j \cdot \vn \\
+b^\ast_i    &=  \int_X \varphi_i 1 
+\end{align}
+and
+\begin{align}
+A^\ast_{1j} &= \delta_{1j}  \\
+A^\ast_{nj} &= \delta_{nj}  \\
+b^\ast_1    &=  \us_{left}    \\
+b^\ast_n    &=  \us_{right}
+\end{align}
+
+
+\subsubsection{FEM tests 1: zero-Dirichlet BC for $u$ and $\us$}
+%------------------------------------------------------
+Here, we pick $u_{right}=u_{left}=0$ and $\us_{left}=\us_{right}=0$. Thus $W(\us,u)=0$ and duality gives us exactly
+\be
+(\us,\mc{B}u) = (\mc{B}^\ast\us,u) 
+\ee
+Recall that $ \mc{B} =  -\div D \grad  $. From here, we can play the FEM game and integrate by parts the Laplacian and we also have 
+\be
+(\grad \us, D \grad u ) = (\grad u, D \grad \us ) 
+\ee
+
+\begin{table*}[!htpb]
+\begin{center}
+\begin{tabular}{|l||c|}
+\hline
+	analytical QoI                                     & 250.0 \\ \hline
+	forward numerical $ \left(\mathds{1}, u \right) $  &  249.999990018411 \\ \hline
+	adjoint numerical $ \left(\us       , q \right) $  &  249.999990018412 \\ \hline
+\end{tabular}
+\end{center}
+\caption{$q=3$, $L=10$, $u_{right}=u_{left}=0$, $\us_{left}=\us_{right}=0$, linear FEM with 5,000 cells for numerical approximations}
+%\label{tab:ExamplesOfResponseFunctions}
+\end{table*}
+
+
+\subsubsection{FEM tests 1: nonzero-Dirichlet BC for $u$ {\bf but} zero-Dirichlet for $\us$}
+%------------------------------------------------------
+Here, we pick $u_{right}=u_{left}=1$. The QoI of interest being the integral of $u$, its new value should be greater than the previous value by $1 \times L$ (i.e., $250 \longrightarrow 260$) and we have that analytically.  
+
+\begin{table*}[!htpb]
+\begin{center}
+\begin{tabular}{|l||c|}
+\hline
+	analytical QoI                                     & 260.0 \\ \hline
+	forward numerical $ \left(\mathds{1}, u \right) $  &  259.999990018996 \\ \hline
+	adjoint numerical $ \left(\us       , q \right) $  &  249.999990018412 \\ \hline
+\end{tabular}
+\end{center}
+\caption{$q=3$, $L=10$, $u_{right}=u_{left}=1$, $\us_{left}=\us_{right}=0$, linear FEM with 5,000 cells for numerical approximations}
+%\label{tab:ExamplesOfResponseFunctions}
+\end{table*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------
+\end{document}

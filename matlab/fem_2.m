@@ -1,16 +1,16 @@
 function F=driver
 
 % clear the console screen
-clc; close all;clf
+clc; close all; clf
 % load the data structure with info pertaining to the physical problem
-dat.diff=2;
-dat.siga=.5;
-dat.esrc=10;
+dat.diff=1;
+dat.siga=3/10;
+dat.esrc=3;
 dat.width=10;
-bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=5; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
+bc.left.type=1; %0=neumann, 1=robin, 2=dirichlet
+bc.left.C=0; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
 bc.rite.type=1;
-bc.rite.C=7;
+bc.rite.C=0;
 dat.bc=bc; clear bc;
 
 % load the numerical parameters, npar, structure pertaining to numerics
@@ -30,36 +30,86 @@ for iel=2:npar.nel
 end
 npar.gn=gn; clear gn;
 
+% assemble the matrix and the rhs
+[A,b,npar,A_nobc]=assemble_system(npar,dat);
 % solve system
-F = solve_fem2(dat,npar);
+u=A\b;
 % plot
 figure(1)
-plot(npar.x,F,'.-'); hold all
+plot(npar.x,u,'.-'); hold all
 % verification is always good
-verif_diff_eq(dat)
+% verif_diff_eq(dat)
+respo=1;
+[QoIf] = QoIforward(respo,npar,u)
+% u'*b/dat.esrc*dat.siga
 
-return
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function u=solve_fem2(dat,npar)
-
-% initial guess
-% (not needed if a direct method is used to solve the linear system)
-u=ones(npar.ndofs,1);
+% % us=u/dat.esrc*dat.siga;
+% % bs=b/dat.esrc*dat.siga;
+% % bs(1)  =dat.bc.left.C;
+% % bs(end)=dat.bc.rite.C;
+% % us=A\bs;
 
 % assemble the matrix and the rhs
-[A,b]=assemble_system(npar,dat);
+dat2=dat; dat2.esrc=respo; 
+dat2.bc.left.type=1; dat2.bc.rite.type=0;
+dat2.bc.left.C=0;    dat2.bc.rite.C=0;
+[As,bs,npar,As_nobc]=assemble_system(npar,dat2);
+us=As\bs;
+plot(npar.x,us,'r-'); hold all
 
-% solve
-u=A\b;
+QoI_u_bstar       = u'*bs
+QoI_u_Astar_ustar = u'*(As*us)
+us'*(As*u)
+
+
+QoIa = us'*b + us'*(As-A)*u
+QoIa = us'*(A*u)+ us'*(As-A)*u
+% u'*(A*us)
+
+% us'*(A_nobc*u)
+% u'*(As_nobc*us)
 
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs]=assemble_system(npar,dat)
+% % function u=solve_fem2(dat,npar)
+% % 
+% % % initial guess
+% % % (not needed if a direct method is used to solve the linear system)
+% % u=ones(npar.ndofs,1);
+% % 
+% % % assemble the matrix and the rhs
+% % [A,b,npar]=assemble_system(npar,dat);
+% % 
+% % % solve
+% % u=A\b;
+% % 
+% % return
+% % end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [QoIf] = QoIforward(value,npar,u)
+
+QoIf = 0;
+f=npar.f;
+% loop over elements
+for iel=1:npar.nel
+    % element extremities
+    x0=npar.x(iel);
+    x1=npar.x(iel+1);
+    % jacobian of the transformation to the ref. element
+    Jac=(x1-x0)/2;
+    % assemble
+    QoIf = QoIf + value*f'*Jac*u(npar.gn(iel,:));
+end
+
+
+return
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [A,rhs,npar,A_nobc]=assemble_system(npar,dat)
 % assemble the matrix, the rhs, apply BC
 
 % shortcuts
@@ -95,6 +145,9 @@ for i=1:porder+1
     end
     f(i)= dot(wq, b(:,i));
 end
+npar.m=m;
+npar.k=k;
+npar.f=f;
 
 % definition of the weak form:
 % int_domain (grad u D grad b) - int_bd_domain (b D grad u n) ...
@@ -112,12 +165,14 @@ for iel=1:npar.nel
         dat.siga*m*Jac + dat.diff*k/Jac;
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + dat.esrc*f*Jac;
 end
+A_nobc=A;
 
 % apply natural BC
 Dirichlet_nodes=[];
 Dirichlet_val=[];
 switch dat.bc.left.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
+        dat.bc.left.C
         rhs(1)=rhs(1)+dat.bc.left.C;
     case 1 % Robin
         A(1,1)=A(1,1)+1/2;
@@ -220,6 +275,9 @@ a=mat\b';
 x=linspace(0,L);
 y=a(1)*sinh(k*x)+a(2)*cosh(k*x)+part;
 plot(x,y,'r-');hold all
+
+% ff= @(x) dat.siga*(a(1)*sinh(k*x)+a(2)*cosh(k*x)+part);
+% num_qoi=quad(ff,0,dat.width)
 
 return
 end

@@ -3,7 +3,7 @@ function F=HC
 % clear the console screen
 clc; close all; 
 % make the problem-data a global variable
-global dat dat_forward
+global dat
 % load the data structure with info pertaining to the physical problem
 dat.diff=@cond;
 dat.siga=@nothing;
@@ -40,7 +40,7 @@ npar.tol_newton_lin = 1e-6;
 % 3=numjac  + Precond Gmres
 % 4=matfree + Gmres
 % 5=matfree + Precond Gmres
-npar.newton_solve_option = 2;
+npar.newton_solve_option = 3;
 myoptP=1; 
 optP=0;  if(npar.newton_solve_option==3 || npar.newton_solve_option==5), optP=myoptP; end
 npar.prec_opt=optP;
@@ -58,22 +58,29 @@ end
 npar.gn=gn; clear gn;
 
 %%%% solve nonlinear forward problem
+dat.adjoint=false;
 [u,uf,xf] = solve_forward(npar);
-%%% compute QoI:
-QoI_forward = QoI_f(@response,u)
-
-%%%% solve nonlinear forward problem
-dat_forward=dat;
-dat.diff=@cond_adj;
-dat.esrc=@response;
-
-[us,usf,xsf] = solve_adjoint(u,npar);
-
 % plot
 figure(1)
 x=linspace(0,dat.width,npar.ndofs);
 plot(x,u,'.'); hold on
 plot(xf,uf,'-'); hold all
+%%% compute QoI:
+QoI_forward = QoI(@response,u,npar)
+
+%%%% solve nonlinear forward problem
+dat.adjoint=true;
+dat.diff_adjoint=@cond_adj;
+dat.esrc_adjoint=@response;
+dat.forward_sol=u;
+dat.bc.rite.C=400*0;
+[us,usf,xsf] = solve_adjoint(npar);
+% plot
+figure(2)
+plot(x,us,'.r'); hold on
+plot(xf,usf,'r-'); hold all
+%%% compute QoI
+QoI_adjoint = QoI(dat.esrc,us,npar)
 
 % % % % verification is always good
 % % % u(1)
@@ -139,14 +146,26 @@ T = newton(npar);
 % finer representation for plotting
 [Tf,xf] = finer(T,npar);
 
+% resi = compute_residual(T,npar);
+% J = compute_jacobian(T,npar,resi);
+% 
+% global dat 
+% 
+% siga_save=dat.siga; dat.siga=@nothing;
+% diff_save=dat.diff; dat.diff=@nothing;
+% rhs = compute_residual(T,npar);
+% 
+% dat.siga=siga_save;
+% dat.diff=diff_save;
+
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [Ta,Taf,xf]=solve_adjoint(T0,npar)
+function [Ta,Taf,xf]=solve_adjoint(npar)
 
 % perform the Newton solve
-Ta = newton(npar,T0);
+Ta = newton(npar);
 
 % finer representation for plotting
 [Taf,xf] = finer(Ta,npar);
@@ -158,13 +177,26 @@ end
 
 function  T=newton(npar)
 
+global dat
+
 % initial guess
-T=ones(npar.ndofs,1)*400;
-T=linspace(1000,400,npar.ndofs)';
+if ~dat.adjoint
+    T=ones(npar.ndofs,1)*400;
+    T=linspace(1000,dat.bc.rite.C,npar.ndofs)';
+else
+    T=zeros(npar.ndofs,1);
+    T=linspace(1000,dat.bc.rite.C,npar.ndofs)';
+end
 T=T/npar.scale;
 
 % compute the residual
 resi = compute_residual(T,npar);
+% if dat.adjoint
+%      J = compute_jacobian(T,npar,resi);
+%      dat.diff_adjoint=@nothing3;
+%      rhs = compute_residual(T,npar);
+%      dat.diff_adjoint=@cond_adj;
+% end
 % compute its norm
 norm_resi=norm(resi);
 % compute stopping criterion
@@ -292,11 +324,17 @@ for iel=1:npar.nel
     x=(x1+x0)/2+xq*(x1-x0)/2;
     % b and dbdx(:,:) are of size (nbr of xq values) x (porder+1),
     % T is of length porder+1, 2/dx is the 1d jacobian
-    local_T    = b(:,:) * T(gn(iel,:));
-    local_dTdx = dbdx(:,:) * T(gn(iel,:));
-    d=dat.diff(x,npar.scale*local_T)/Jac;
+    local_T         = b(:,:)    * T(gn(iel,:));
+    local_dTdx      = dbdx(:,:) * T(gn(iel,:));
     s=dat.siga(x,npar.scale*local_T)*Jac;
-    q=dat.esrc(x,npar.scale*local_T)*Jac/npar.scale;
+    if ~dat.adjoint
+        d=dat.diff(x,npar.scale*local_T)/Jac;
+        q=dat.esrc(x,npar.scale*local_T)*Jac/npar.scale;
+    else
+        local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
+        d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
+        q=dat.esrc_adjoint(x,npar.scale*local_T)*Jac/npar.scale;
+    end
     % compute local residual
     for i=1:porder+1
         local_res(i) =  dot(s.*wq.*b(:,i)    , local_T(:)) ...
@@ -522,8 +560,13 @@ for iel=1:npar.nel
     if(optP==1)
         % b and dbdx(:,:) are of size (nbr of xq values) x (porder+1),
         local_T    = b(:,:) * T(gn(iel,:));
-        d=dat.diff(x,npar.scale*local_T);
         s=dat.siga(x,npar.scale*local_T);
+        if ~dat.adjoint
+            d=dat.diff(x,npar.scale*local_T)/Jac;
+        else
+            local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
+            d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
+        end
         % compute local matrices
         for i=1:porder+1
             for j=1:porder+1
@@ -535,8 +578,13 @@ for iel=1:npar.nel
     else
         % first compute ave_cond
         % b and dbdx(:,:) are of size (nbr of xq values) x (porder+1),
-        local_T    = b(:,:) * T(gn(iel,:));
-        d=dat.diff(x,npar.scale*local_T);
+        if ~dat.adjoint
+            local_T    = b(:,:) * T(gn(iel,:));
+            d=dat.diff(x,npar.scale*local_T);
+        else
+            local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
+            d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
+        end
         ave_cond = dot(wq, d)/sum(wq);
         % then compute local mat
         local_mat =  0*m*Jac + ave_cond*k/Jac;
@@ -584,8 +632,8 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [QoI]=QoI_f(r,T,npar)
-% compute the QoI using forward
+function [QoI]=QoI(r,T,npar)
+% compute the QoI
 
 % shortcuts
 porder= npar.porder;
@@ -619,10 +667,8 @@ for iel=1:npar.nel
     % T is of length porder+1, 2/dx is the 1d jacobian
     local_T    = b(:,:) * T(gn(iel,:));
     q=r(x,local_T)*Jac;
-    % compute local residual
-    for i=1:porder+1
-        QoI = QoI +  sum( dot(q.*wq.*b(:,i)    , local_T(:)) );
-    end
+    % compute local response
+    QoI = QoI +  dot(q.*wq , local_T(:)) ;
 end
 
 return
@@ -760,10 +806,10 @@ end
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=cond_adj(x,T0,T)
+function y=cond_adj(x,T,Tforward)
 % conductivity function used in adjoint eqs.
-y=cond(x,T0);
-
+y=cond(x,Tforward);
+% y(:)=1;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -777,7 +823,12 @@ y=x;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=nothing(x,T)
+function y=nothing(~,~)
+y=0;
+return
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function y=nothing3(~,~,~)
 y=0;
 return
 end
@@ -797,7 +848,8 @@ return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function y=response(x,T)
-y=1;
+global dat
+y=1/dat.width;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

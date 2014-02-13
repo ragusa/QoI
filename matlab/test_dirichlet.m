@@ -14,6 +14,8 @@ plot(x); hold all
 [As,bs]=symmetrize_bc(A,b,Lx,Rx)
 xs=As\bs;
 plot(xs,'o')
+% As*x-b-(As-A)*x
+% bs = b+(As-A)*x
 
 [M,q]=make_matrix(n,vy);
 [M,q]=apply_bc(M,q,Ly,Ry)
@@ -23,7 +25,7 @@ plot(y); hold all
 ys=Ms\qs;
 plot(ys,'o')
 
-[y' *b  x' *q ]
+[y' *b  x' *q  y'*(As-A)*x x'*(Ms-M)*y]
 [ys'*bs xs'*qs]
 
 return

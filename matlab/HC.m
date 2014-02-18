@@ -82,6 +82,22 @@ plot(xf,usf,'r-'); hold all
 %%% compute QoI
 QoI_adjoint = QoI(dat.esrc,us,npar)
 
+% boundary terms
+[b,dbdx] =feshpln([1],npar.porder);
+gn    = npar.gn;
+nel   = npar.nel;
+% jacobian of the transformation to the ref. element
+x0=npar.x(nel);
+x1=npar.x(nel+1);
+Jac=(x1-x0)/2;
+% local values
+local_T         = b(:,:)    * u(gn(nel,:));
+local_Ts        = b(:,:)    * us(gn(nel,:));
+local_dTsdx     = dbdx(:,:) * us(gn(nel,:));
+d=dat.diff([1],local_T)/Jac;
+local_T*d*local_dTsdx
+
+
 % % % % verification is always good
 % % % u(1)
 % % %(5/2*3e11*40^2+400^5)^0.2 % rad

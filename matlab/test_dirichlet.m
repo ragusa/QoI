@@ -2,10 +2,12 @@
 function test_dirichlet
 close all;
 
-n=15;
+n=7;
 
-Lx=0; Rx=15; vx=10;
-Ly=10; Ry=5; vy=1;
+% forward
+Lx= 0; Rx=10; vx=10;
+% adjoint
+Ly= 0; Ry= 7; vy= 1;
 
 [A,b]=make_matrix(n,vx);
 [A,b]=apply_bc(A,b,Lx,Rx)
@@ -27,6 +29,13 @@ plot(ys,'o')
 
 [y' *b  x' *q  y'*(As-A)*x x'*(Ms-M)*y]
 [ys'*bs xs'*qs]
+ys(1:end-1)'*bs(1:end-1) + ys(end)*bs(end)
+xs(1:end-1)'*qs(1:end-1) + xs(end)*qs(end)
+
+% aa=ys(1)*(xs(2)-xs(1)) - ys(end)*(xs(end)-xs(end-1))
+% bb=xs(1)*(ys(2)-ys(1)) - xs(end)*(ys(end)-ys(end-1))
+% aa-bb
+% aa+bb
 
 return
 end

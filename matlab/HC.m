@@ -32,9 +32,9 @@ npar.porder=1;
 npar.ndofs = npar.porder*npar.nel+1;
 % for newton's solve
 npar.max_newton = 250;
-npar.atol_newton = 1e-9;
-npar.rtol_newton = 1e-9;
-npar.tol_newton_lin = 1e-6;
+npar.atol_newton = 1e-11;
+npar.rtol_newton = 1e-11;
+npar.tol_newton_lin = 1e-9;
 % 1=numjac  + LU
 % 2=numjac  + Gmres
 % 3=numjac  + Precond Gmres
@@ -68,12 +68,16 @@ plot(xf,uf,'-'); hold all
 %%% compute QoI:
 QoI_forward = QoI(@response,u,npar)
 
-%%%% solve nonlinear forward problem
+resi = compute_residual(u,npar);
+J = compute_jacobian(u,npar,resi);
+
+
+%%%% solve adjoint problem
 dat.adjoint=true;
 dat.diff_adjoint=@cond_adj;
 dat.esrc_adjoint=@response;
 dat.forward_sol=u;
-dat.bc.rite.C=400*0;
+dat.bc.rite.C=1;
 [us,usf,xsf] = solve_adjoint(npar);
 % plot
 figure(2)
@@ -82,20 +86,25 @@ plot(xf,usf,'r-'); hold all
 %%% compute QoI
 QoI_adjoint = QoI(dat.esrc,us,npar)
 
-% boundary terms
-[b,dbdx] =feshpln([1],npar.porder);
-gn    = npar.gn;
-nel   = npar.nel;
-% jacobian of the transformation to the ref. element
-x0=npar.x(nel);
-x1=npar.x(nel+1);
-Jac=(x1-x0)/2;
-% local values
-local_T         = b(:,:)    * u(gn(nel,:));
-local_Ts        = b(:,:)    * us(gn(nel,:));
-local_dTsdx     = dbdx(:,:) * us(gn(nel,:));
-d=dat.diff([1],local_T)/Jac;
-local_T*d*local_dTsdx
+resia = compute_residual(us,npar);
+Ja = compute_jacobian(us,npar,resia);
+
+QoI_forward-QoI_adjoint
+
+% % % boundary terms
+% % [b,dbdx] =feshpln([1],npar.porder);
+% % gn    = npar.gn;
+% % nel   = npar.nel;
+% % % jacobian of the transformation to the ref. element
+% % x0=npar.x(nel);
+% % x1=npar.x(nel+1);
+% % Jac=(x1-x0)/2;
+% % % local values
+% % local_T         = b(:,:)    * u(gn(nel,:));
+% % local_Ts        = b(:,:)    * us(gn(nel,:));
+% % local_dTsdx     = dbdx(:,:) * us(gn(nel,:));
+% % d=dat.diff([1],local_T)/Jac;
+% % local_T*d*local_dTsdx
 
 
 % % % % verification is always good

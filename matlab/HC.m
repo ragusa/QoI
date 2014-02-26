@@ -5,7 +5,7 @@ clc; close all;
 % make the problem-data a global variable
 global dat
 % load the data structure with info pertaining to the physical problem
-dat.diff=@cond;
+dat.diff=@cond_for;
 dat.siga=@nothing;
 dat.esrc=@esrc;
 dat.pb_type='hc';
@@ -18,7 +18,7 @@ end
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
 bc.left.C=0; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
 bc.rite.type=2;
-bc.rite.C=400;
+bc.rite.C=8020;
 dat.bc=bc; clear bc;
 
 % load the numerical parameters, npar, structure pertaining to numerics
@@ -57,7 +57,9 @@ for iel=2:npar.nel
 end
 npar.gn=gn; clear gn;
 
+%%%%
 %%%% solve nonlinear forward problem
+%%%%
 dat.adjoint=false;
 [u,uf,xf] = solve_forward(npar);
 % plot
@@ -68,16 +70,25 @@ plot(xf,uf,'-'); hold all
 %%% compute QoI:
 QoI_forward = QoI(@response,u,npar)
 
-resi = compute_residual(u,npar);
-J = compute_jacobian(u,npar,resi);
+resi = compute_residual(u,npar); 
 
+%%%%
+%%%% solve nonlinear forward problem analytically
+%%%%
+Tc=T_analytical(0)
+QoI_analytical=(quad(@T_analytical,0,0.4))/dat.width
 
+dat.diff=@nothing;
+resi2 = compute_residual(u,npar); resi2=-resi2;
+
+%%%%
 %%%% solve adjoint problem
+%%%%
 dat.adjoint=true;
 dat.diff_adjoint=@cond_adj;
 dat.esrc_adjoint=@response;
 dat.forward_sol=u;
-dat.bc.rite.C=1;
+dat.bc.rite.C=13;
 [us,usf,xsf] = solve_adjoint(npar);
 % plot
 figure(2)
@@ -86,10 +97,28 @@ plot(xf,usf,'r-'); hold all
 %%% compute QoI
 QoI_adjoint = QoI(dat.esrc,us,npar)
 
-resia = compute_residual(us,npar);
+resia = compute_residual(us,npar); 
+epsi=1e-2;
+pert=zeros(npar.ndofs,1);pert(end)=epsi;
+resia_pert = compute_residual(us+pert,npar);
+alpha=((resia_pert-resia)/epsi);alpha=alpha(end-1);
 Ja = compute_jacobian(us,npar,resia);
 
-QoI_forward-QoI_adjoint
+dat.diff_adjoint=@nothing3;
+resia2 = compute_residual(us,npar); resia2=-resia2;
+
+% forward
+h=(dat.width/npar.nel);
+resia2'*u+ h/dat.width/2*u(end)
+% resia2(end)=resia2(end) + h/dat.width/2;
+% resia2'*u
+
+resi3=resi2;
+resi3(end-1)=resi3(end-1)-alpha*u(end);
+% resi3(end-1)=resi3(end-1)-alpha*us(end);
+resi3'*us +h/dat.width/2*u(end) +alpha*us(end)*u(end-1)
+ 
+% QoI_forward-QoI_adjoint
 
 % % % boundary terms
 % % [b,dbdx] =feshpln([1],npar.porder);
@@ -351,14 +380,14 @@ for iel=1:npar.nel
     % T is of length porder+1, 2/dx is the 1d jacobian
     local_T         = b(:,:)    * T(gn(iel,:));
     local_dTdx      = dbdx(:,:) * T(gn(iel,:));
-    s=dat.siga(x,npar.scale*local_T)*Jac;
+    s=dat.siga(npar.scale*local_T,x)*Jac;
     if ~dat.adjoint
-        d=dat.diff(x,npar.scale*local_T)/Jac;
-        q=dat.esrc(x,npar.scale*local_T)*Jac/npar.scale;
+        d=dat.diff(npar.scale*local_T,x)/Jac;
+        q=dat.esrc(npar.scale*local_T,x)*Jac/npar.scale;
     else
         local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
-        d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
-        q=dat.esrc_adjoint(x,npar.scale*local_T)*Jac/npar.scale;
+        d=dat.diff_adjoint(npar.scale*local_T,x,local_T_forward)/Jac;
+        q=dat.esrc_adjoint(npar.scale*local_T,x)*Jac/npar.scale;
     end
     % compute local residual
     for i=1:porder+1
@@ -585,12 +614,12 @@ for iel=1:npar.nel
     if(optP==1)
         % b and dbdx(:,:) are of size (nbr of xq values) x (porder+1),
         local_T    = b(:,:) * T(gn(iel,:));
-        s=dat.siga(x,npar.scale*local_T);
+        s=dat.siga(npar.scale*local_T,x);
         if ~dat.adjoint
-            d=dat.diff(x,npar.scale*local_T)/Jac;
+            d=dat.diff(npar.scale*local_T,x)/Jac;
         else
             local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
-            d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
+            d=dat.diff_adjoint(npar.scale*local_T,x,local_T_forward)/Jac;
         end
         % compute local matrices
         for i=1:porder+1
@@ -605,10 +634,10 @@ for iel=1:npar.nel
         % b and dbdx(:,:) are of size (nbr of xq values) x (porder+1),
         if ~dat.adjoint
             local_T    = b(:,:) * T(gn(iel,:));
-            d=dat.diff(x,npar.scale*local_T);
+            d=dat.diff(npar.scale*local_T,x);
         else
             local_T_forward = b(:,:) * dat.forward_sol(gn(iel,:));
-            d=dat.diff_adjoint(x,npar.scale*local_T,local_T_forward)/Jac;
+            d=dat.diff_adjoint(npar.scale*local_T,x,local_T_forward)/Jac;
         end
         ave_cond = dot(wq, d)/sum(wq);
         % then compute local mat
@@ -814,7 +843,7 @@ return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=cond(x,T)
+function y=cond_for(T,x)
 % conductivity function. may depend on space and temperature
 
 % make the problem-data a global variable
@@ -831,19 +860,19 @@ end
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=cond_adj(x,T,Tforward)
+function y=cond_adj(T,x,Tforward)
 % conductivity function used in adjoint eqs.
-y=cond(x,Tforward);
+y=cond_for(Tforward,x);
 % y(:)=1;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=diffu(x,T)
+function y=diffu(T,x)
 y=1+0*0.5*x.^2;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=siga(x,T)
+function y=siga(T,x)
 y=x;
 return
 end
@@ -858,7 +887,7 @@ y=0;
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=esrc(x,T)
+function y=esrc(T,x)
 
 % make the problem-data a global variable
 global dat
@@ -872,9 +901,26 @@ end
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function y=response(x,T)
+function y=response(T,x)
 global dat
 y=1/dat.width;
+return
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function T=T_analytical(xx)
+global dat
+for i=1:length(xx)
+    x=xx(i);
+    Tc=1200;
+    dT=100;
+    while (abs(dT)>1e-6)
+        int=quad(dat.diff,dat.bc.rite.C,Tc)-3e4*(dat.width^2-x^2)/2;
+        k=dat.diff(Tc,1);
+        dT=-int./k;
+        Tc=Tc+dT;
+    end
+    T(i)=Tc;
+end
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

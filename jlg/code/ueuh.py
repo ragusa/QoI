@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from multiprocessing import Pool
-from FinElem import fem, QoI
+from FinElem import fem, QoI, fem_nonlinear, sensitivity, sensitivity_direct
 import numpy as np
+import scipy as sp
 from numpy import exp, sqrt
+from scipy.integrate import quad as integrate
 from pylab import *
 import matplotlib.pyplot as plt
 from numpy.linalg import solve
@@ -65,7 +67,7 @@ def L2(ue, par, uh, order):
 			#print(uh_interpol(uh[1][k], uh[1][k+1], pts[q]), ue(x(pts[q])))
 	return err
 def ueuh(nel, diff, siga, src, width, bc, plot=False):
-	(par, A, uh, b) = fem(nel, diff, siga, src, width, bc)
+	(par, A, A_nob, uh, b, b_nob) = fem(nel, diff, siga, src, width, bc)
 	(ue, iue) = analytical(diff, siga, src, width, bc)
 	l2err = L2(ue, par, uh,2)
 	if plot:
@@ -88,43 +90,89 @@ def uplot(x, u, us=None):
 	
 def QoIexact(nel, diff, siga, src, width, bc, res):
 	(ue, iue) = analytical(diff, siga, src, width, bc)
-#	QoI = 0
-#	for x in np.linspace(0,width,num=5000,endpoint=True):
-#		QoI += ue(x)*(width/5000)
-#	QoI *= res
-#	return QoI
-	return res * (iue(width) - iue(0))
+	#return res * (iue(width) - iue(0))
+	intagrand = lambda x: ue(x) * res(x)
+	integral = 0
+	for i in range(nel):
+		x0 = width/nel * i
+		x1 = width/nel * (i+1)
+		integral += integrate(intagrand, x0, x1)[0]
+	return integral
 # bc types: 0=Neumann 1=Robin 2=Dirichlet
 # bc = (left type, left C, right type, right C)
-diff	= 1
-siga	= 3/10
-src	= 3
-width	= 10
-res = 1/width
-bcs = [(0,10,0,0),
-	(0,10,1,0),
-	(0,10,2,0),
-	(1,10,0,0),
-	(1,10,1,0),
-	(1,10,2,0),
-	(2,10,0,0),
-	(2,10,1,0),
-	(2,10,2,0)
-	]
+def L2Test():
+	diff	= 1
+	siga	= 3/10
+	src	= 3
+	width	= 10
+	res = 1/width
+	bcs = [(0,10,0,0),
+		(0,10,2,0),
+		(1,10,1,0),
+		(1,10,2,0),
+		(2,10,0,0),
+		(2,10,2,0)
+		]
+	ns = [1, 10, 100, 1000]
+	for bc in bcs:
+		for nel in ns:
+			print('%i'%nel, end='\t')
+			for bc in bcs:
+				t = ueuh(nel, diff, siga, src, width, bc)
+				print('%.3E'%t, end='\t')
+			print()
+def QOITest():
+	diff	= 1
+	siga	= 3/10
+	src	= 1
+	width	= 10
+	res = lambda x: 1
+	bcs = [#(0,10,0,0),
+		#(0,10,2,0),
+		#(1,10,1,0),
+		#(1,10,2,0),
+		#(2,10,0,0),
+		(1,10,1,10)
+		]
+	
+	ns = [1, 10, 100, 1000]
+	for bc in bcs:
+		print(bc, '\tQe       Qf       Qa')
+		for nel in ns:
+			#t = ueuh(nel, diff, siga, src, width, bc, plot=True)
+			(Qf, Qa, x, u, us) = QoI(nel, diff, siga, src*np.ones(nel+1) , width, bc, res)
+			Qe = QoIexact(nel, diff, siga, src, width, bc, res)
+			#uplot(x, u, us)
+			print('%15i\t%8.2E %8.2E %8.2E %8.2E %8.2E %8.2E'%(nel, Qe, Qf, Qa, abs((Qf - Qe)/Qe), abs((Qa - Qe)/Qe), abs((Qa - Qf)/Qf)))
+def nonlinearTest():
+	D = lambda u: u
+	dDdu = lambda u: 1
+	q	= -1
+	width	= 1
+	nel = 10
+	bc = (2,0,2,1)
+	ustart = np.ones(nel+1)
+	x = fem_nonlinear(nel, width, bc, D, dDdu, q, ustart)
+	print(x[0])
+def sensitivityTest():
+	diff	= 1
+	siga	= 3/10
+	src	= 1
+	width	= 10
+	res = lambda x: 1
+	bcs = [(1,10,1,10)]
+	
+	ns = [1, 10, 100, 1000]
+	for bc in bcs:
+		print(bc, '\tAdjoint       Direct	Error')
+		for nel in ns:
+			# Using adjoint method
+			(sens, par, u) = sensitivity(nel, diff, siga, src*np.ones(nel+1) , width, bc, res)
+			(sens_d) = sensitivity_direct(nel, diff, siga, src*np.ones(nel+1) , width, bc, res, 1E-8)
+			print('%15i\t%8.2E %8.2E %8.2E' %(nel, sens, sens_d, abs(sens-sens_d)/sens))
+			uplot(par.x,u)
 
-ns = [1, 10, 100, 1000]
-for bc in bcs:
-	print(bc, '\tQe       Qf       Qa       Qa_nbc')
-	for nel in ns:
-		'''
-		print('%i'%nel, end='\t')
-		for bc in bcs:
-			t = ueuh(nel, diff, siga, src, width, bc)
-			print('%.3E'%t, end='\t')
-		print()
-		'''
-		#t = ueuh(nel, diff, siga, src, width, bc, plot=True)
-		(Qf, Qa, Qa_nbc, x, u, us) = QoI(nel, diff, siga, src, width, bc, res)
-		Qe = QoIexact(nel, diff, siga, src, width, bc, res)
-		#uplot(x, u, us)
-		print('%15i\t%8.2E %8.2E %8.2E %8.2E %8.2E %8.2E %8.2E'%(nel, Qe, Qf, Qa, Qa_nbc, abs((Qf - Qe)/Qe), abs((Qa - Qe)/Qe), abs((Qa_nbc - Qe)/Qe)))
+#L2Test()
+QOITest()
+#nonlinearTest()
+sensitivityTest()

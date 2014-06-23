@@ -7,6 +7,7 @@ from numpy.linalg import solve
 from scipy import sparse
 from pylab import *
 import matplotlib.pyplot as plt
+from scipy.optimize import minimize
 def assemble_system(par, data):
 	nnx = (par.porder+1)*par.nel
 	n = par.nel * par.porder + 1
@@ -117,7 +118,7 @@ def sensitivity(nel, diff, siga, src, width, bc, res):
 	(par, A, A_nbc, u, b, b_nbc) = fem(nel, diff, siga, src, width, bc)
 	(pars, As, As_nbc, us, bs, bs_nbc) = fem(nel, diff, siga, res, width, (0,0,0,0))
 	deltaA = 1
-	deltab = 1
+	deltab = 0
 	sensitivity = 0
 	lin_interpol = lambda u0, u1, x: (u0-u1)/2*x+(u0+u1)/2
 	[pts, wq] = np.polynomial.legendre.leggauss(2)
@@ -143,18 +144,29 @@ def fem(nel, diff, siga, src, width, bc):
 def residual(nel, width, bc, D, Dderiv, q, u):
 	[xq, wq] = np.polynomial.legendre.leggauss(2)
 	F = np.zeros(nel+1)
-	for i in range(1,nel):
-		h = width/nel
-		gn = [i, i+1] #par.gn[i] # Connectivity, should = [i, i+1]
-		b = np.array([1-(xq/2+.5),xq/2+.5])
-		delb = np.array([-1,1])*h
-		x0 = (i + (xq[0]+1)/2) * h # X value of first quad point
-		x1 = (i + (xq[1]+1)/2) * h # X value of second quad point
-		delu = (u[i+1] - u[i]) / h # _Linear_ finite elem, so lines
-		u0 = u[i] + h*(xq[0]+1)/2 * delu # Linear extrapolate to the quad point
-		u1 = u[i] + h*(xq[1]+1)/2 * delu # Linear extrapolate to the quad point
-		Ds = np.array([D(u0), D(u1)])
-		fi = delb*sum(wq*Ds*delu)-sum(wq*q*h/2)
+	for i in range(nel):
+		# X values at the ends of the interval
+		x0 = width/nel * i
+		x1 = width/nel * (i+1)
+		# Jacobian
+		jacob = (x1-x0)/2
+		# Basis function (and derivative) at the quad points
+		b = np.array([(1-xq)/2, (1+xq)/2])
+		delb = np.array([[-.5, .5],[-.5, .5]])
+		# Quad points on the interval
+		x = (x1+x0)/2 + xq*jacob
+		# u values at quad points
+		us = np.dot(b, u[i:i+2])
+		# du/dx at the quad points
+		delu = np.dot(delb, u[i:i+2])
+		
+		ds = D(us)/jacob #D at u values (at quadrature points)
+		qs = q(x)*jacob # Source
+		# Construct local residual
+		fi = np.zeros(2)
+		for j in range(2):
+			fi[j] = np.dot(ds*wq*delb[:,j], delu) - np.dot(qs*wq, b[:,j])
+		
 		F[i:i+2] += fi
 	# Dirchlet
 	if bc[0] == 2: # Left
@@ -162,45 +174,56 @@ def residual(nel, width, bc, D, Dderiv, q, u):
 	if bc[2] == 2: # Right
 		F[-1] = u[-1] - bc[3]
 	return F
-def jacobian(nel, width, bc, D, Dderiv, q, u):
+def jacobian(nel, width, bc, D, Dderiv, q, u, unmod=False):
 	[xq, wq] = np.polynomial.legendre.leggauss(2)
 	J = np.zeros((nel+1, nel+1))
-	for i in range(nel):
-		gn = [i, i+1] #par.gn[i] # Connectivity, should = [i, i+1]
-		x0 = (i + (xq[0]+1)/2) * width/nel # X value of first quad point
-		x1 = (i + (xq[1]+1)/2) * width/nel # X value of second quad point
-		delu = (u[i+1] - u[i]) / (width/nel)
-		u0 = u[i] + (xq[0]+1)/2 * delu # Linear extrapolate to the quad point
-		u1 = u[i] + (xq[1]+1)/2 * delu # Linear extrapolate to the quad point
-		Ds = np.array([D(u0), D(u1)])
-		dDs = np.array([Dderiv(u0), Dderiv(u1)])
-		delbi = [-1, 1]
-		jlet = np.array([(Ds+dDs*delu),(Ds+dDs*delu)])
-		jlet[0,-1] *= -1
-		jlet[-1,0] *= -1
-		J[i:i+2,i:i+2] += jlet#np.array([(Ds+dDs),(Ds+dDs)])
+	for k in range(nel):
+		# X values at the ends of the interval
+		x0 = width/nel * k
+		x1 = width/nel * (k+1)
+		# Jacobian
+		jacob = (width/nel)/2
+		# Basis function (and derivative) at the quad points
+		b = np.array([(1-xq)/2, (1+xq)/2])
+		delb = np.array([[-.5, .5],[-.5, .5]])
+		# Quad points on the interval
+		x = (x1+x0)/2 + xq*jacob
+		# u values at quad points
+		us = np.dot(b, u[k:k+2])
+		# du/dx at the quad points
+		delu = np.dot(delb, u[k:k+2])
+		ds = D(us)/jacob #D at u values (at quadrature points)
+		dDdu = Dderiv(us)
+		jlet = np.zeros((2,2))
+		for i in range(2):
+			for j in range(2):
+				jlet[i,j] = sum(wq*delb[:,i]*ds*delb[:,j]) + sum(wq*b[j]*dDdu*delu)
+		J[k:k+2,k:k+2] += jlet
+	if unmod:
+		return J
 	# Dirchlet
 	if bc[0] == 2: # Left
 		J[0,:] = 0
+		J[:,0] = 0
 		J[0,0] = 1
 	if bc[2] == 2: # Right
 		J[-1,:] = 0
+		J[:,-1] = 0
 		J[-1,-1] = 1
 	return J
 def norm(x):
 	return sqrt(sum(i**2 for i in x))
 def fem_nonlinear(nel, width, bc, D, Dderiv, q, ustart):
 	"""
-	Performs Newton's method to solve -∇·D(u)∇u = q
+	Performs Newton's method to solve -∇·D(u)∇u = q(x)
 	"""
 	converged = False
 	F_init = norm(residual(nel, width, bc, D, Dderiv, q, ustart))
-	tol = 1E-8
+	tol = 1E-12
 	unew = ustart
 	k = 0
 	deltau = 0
-	u_true = [0, .1, .2, .3, .4, .5, .6, .7,.8,.9,1]
-	while not converged and k < 5:
+	while not converged and k < 1000:
 		uold = unew
 		F = residual(nel, width, bc, D, Dderiv, q, unew)
 		# Convergence check
@@ -210,8 +233,51 @@ def fem_nonlinear(nel, width, bc, D, Dderiv, q, ustart):
 		J = jacobian(nel, width, bc, D, Dderiv, q, unew)
 		deltau = solve(J, -F)
 		unew = uold + deltau
-		print(k, "F/F=", norm(F)/F_init)
-		print(k, "u=", unew)
-		print(k, "diff", (norm(unew-uold)/norm(uold)))
+		#print(k, "F=", norm(F))
+		#print(k, "F/F=", norm(F)/F_init)
+		#print(k, "u=", unew)
+		#print(k, "diff", (norm(unew-uold)/norm(uold)))
 		k += 1
 	return [unew, converged, k]
+def nonlinearAssemble(nel, width, bc, D, q, u, unmod=False):
+	nullfun = lambda x: 0
+	# The Jacobian used in the newton's is the A matrix with an extra term
+	# nullfun kills that term
+	A = jacobian(nel, width, bc, D, nullfun, q, u, unmod)
+	[xq, wq] = np.polynomial.legendre.leggauss(2)
+	basis = np.array([(1-xq)/2, (1+xq)/2])
+	b = np.zeros(nel+1)
+	f = np.zeros(2)
+	for i in range(2):
+		f[i] = np.dot(wq,basis[:,i])
+	for i in range(nel):
+		x0 = width/nel * i
+		x1 = width/nel * (i+1)
+		jacob = (x1-x0)/2
+		b[i:i+2] += [q(x0), q(x1)] * f * jacob
+	if not unmod:
+		#Dirchlet hardcoded
+		b -= bc[1]*A[:,0]
+		b[0] = bc[1]
+		b -= bc[3]*A[:,-1]
+		b[-1] = bc[3]
+	return (A,b)
+		
+def nonlinearQoI(nel, width, bc, D, Dderiv, q, ustart, res):
+	[u, isconverged, numiters] = fem_nonlinear(nel, width, bc, D, Dderiv, q, ustart)
+	[xq, wq] = np.polynomial.legendre.leggauss(2)
+	b = np.array([(1-xq)/2, (1+xq)/2])
+
+	QoIf = 0
+	for i in range(nel):
+		x0 = width/nel * i
+		x1 = width/nel * (i+1)
+		jacob = (x1-x0)/2
+		QoIf += jacob * sum(wq*np.dot(b,u[i:i+2])*[res(x0),res(x1)])
+	
+	(A, b) = nonlinearAssemble(nel, width, bc, D, q, u)
+	(Astar, bstar) = nonlinearAssemble(nel, width, bc, D, res, u)
+	ustar = solve(Astar,bstar)
+	QoIa = sum(ustar*b) + sum(ustar*np.dot((Astar-A),u))
+	
+	return (QoIf, QoIa)

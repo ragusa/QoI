@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from multiprocessing import Pool
-from FinElem import fem, QoI, fem_nonlinear, sensitivity, sensitivity_direct
+from FinElem import fem, QoI, fem_nonlinear, sensitivity, sensitivity_direct, nonlinearQoI
 import numpy as np
 import scipy as sp
 from numpy import exp, sqrt
@@ -123,10 +123,10 @@ def L2Test():
 			print()
 def QOITest():
 	diff	= 1
-	siga	= 3/10
+	siga	= 0
 	src	= 1
-	width	= 10
-	res = lambda x: 1
+	width	= 1
+	res = lambda x: 1 if x < 5 else 0
 	bcs = [#(0,10,0,0),
 		#(0,10,2,0),
 		#(1,10,1,0),
@@ -145,34 +145,33 @@ def QOITest():
 			#uplot(x, u, us)
 			print('%15i\t%8.2E %8.2E %8.2E %8.2E %8.2E %8.2E'%(nel, Qe, Qf, Qa, abs((Qf - Qe)/Qe), abs((Qa - Qe)/Qe), abs((Qa - Qf)/Qf)))
 def nonlinearTest():
-	D = lambda u: u
-	dDdu = lambda u: 1
-	q	= -1
+	D     = lambda u: u**2
+	dDdu  = lambda u: 2*u
+	q	= lambda x: -2*x
+	res = lambda x: 1
 	width	= 1
 	nel = 10
 	bc = (2,0,2,1)
 	ustart = np.ones(nel+1)
 	x = fem_nonlinear(nel, width, bc, D, dDdu, q, ustart)
-	print(x[0])
+	uplot(np.linspace(0,width,nel+1), x[0])
+	
+	print(nonlinearQoI(nel, width, bc, D, dDdu, q, ustart, res))
 def sensitivityTest():
 	diff	= 1
-	siga	= 3/10
-	src	= 1
-	width	= 10
+	siga	= 1
+	srcs	= [.9+x/100 for x in range(10)]
+	width	= 1
 	res = lambda x: 1
-	bcs = [(1,10,1,10)]
-	
-	ns = [1, 10, 100, 1000]
-	for bc in bcs:
-		print(bc, '\tAdjoint       Direct	Error')
-		for nel in ns:
-			# Using adjoint method
-			(sens, par, u) = sensitivity(nel, diff, siga, src*np.ones(nel+1) , width, bc, res)
-			(sens_d) = sensitivity_direct(nel, diff, siga, src*np.ones(nel+1) , width, bc, res, 1E-8)
-			print('%15i\t%8.2E %8.2E %8.2E' %(nel, sens, sens_d, abs(sens-sens_d)/sens))
-			uplot(par.x,u)
-
+	bc = (0,0,0,0)
+	nel = 500
+	print(bc, '\tAdjoint       Direct	Error')
+	for src in srcs:
+		(sens, par, u) = sensitivity(nel, diff, siga, src*np.ones(nel+1) , width, bc, res)
+		(sens_d) = sensitivity_direct(nel, diff, siga, src*np.ones(nel+1) , width, bc, res, 1E-8)
+		print('%15i\t%8.2E %8.2E %8.2E' %(nel, sens, sens_d, abs(sens-sens_d)/sens))
+		
 #L2Test()
-QOITest()
-#nonlinearTest()
-sensitivityTest()
+#QOITest()
+nonlinearTest()
+#sensitivityTest()

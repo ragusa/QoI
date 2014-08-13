@@ -1,0 +1,154 @@
+\title{Methods and their Adjoints}
+\author{Jared Geer}
+\date{\today}
+
+\documentclass[12pt]{article}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{bm}
+\begin{document}
+\maketitle
+\section{Methods}
+\begin{equation}\label{ForwardProblem}
+\frac{\partial u}{\partial t} = A u + b
+\end{equation}
+\begin{equation}\label{AdjointProblem}
+-\frac{\partial u^*}{\partial t} = A^* u^* + r
+\end{equation}
+\subsection{Continuum}
+\subsection{Forward Euler's Method}
+The forward problem is discretized as
+\begin{equation}\label{FEulerDiscrete}
+(I-A_{n+1})u_{n+1} = u_n + \tau b_{n+1}
+\end{equation}
+In matrix form that is
+\begin{equation}
+\begin{bmatrix}
+I\\
+-I & I - \tau A_1\\
+& \ddots & \ddots\\
+& & -I & I - \tau A_{n-1}\\
+& & & -I & I - \tau A_{n}\\
+\end{bmatrix}
+u = 
+\begin{bmatrix}
+u_0 \\
+\tau b_1 \\
+\vdots \\
+\tau b_{n-1} \\
+\tau b_n
+\end{bmatrix}
+\end{equation}
+
+With malice aforethought we modify the 0th row to conform with the diagonal. I.e.
+\begin{equation}
+\begin{bmatrix}
+I\bm{-\tau A_0}\\
+-I & I - \tau A_1\\
+& \ddots & \ddots\\
+& & -I & I - \tau A_{n-1}\\
+& & & -I & I - \tau A_{n}\\
+\end{bmatrix}
+u = 
+\begin{bmatrix}
+u_0 \bm{- \tau A_0 u_0}\\
+\tau b_1 \\
+\vdots \\
+\tau b_{n-1} \\
+\tau b_n
+\end{bmatrix}
+\end{equation}
+Out requirement is that $ A^* := A^t $ which means the equations for the adjoint are given by
+\begin{equation}
+\begin{bmatrix}
+I-\tau A^*_0 & -I\\
+& I - \tau A^*_1  & -I\\
+& & \ddots & \ddots\\
+& & & I - \tau A^*_{n-1} & -I\\
+& & & & I - \tau A^*_{n}\\
+\end{bmatrix}
+u^* = 
+\begin{bmatrix}
+\tau r_0\\
+\tau r_1 \\
+\vdots \\
+\tau r_{n-1} \\
+u^*_n - \tau A^*_n u^*_n
+\end{bmatrix}
+\end{equation}
+which leads to the equation
+\begin{equation}\label{BEulerDiscrete}
+(I-\tau A^*_{n-1})u^*_{n-1} - u^*_n = \tau r_n-1
+\end{equation}
+Which is the Backwards Euler Method.
+
+To calculate the QoI
+\begin{eqnarray}
+u^* A u & = & u^* b \\
+ & = & \sum_{n=1}^N \left(u^*_n \tau b_n\right) \bm{+ u^*_0(I-\tau A_0)u_0} \\
+ & = & u r \\
+ & = & \sum_{n=0}^{N-1}\left( u_n \tau r_n\right) \bm{+ u_n(I-\tau A_N)u^*_N}
+\end{eqnarray}
+where the extra bolded terms is due to the modification done to make the A matrix's transpose equivalent to the adjoint's.\\
+
+The QoI is $\sum_{n=0}^{N-1}\left( u_n \tau r_n\right)$ which is thus equivalent to
+\begin{equation}\label{FEulerQoIa}
+QoI = \sum_{n=0}^{N-1}\left( u_n \tau r_n\right) = \sum_{n=1}^N \left(u^*_n \tau b_n\right) + u^*_0(I-\tau A_0)u_0 - u_n(I-\tau A_N)u^*_N
+\end{equation}
+As the number of steps approaches infinity (the continuum) the step size, $\tau$, approaches zero, thus
+\begin{equation}
+QoI_{n\rightarrow\infty} = \sum_{n=1}^N \left(u^*_n \tau b_n\right) + u^*_0 u_0 - u_n u^*_N
+\end{equation}
+Which is equivalent to the continuum.
+\subsection{Backward Euler's Method}
+\begin{equation}\label{BEulerDiscrete}
+(I-\tau A^*_{n-1})u^*_{n-1} - u^*_n = \tau r_n-1
+\end{equation}
+\subsection{Crank–Nicolson Method}
+The forward problem is discretized as
+\begin{equation}\label{CNdiscrete}
+\left(\frac{1}{\tau}-\frac{A_{n+1}}{2}\right)u_{n+1} + \left(-\frac{1}{\tau}-\frac{A_n}{2}\right)u_n = \tau \frac{b_{n+1} + b_n}{2}
+\end{equation}
+\begin{equation}
+\begin{bmatrix}
+\frac{1}{\tau}-\frac{A_0}{2}\\
+-\frac{1}{\tau}-\frac{A_0}{2} & \frac{1}{\tau}-\frac{A_1}{2}\\
+& \ddots & \ddots\\
+& & -\frac{1}{\tau}-\frac{A_{n-2}}{2} & \frac{1}{\tau}-\frac{A_{n-1}}{2} \\
+& & & -\frac{1}{\tau}-\frac{A_{n-1}}{2} & \frac{1}{\tau}-\frac{A_{n}}{2} \\
+\end{bmatrix}
+u = 
+\begin{bmatrix}
+\left(\frac{1}{\tau}-\frac{A_0}{2}\right)u_0 \\
+\tau \frac{b_1 + b_0}{2}\\
+\vdots \\
+\tau \frac{b_{n-1} + b_{n-2}}{2}\\
+\tau \frac{b_n + b_{n-1}}{2}
+\end{bmatrix}
+\end{equation}
+Again we take the transpose of A and get the adjoint system
+\begin{equation}
+\begin{bmatrix}
+\frac{1}{\tau}-\frac{A^*_0}{2} & -\frac{1}{\tau}-\frac{A^*_0}{2}\\
+ & \frac{1}{\tau}-\frac{A^*_1}{2} & -\frac{1}{\tau}-\frac{A^*_1}{2}\\
+& \ddots & \ddots\\
+& & & \frac{1}{\tau}-\frac{A^*_{n-1}}{2} & -\frac{1}{\tau}-\frac{A^*_{n-1}}{2} \\
+& & & & \frac{1}{\tau}-\frac{A^*_{n}}{2} \\
+\end{bmatrix}
+u^* = 
+\begin{bmatrix}
+\\
+\\
+\vdots \\
+\\
+\left(\frac{1}{\tau}-\frac{A^*_{n}}{2}\right)u^*_n
+\end{bmatrix}
+\end{equation}
+\begin{eqnarray}
+ & = & \left(\frac{1}{\tau} - \frac{A^*_{n}}{2}\right) u^*_{n} +
+\left(-\frac{1}{\tau} - \frac{A^*_{n}}{2}\right) u^*_{n+1}\\
+& = & -\frac{u^*_{n+1} - u^*_n}{\tau} - \frac{A^*_{n}}{2} ( u^*_{n} + u^*_{n+1})
+\end{eqnarray}
+\subsection{Heun's Method}
+
+\end{document}

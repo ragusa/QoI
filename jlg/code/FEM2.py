@@ -194,8 +194,6 @@ class femsys:
 		Returns a forward, and adjoint Quantity of interest
 		'''
 		(u, converged, itr) = self.newton_solve(np.ones(self.nel+1))
-		print(u)
-		print(converged, itr)
 		return (self.qoif(u, res), self.qoia(u, res))
 	def qoif(self, u, res):
 		'''
@@ -228,4 +226,3 @@ def TestFun():
 	fem = femsys(10, 1, diff, ddiff, sigma, q, (0,0,0,0))
 	(qoif, qoia) = fem.qoi(res)
 	print(qoif, qoia, abs(qoif-qoia))
-TestFun()

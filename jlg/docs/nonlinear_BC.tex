@@ -45,6 +45,31 @@ and the residual
 \tilde{F}_{N} & = & \frac{1}{2} u_N - 2\times Right
 \end{eqnarray}
 \section{Dirichlet}
-...
+The Dirichlet BC is:
+\begin{eqnarray}
+u_0 & = & Left \\
+u_N & = & Right
+\end{eqnarray}
+In a linear problem of the form $A u = b$, the b vector is modified as follows for all $i$ indices.
+\begin{eqnarray}
+\tilde{b}_i & = & b_i + Left\times A_{i,N} - Right\times A_{i,0}\\
+\end{eqnarray}
+In the nonlinear problem the jacobian is modified as for a left condition
+\begin{eqnarray}
+\tilde{J}_{i,0} & = & 0\\
+\tilde{J}_{0,i} & = & 0\\
+\tilde{J}_{0,0} & = & 1
+\end{eqnarray}
+as as follows for a right condition
+\begin{eqnarray}
+\tilde{J}_{i,N} & = & 0\\
+\tilde{J}_{N,i} & = & 0\\
+\tilde{J}_{N,N} & = & 1
+\end{eqnarray}
+and the residual is modified as
+\begin{eqnarray}
+\tilde{F}_0 & = & u_0 - Left\\ 
+\tilde{F}_N & = & u_N - Right 
+\end{eqnarray}
 
 \end{document}

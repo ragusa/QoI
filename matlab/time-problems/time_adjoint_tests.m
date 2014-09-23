@@ -69,7 +69,7 @@ loglog(dt,y_err,'r+-',dt,C*dt.^order,'m-'); axis tight; legend('error',sprintf('
 
 % plot conv rate of QoI
 if pbID==1
-    order=1.5; % it is unclear to me why when a(t) and b(t) are function of time, the cv rate goes to 1.5
+    order=1.5; % it is unclear to me why when a(t) and b(t) are functions of time, the cv rate goes to 1.5
 end
 figure(3); C=abs(QoI_trap(1)-QoI_trap_ref)/dt(1)^order;
 loglog(dt,abs(QoI_trap'-QoI_trap_ref),'r+-',dt,C*dt.^order,'m-'); axis tight; legend('QoI error',sprintf('slope %g',order))
@@ -98,6 +98,7 @@ u_adj=A_adj\r;
 % verify that the qoi computed the adjoint yields the same answer!
 qoi_uadjb=dot(u_adj,K*bforward)
 
+diff_=qoi_uadjb-qoi_ur
 end
 
 %%%%--------------------------------------%%%%

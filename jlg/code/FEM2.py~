@@ -92,6 +92,7 @@ class femsys:
 			A[ :,-1] = 0
 			A[-1,-1] = 1
 			b[-1] = self.bc.rval
+			print(A-A_nobc)
 		return (A, b, A_nobc, b_nobc)
 	def newton_jacobian(self, u0):
 		'''

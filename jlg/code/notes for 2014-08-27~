@@ -1,0 +1,9 @@
+When testing
+U·R noted that the R vector has the quadrature built into it --- i.e. quadrature integration was built in.
+Where as int(u*r) form uses r values at points
+
+Must use same BC for A and A*, sum(us*np.dot((As-A),u)) = 0
+
+Found bug in my CN code making for/adj differ
+	was related to use of ×tau vs ÷steps
+

@@ -167,7 +167,7 @@ us0 = np.ones(N+1)
 (us, r) = CNadjoint(N, T, us0, Dfun, dDfun, SIGfun, Qfun, res, bc_fun)
 #qoia = -innerproduct(us, Qfun, T, N) + h*(sum(u[:,-1]*us[:,-1])-sum(u[:,0]*us[:,0]))
 qoia = dotproduct(us, b, T, N)
-print('x t^2\t%.2f\t%.2e\t%.2f\t%.2e'%(qoif, abs(qoif-1/6), qoia, abs(qoif-qoia)))
+print('x t\t%.2f\t%.2e\t%.2f\t%.2e'%(qoif, abs(qoif-1/6), qoia, abs(qoif-qoia)))
 
 # u = x t^3
 Dfun = lambda u, x, t: 1
@@ -184,4 +184,4 @@ us0 = np.ones(N+1)
 (us, r) = CNadjoint(N, T, us0, Dfun, dDfun, SIGfun, Qfun, res, bc_fun)
 #qoia = -innerproduct(us, Qfun, T, N) + h*(sum(u[:,-1]*us[:,-1])-sum(u[:,0]*us[:,0]))
 qoia = dotproduct(us, b, T, N)
-print('x t\^3t%.2f\t%.2e\t%.2f\t%.2e'%(qoif, abs(qoif-1/8), qoia, abs(qoif-qoia)))
+print('x t\t%.2f\t%.2e\t%.2f\t%.2e'%(qoif, abs(qoif-1/8), qoia, abs(qoif-qoia)))

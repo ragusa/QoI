@@ -28,14 +28,13 @@ def make_operators(D, dD, Sigma, BC, Q, R, N, T, N_WIDTH, T_WIDTH, u):
 	'''
 	tau = T_WIDTH/T
 	M = mass_matrix(N, T)
-	
 	# Reuse FEM code for spatial portion.
 	FEM = femsys(N, N_WIDTH, D, dD, Sigma, Q, BC)
 	ignored_A_bc, ignored_b_bc, A, rhs = FEM.assemble(u)
 	
 	# Create the operators
-	on_diagonal  =   M - tau/2*A
-	off_diagonal = - M - tau/2*A
+	on_diagonal  = M + tau/2*A
+	off_diagonal = -M + tau/2*A
 	rhs *= tau
 	
 	return (np.array(on_diagonal), np.array(off_diagonal), rhs)
@@ -91,6 +90,7 @@ def forward(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0):
 	return u, src
 
 def adjoint(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0):
+	K = make_K(N,T)
 	u = np.empty((T+1, N+1))
 	A_adj = np.zeros(((T+1)*(N+1),(T+1)*(N+1)))
 	for t in range(T, -1,-1):
@@ -103,9 +103,8 @@ def adjoint(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0):
 		
 		# Create Operators
 		on_diagonal, off_diagonal, rhs = make_operators(D, dD, Sigma, BC(t), R, Q, N, T, N_WIDTH, T_WIDTH, u[t-1,:])
-		on, off, rhs = apply_bc(on_diagonal, off_diagonal, rhs, BC, t, t)
+		on, off, rhs = apply_bc(on_diagonal, off_diagonal, rhs, BC, t+1, t)
 		rhs = np.ones(N+1)
-		
 		if t == T:
 			u[t,:] = solve(on, rhs)
 		elif t == T-1:
@@ -173,12 +172,13 @@ def test_problem(tag, u0, BC, Q, N, T, qoi_known):
 	qoia =  dotproduct(u_adj, src, N, T)
 	print("%3i %3i %12s\t%5E\t%5E\t%5E\t%5E"%(N, T, tag, qoif, abs(qoif - qoi_known), qoia, abs(qoia - qoif)))
 	return qoif, abs(qoif - qoi_known), qoia, abs(qoia - qoif),qoia/qoif, u_for, u_adj
+'''
 fig = plt.figure()
 ax = fig.add_subplot(111)
-'''Nmin = 3
-Nmax = 10
+Nmin = 3
+Nmax = 20
 maxE = []
-for T in range(1,20):
+for T in range(1,21):
 	E = []
 	for N in range(Nmin, Nmax+1):
 		# u = 1
@@ -187,14 +187,14 @@ for T in range(1,20):
 		Q = lambda x, t: 0
 		qoif, errf, qoia, errfa, err, u, us = test_problem('u = 1',u0, BC, Q, N, T, 1)
 		E.append(errfa)
+		maxE.append((N,T,errfa))
 	ax.plot(np.linspace(Nmin,Nmax,(Nmax-Nmin+1)), E, label=T)
-	maxE.append((N,T,max(E)))
 print(maxE)
 legend = ax.legend()
-plt.show()'''
-
+plt.show()
+'''
 N = 100
-T = 1
+T = 100
 # u = 1
 u0 = np.ones(N+1)
 BC = lambda t: (2, 1, 2, 1)
@@ -218,3 +218,8 @@ BC = lambda t: (2, 0, 2, t/T)
 Q = lambda x, t: x
 qoif, errf, qoia, errfa, err, u, us = test_problem('u = t x',u0, BC, Q, N, T, 1/4)
 
+# u = t^2
+u0 = np.zeros(N+1)
+BC = lambda t: (2, (t/T)**2, 2, (t/T)**2)
+Q = lambda x, t: 2 * (t/T)
+qoif, errf, qoia, errfa, err, u, us = test_problem('u = t^2',u0, BC, Q, N, T, 1/3)

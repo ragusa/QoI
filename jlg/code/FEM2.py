@@ -181,7 +181,9 @@ class femsys:
 		k = 0
 		resi = self.newton_residual(ustart)
 		norm0 = norm(resi)
-		uk = ustart
+		uk = ustart.copy()
+		if norm0 == 0:
+			return (uk, True, 0)
 		while norm(resi)/norm0 > tol and k < max_iter:
 			k+=1
 			jaco = self.newton_jacobian(uk)

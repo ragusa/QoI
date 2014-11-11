@@ -39,7 +39,7 @@ def make_operators(D, dD, Sigma, BC, Q, R, N, T, N_WIDTH, T_WIDTH, u):
 	
 	return (np.array(on_diagonal), np.array(off_diagonal), rhs)
 
-def apply_bc(on_diagonal, off_diagonal, rhs, bc, t_cur, t_old):
+def apply_bc(on_diagonal, off_diagonal, rhs, bc, t_cur, t_old, ign_new=False):
 	bc_cur = bc(t_cur)
 	bc_prev = bc(t_old)
 	if bc_cur [0] == 2:
@@ -48,9 +48,10 @@ def apply_bc(on_diagonal, off_diagonal, rhs, bc, t_cur, t_old):
 		off_diagonal[0,:] = 0
 		off_diagonal[:,0] = 0
 		
-		rhs -= bc_cur[1] * on_diagonal[:,0]
-		on_diagonal[0,:] = 0
-		on_diagonal[:,0] = 0
+		if not ign_new:
+			rhs -= bc_cur[1] * on_diagonal[:,0]
+			on_diagonal[0,:] = 0
+			on_diagonal[:,0] = 0
 		
 		on_diagonal[0,0] = 1
 		rhs[0] = bc_cur [1]
@@ -60,9 +61,10 @@ def apply_bc(on_diagonal, off_diagonal, rhs, bc, t_cur, t_old):
 		off_diagonal[-1,:] = 0
 		off_diagonal[:,-1] = 0
 		
-		rhs -= bc_cur[3] * on_diagonal[:,-1]
-		on_diagonal[-1,:] = 0
-		on_diagonal[:,-1] = 0
+		if not ign_new:
+			rhs -= bc_cur[3] * on_diagonal[:,-1]
+			on_diagonal[-1,:] = 0
+			on_diagonal[:,-1] = 0
 		
 		on_diagonal[-1,-1] = 1
 		rhs[-1] = bc_cur [3]
@@ -88,6 +90,40 @@ def forward(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0):
 		u[t,:] = solve(on, rhs - np.dot(off, u[t-1,:]))
 		src[t,:] = rhs
 	return u, src
+
+def forward_nonlinear(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0):
+	u = np.empty((T+1, N+1))
+	src = np.empty((T+1, N+1))
+	u[0,:] = u0
+	src[0,:] = u0
+	for t in range(1, T+1):
+		ut, srct = newton_forward_step(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, t, N_WIDTH, T_WIDTH, u)
+		u[t,:] = ut
+		src[t,:] = srct
+	return u, src
+def xinterpol(V, x, N, N_WIDTH):
+	'''
+	Interpolates on V assuming it goes from 0 to N_WIDTH
+	'''
+	Vout = np.empty(len(x))
+	for i in range(len(x)):
+		x0 = int(np.floor(N*x[i]))
+		x1 = int(np.ceil(N*x[i]))
+		Vout[i] = (x1-x[i]) * V[x1] + (1-(x1-x[i])) * V[x0]
+	return Vout
+def newton_forward_step(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, t, N_WIDTH, T_WIDTH, u):
+	D = lambda u, x: D_t(u, x, t)
+	dD = lambda u, x: dD_t(u, x, t)
+	Sigma = lambda u, x: Sigma_t(u, x, t)
+	Q = lambda x: Q_t(x, t)
+	R = lambda x: R_t(x, t)
+	on_diagonal, off_diagonal, rhs = make_operators(D, dD, Sigma, BC(t), Q, R, N, T, N_WIDTH, T_WIDTH, u[t-1,:])
+	on, off, rhs = apply_bc(on_diagonal, off_diagonal, rhs, BC, t, t-1, ign_new=True)
+	RHS = rhs - np.dot(off, u[t-1,:])
+	modQ = lambda x: Q(x) + xinterpol(RHS, x, N, N_WIDTH)
+	FEM = femsys(N, N_WIDTH, D, dD, Sigma, modQ, BC(t))
+	uk, conv, k = FEM.newton_solve(u[t-1,:], tol=1E-14)
+	return uk, RHS
 
 def adjoint(D_t, dD_t, Sigma_t, BC, Q_t, R_t, N, T, N_WIDTH, T_WIDTH, u0, u_for):
 	K = make_K(N,T)
@@ -162,18 +198,18 @@ def plot(U, N, T):
 
 R = lambda x, t: 1
 def test_problem(tag, u0, D, dD, Sigma, BC, Q, N, T, qoi_known):
-	u_for, src = forward(D, dD, Sigma, BC, Q, R, N, T, 1, 1, u0)
+	u_for, src = forward_nonlinear(D, dD, Sigma, BC, Q, R, N, T, 1, 1, u0)
 	qoif = innerproduct(u_for, R, N, T)
 	u_adj = adjoint(D, dD, Sigma, BC, Q, R, N, T, 1, 1, u0, u_for)
 	qoia =  dotproduct(u_adj, src, N, T)
 	if abs(qoia - qoif) > 1E-12:
-		flag = '*****'
+		flag = '**'
 	else:
 		flag = ''
-	print("%4i %3i %12s\t%5E\t%5E\t%5E\t%5E\t%s"%(N, T, tag, qoif, abs(qoif - qoi_known), qoia, abs(qoia - qoif), flag))
+	print("%4i %3i %8s %.2E %.2E %.2E %.2E %.2E %.2E %s"%(N, T, tag, qoi_known, qoif, qoia, abs(qoif - qoi_known), abs(qoia - qoi_known), abs(qoia - qoif), flag))
 	return qoif, abs(qoif - qoi_known), qoia, abs(qoia - qoif),qoia/qoif, u_for, u_adj
 
-print("%21s\t%12s\t%12s\t%12s\t%12s"%('Function', 'QoI_F', 'ERR_F', 'QoI_A', 'ERR_FA'))
+print("%17s %8s %8s %8s %8s %8s %8s"%('Function', 'Known', 'QoI_F', 'QoI_A', 'ERR_F', 'ERR_A', 'ERR_FA'))
 
 N = 1
 T = 1

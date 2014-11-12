@@ -17,7 +17,7 @@ class boundary_condition:
 			else:
 				self.right = lambda t: BC[3]
 class diffusion_system:
-	def __init__(self, k, Dk, Q, BC, sig=0):
+	def __init__(self, N, k, Dk, Q, BC, sig=0):
 		if callable(k):
 			self.k = k
 		else:
@@ -35,6 +35,24 @@ class diffusion_system:
 		else:
 			self.sig = lambda x,t,uph,uth: sig
 		self.BC = boundary_condition(BC)
+		self.mass_matrix = self.generate_mass_matrix(N)
+	def generate_mass_matrix(self, N):
+		"""
+		Mass matrix with a flux = u and at time = t
+		"""
+		h = 1/(N)
+		# Create the mass matrix
+		d_main = 4/3 * np.ones(N+1) # Diagonal Entries
+		d_off = 1/3 * np.ones(N+1) # Off diagonals
+		M = spar.spdiags([d_off, d_main, d_off], [-1,0,1], N+1, N+1, format='csc')
+		M[0,0] /= 2
+		M[-1,-1] /= 2
+		return M*h/2
+	def stiffness_matrix(self, u, t):
+		"""
+		Stiffness matrix with a flux = u and at time = t
+		"""
+		raise NotImplementedError('Function not implemented')
 class boundary:
 	'''
 	Boundary conditions container
@@ -76,7 +94,8 @@ class FEM_SYS:
 		Takes a single (crank nicolson) time step forward
 		Returns the flux at the next time step.
 		"""
-	def newton_jacobian(self, u_k, u_cur, t_cur, F0):
+		raise NotImplementedError('Function not implemented')
+	def newton_jacobian(self, u_k, u_cur, t_cur):
 		"""
 		Calculate the jacobian for the FEM_STATE
 		Takes:
@@ -86,6 +105,16 @@ class FEM_SYS:
 		R0, initial residual normal
 		"""
 		JAC = spar.csr_matrix(((self.N+1)*2, (self.N+1)*2))
+		# Mass + Stiffness for photon part (Top Left)
+		
+		# Mass + Stiffness for thermal part (Bottom Right)
+		
+		# Mass (Top Right)
+		
+		# (Bottom Left)
+		
+		raise NotImplementedError('Function not implemented')
+		
 	def newton_residual_half(self, u_cur, t, d_sys, part):
 		offset = (self.N+1)*part
 		F = np.zeros(self.N+1)
@@ -107,10 +136,11 @@ class FEM_SYS:
 			# sigma(x,t,u) at quadrature points
 			sigq = d_sys.sig(x, t, ph_uq, th_uq)
 			# Q(x,t,u) at the quadrature points
-			Qq = d_sys.Q(x, t, ph_uq, th_uq)
+			Qq = d_sys.Q(x, t, ph_uq, th_uq) # TOADD: Time term
 			local = np.zeros(self.qorder)
 			for j in range(self.qorder):
 				local[j] = sum(uq*sigq*self.wq*self.b[:,j]) + np.dot(kq*self.wq*self.dbdx[:,j], dudxq) - np.dot(Qq*self.wq, self.b[:,j])
+				# TOADD: Time Term
 			F[k:k+self.qorder] += local
 		# Apply Boundary Conditions
 		if d_sys.BC.ltype == 0: # Neumann
@@ -126,7 +156,7 @@ class FEM_SYS:
 		elif d_sys.BC.rtype == 2: # Dirichlet
 			F[-1] = u_cur[N+offset] - d_sys.BC.right(t)
 		return F
-	def newton_residual(self, u_cur, t, F0=1):
+	def newton_residual(self, u_cur, t):
 		"""
 		Calculate the residual divided by the initial residual
 		Inital defaults to "1" so it returns the undivided residual if not provided.
@@ -138,30 +168,44 @@ class FEM_SYS:
 		F = np.zeros((self.N+1)*2)
 		F[0:self.N+1] = self.newton_residual_half(u_cur, t, self.ph, 0)
 		F[self.N+1: ] = self.newton_residual_half(u_cur, t, self.th, 1)
-		return sum(F**2)/F0
+		return F
+	def newton_residual_norm(self, u_cur, t):
+		return sum(self.newton_residual(u_cur, t)**2)
 	def newton_solve(self, u0, t):
 		"""
 		Use newton's method to solve at time=1, using the initial guess u0
 		"""
 		if u0 == None:
 			u0 = np.zeros((N+1)*2)
-		F0 = self.newton_residual(u0, t)
-		if F0 == 0:
-			return u0
 		return opt.minimize(
-				fun = self.newton_residual,
+				fun = self.newton_residual_norm,
 				x0 = u0,
-				args = (t, F0),
+				args = (t,),
 				#jac = self.newton_jacobian,
-				tol = 1E-12)
+				)
 
 N = 2
 T = 1
-ph = diffusion_system(0,0,1,(2,1,2,1),1)
-th = diffusion_system(0,0,0,(0,0,0,0))
+
+kph  = lambda x, t, ph_uq, th_uq: x
+Dkph = lambda x, t, ph_uq, th_uq: 1
+Qph  = lambda x, t, ph_uq, th_uq: 0
+BCph = (2,lambda t: 1,2,lambda t: 1)
+
+kth  = lambda x, t, ph_uq, th_uq: x
+Dkth = lambda x, t, ph_uq, th_uq: 1
+Qth  = lambda x, t, ph_uq, th_uq: 0
+BCth = (2,lambda t: 1,2,lambda t: 1)
+
+ph = diffusion_system(N, kph, Dkph, Qph, BCph)
+th = diffusion_system(N, kth, Dkth, Qth, BCth)
+
 constant = FEM_SYS(N, T, ph, th)
+
 u_0 = np.asarray([0,0,0,0,0,0])
-u_sol = np.asarray([1,1,1,0,0,0])
+u_sol = np.asarray([1,1,1,1,1,1])
+
 print(constant.newton_residual(u_0,0))
 print(constant.newton_residual(u_sol,0))
+
 print(constant.newton_solve(None,0))

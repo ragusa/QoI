@@ -115,7 +115,7 @@ class FEM_SYS:
 		
 		raise NotImplementedError('Function not implemented')
 		
-	def newton_residual_half(self, u_cur, t, d_sys, part):
+	def newton_residual_half(self, u_cur, Auold, t, d_sys, part):
 		offset = (self.N+1)*part
 		F = np.zeros(self.N+1)
 		for k in range(self.N):
@@ -136,11 +136,11 @@ class FEM_SYS:
 			# sigma(x,t,u) at quadrature points
 			sigq = d_sys.sig(x, t, ph_uq, th_uq)
 			# Q(x,t,u) at the quadrature points
-			Qq = d_sys.Q(x, t, ph_uq, th_uq) # TOADD: Time term
+			Qq = d_sys.Q(x, t, ph_uq, th_uq) # TOADD: Time previous term (M±A(k-1)*tau/2)u(k-1)
 			local = np.zeros(self.qorder)
 			for j in range(self.qorder):
 				local[j] = sum(uq*sigq*self.wq*self.b[:,j]) + np.dot(kq*self.wq*self.dbdx[:,j], dudxq) - np.dot(Qq*self.wq, self.b[:,j])
-				# TOADD: Time Term
+				# TOADD: Time Term (M±A(k)*tau/2)u(k)
 			F[k:k+self.qorder] += local
 		# Apply Boundary Conditions
 		if d_sys.BC.ltype == 0: # Neumann
@@ -156,31 +156,36 @@ class FEM_SYS:
 		elif d_sys.BC.rtype == 2: # Dirichlet
 			F[-1] = u_cur[N+offset] - d_sys.BC.right(t)
 		return F
-	def newton_residual(self, u_cur, t):
+	def newton_residual(self, u_cur, u_old, t):
 		"""
-		Calculate the residual divided by the initial residual
-		Inital defaults to "1" so it returns the undivided residual if not provided.
+		Calculate the residual
 		Takes:
 		u_cur, current guess
+		u_old, solution of previous time step
 		t, current time
 		F0, normal of initial residual 
 		"""
 		F = np.zeros((self.N+1)*2)
-		F[0:self.N+1] = self.newton_residual_half(u_cur, t, self.ph, 0)
-		F[self.N+1: ] = self.newton_residual_half(u_cur, t, self.th, 1)
+		# (M±A(k-1)*tau/2)*u(k-1)
+		# Previous time step for time dependence.
+		Auold =
+		F[0:self.N+1] = self.newton_residual_half(u_cur, Auold, t, self.ph, 0)
+		F[self.N+1: ] = self.newton_residual_half(u_cur, Auold, t, self.th, 1)
 		return F
-	def newton_residual_norm(self, u_cur, t):
-		return sum(self.newton_residual(u_cur, t)**2)
-	def newton_solve(self, u0, t):
+	def newton_residual_norm(self, u_cur, u_old, t):
+		return sum(self.newton_residual(u_cur, u_old, t)**2)
+	def newton_solve(self, u0, t, u_old):
 		"""
 		Use newton's method to solve at time=1, using the initial guess u0
 		"""
 		if u0 == None:
 			u0 = np.zeros((N+1)*2)
+		if u_old == None:
+			u_old = np.zeros((N+1)*2)
 		return opt.minimize(
 				fun = self.newton_residual_norm,
 				x0 = u0,
-				args = (t,),
+				args = (u_old,t),
 				#jac = self.newton_jacobian,
 				)
 

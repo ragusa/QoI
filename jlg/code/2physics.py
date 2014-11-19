@@ -4,37 +4,38 @@ import numpy as np
 import scipy as sp
 import scipy.sparse as spar
 import scipy.optimize as opt
+from numpy.linalg import norm
+
+np.set_printoptions(linewidth=200)
+
 class boundary_condition:
 		def __init__(self, BC):
 			self.ltype = BC[0]
 			self.rtype = BC[2]
-			if callable(BC[1]):
-				self.left = BC[1]
-			else:
-				self.left = lambda t: BC[1]
-			if callable(BC[3]):
-				self.right = BC[3]
-			else:
-				self.right = lambda t: BC[3]
+			self.left  = BC[1] if callable(BC[1]) else lambda t: BC[1]
+			self.right = BC[3] if callable(BC[3]) else lambda t: BC[3]
 class diffusion_system:
-	def __init__(self, N, k, Dk, Q, BC, sig=0):
-		if callable(k):
-			self.k = k
-		else:
-			self.k = lambda x,t,uph,uth: k
-		if callable(Dk):
-			self.Dk = Dk
-		else:
-			self.Dk = lambda x,t,uph,uth: Dk
-		if callable(Q):
-			self.Q = Q
-		else:
-			self.Q = lambda x,t,uph,uth: Q
-		if callable(sig):
-			self.sig = sig
-		else:
-			self.sig = lambda x,t,uph,uth: sig
+	def __init__(self, N, k, Dk, Q, BC, offset, sig=0, order=2):
+		self.N = N
+		self.x = np.linspace(0,1,N+1) # X values of nodes (N+1)
+		self.offset = offset
+		
+		self.k   = k   if callable(k)   else lambda x,t,uph,uth: k
+		self.Dk  = Dk  if callable(Dk)  else lambda x,t,uph,uth: Dk
+		self.Q   = Q   if callable(Q)   else lambda x,t,uph,uth: Q
+		self.sig = sig if callable(sig) else lambda x,t,uph,uth: sig
+		
+		# Quadrature points used for integration
+		# Weights of quadrature
+		self.qorder = order
+		[self.xq, self.wq] = np.polynomial.legendre.leggauss(self.qorder)
+		# Basis functions at quadrature points
+		self.b = np.array([(1-self.xq)/2, (1+self.xq)/2])
+		# Derivative of the basis functions at quadrature points
+		self.dbdx = np.array([[-.5, .5],[-.5, .5]])
+		# Boundary Conditions
 		self.BC = boundary_condition(BC)
+		# Generate and save the mass matrix
 		self.mass_matrix = self.generate_mass_matrix(N)
 	def generate_mass_matrix(self, N):
 		"""
@@ -48,11 +49,38 @@ class diffusion_system:
 		M[0,0] /= 2
 		M[-1,-1] /= 2
 		return M*h/2
-	def stiffness_matrix(self, u, t):
+	def stiffness_matrix(self, u0, t):
 		"""
 		Stiffness matrix with a flux = u and at time = t
 		"""
-		raise NotImplementedError('Function not implemented')
+		A_nobc = np.zeros((self.N+1,self.N+1))
+		f = np.zeros(self.qorder)
+		for i in range(self.qorder):
+			f[i] = sum(self.wq*self.b[:,i])
+		for k in range(self.N):
+			# u and du/dx values at quadrature points
+			ph_uq = np.dot(self.b,    u0[k:k+self.qorder])
+			th_uq = np.dot(self.b,    u0[k+self.N+1:k+self.N+1+self.qorder])
+
+			x0 = self.x[k]
+			x1 = self.x[k+1]
+			jacob = (x1-x0)/2
+			# Quadrature points mapped to the element
+			x = (x1+x0)/2 + self.xq*jacob
+			# u and du/dx values at quadrature points
+			uq    = np.dot(self.b,    u0[k + self.offset*(N+1):k + self.offset*(N+1) + self.qorder])
+			dudxq = np.dot(self.dbdx, u0[k + self.offset*(N+1):k + self.offset*(N+1) + self.qorder])
+			# D(x,u) values at quadrature points
+			Dq = self.k(uq, x, ph_uq, th_uq)/jacob
+			dDduq = self.Dk(uq, x, ph_uq, th_uq)
+			# Sigma values at quadrature points
+			Sq = self.sig(uq, x, ph_uq, th_uq)*jacob
+			Alet = np.zeros((self.qorder,self.qorder))
+			for i in range(self.qorder):
+				for j in range(self.qorder):
+					Alet[i,j] = sum(self.wq*self.dbdx[:,i]*Dq*self.dbdx[:,j]) + sum(self.wq*Sq*self.b[:,i]*self.b[:,j])
+			A_nobc[k:k+self.qorder,k:k+self.qorder] += Alet
+		return A_nobc
 class boundary:
 	'''
 	Boundary conditions container
@@ -69,11 +97,12 @@ class FEM_SYS:
 		# Discretation
 		self.N = N # Number of spatial steps
 		self.T = T # Number of temporal steps
+		self.dt = 1/T # Time step width
 		self.x = np.linspace(0,1,N+1) # X values of nodes (N+1)
 		
-		# Diffusion parameters
-		self.ph = photon_system  # Photon equation parameters
-		self.th = thermal_system # Thermal equation parameters
+		# Diffusion systems, creates a constant zero system if it is None
+		self.ph =  photon_system if  photon_system is not None else diffusion_system(N, 0, 0, 0, (2,lambda t: 0,2,lambda t: 0), 0)
+		self.th = thermal_system if thermal_system is not None else diffusion_system(N, 0, 0, 0, (2,lambda t: 0,2,lambda t: 0), 0)
 		
 		# Quadrature points used for integration
 		# Weights of quadrature
@@ -118,6 +147,14 @@ class FEM_SYS:
 	def newton_residual_half(self, u_cur, Auold, t, d_sys, part):
 		offset = (self.N+1)*part
 		F = np.zeros(self.N+1)
+		
+		# (M+A(k-1)*tau/2)*u(k-1)
+		# Previous time step for time dependence.
+		ph_A = self.ph.mass_matrix + self.dt/2 * self.ph.stiffness_matrix(u_cur,t)
+		th_A = self.th.mass_matrix + self.dt/2 * self.th.stiffness_matrix(u_cur,t)
+		Aucur = np.empty((N+1)*2)
+		Aucur[:len(u_cur)//2] = np.dot(ph_A, u_cur[:len(u_cur)//2])
+		Aucur[len(u_cur)//2:] = np.dot(th_A, u_cur[len(u_cur)//2:])
 		for k in range(self.N):
 			x0 = self.x[k]
 			x1 = self.x[k+1]
@@ -136,11 +173,22 @@ class FEM_SYS:
 			# sigma(x,t,u) at quadrature points
 			sigq = d_sys.sig(x, t, ph_uq, th_uq)
 			# Q(x,t,u) at the quadrature points
-			Qq = d_sys.Q(x, t, ph_uq, th_uq) # TOADD: Time previous term (M±A(k-1)*tau/2)u(k-1)
+			Qq = d_sys.Q(x, t, ph_uq, th_uq)
+			
+			Auoldq = np.dot(self.b, Auold[k + offset:k + offset + self.qorder])
+			Aucurq = np.dot(self.b, Aucur[k + offset:k + offset + self.qorder])
 			local = np.zeros(self.qorder)
 			for j in range(self.qorder):
-				local[j] = sum(uq*sigq*self.wq*self.b[:,j]) + np.dot(kq*self.wq*self.dbdx[:,j], dudxq) - np.dot(Qq*self.wq, self.b[:,j])
-				# TOADD: Time Term (M±A(k)*tau/2)u(k)
+				local[j]  = sum(uq*sigq*self.wq*self.b[:,j])
+				local[j] += np.dot(kq*self.wq*self.dbdx[:,j], dudxq)
+				local[j] -= np.dot(Qq*self.wq, self.b[:,j])
+				#local[j] += np.dot(Aucurq*self.wq, self.b[:,j]) # Time Term  ( M+A(k)  *tau/2)u(k)
+				#local[j] += np.dot(Auoldq*self.wq, self.b[:,j]) # Time Term -(-M+A(k-1)*tau/2)u(k-1)
+#				print('Local',k,j,local[j])
+#				print(sum(uq*sigq*self.wq*self.b[:,j]))
+#				print(np.dot(kq*self.wq*self.dbdx[:,j], dudxq))
+#				print(-np.dot(Qq*self.wq, self.b[:,j]))
+#				print(sum(self.wq*np.dot(self.b, Aucur[k + offset:k + offset + self.qorder])*self.b[:,j]))
 			F[k:k+self.qorder] += local
 		# Apply Boundary Conditions
 		if d_sys.BC.ltype == 0: # Neumann
@@ -166,51 +214,69 @@ class FEM_SYS:
 		F0, normal of initial residual 
 		"""
 		F = np.zeros((self.N+1)*2)
-		# (M±A(k-1)*tau/2)*u(k-1)
+		# (-M+A(k-1)*tau/2)*u(k-1)
 		# Previous time step for time dependence.
-		Auold =
+		ph_A = -self.ph.mass_matrix + self.dt/2 * self.ph.stiffness_matrix(u_old,t - self.dt)
+		th_A = -self.th.mass_matrix + self.dt/2 * self.th.stiffness_matrix(u_old,t - self.dt)
+		Auold = np.empty((N+1)*2)
+		Auold[:len(u_old)//2] = np.dot(ph_A, u_old[:len(u_old)//2])
+		Auold[len(u_old)//2:] = np.dot(th_A, u_old[len(u_old)//2:])
+		
+		# Each half of the residual
 		F[0:self.N+1] = self.newton_residual_half(u_cur, Auold, t, self.ph, 0)
 		F[self.N+1: ] = self.newton_residual_half(u_cur, Auold, t, self.th, 1)
+		print(u_old)
+		print('\t',F)
 		return F
-	def newton_residual_norm(self, u_cur, u_old, t):
-		return sum(self.newton_residual(u_cur, u_old, t)**2)
-	def newton_solve(self, u0, t, u_old):
+	def newton_residual_norm(self, u_cur, u_old, t, normed=1):
+		if u_old is None:
+			u_old = u_cur
+		F = self.newton_residual(u_cur, u_old, t)
+		R = norm(F)/normed
+		return R
+	def newton_solve(self, u0, u_old, t):
 		"""
 		Use newton's method to solve at time=1, using the initial guess u0
 		"""
-		if u0 == None:
+		if u0 is None:
 			u0 = np.zeros((N+1)*2)
-		if u_old == None:
-			u_old = np.zeros((N+1)*2)
+		res0 = self.newton_residual_norm(u0,u_old,t)
 		return opt.minimize(
 				fun = self.newton_residual_norm,
 				x0 = u0,
-				args = (u_old,t),
+				args = (u_old,t,res0),
+				tol=1E-16
 				#jac = self.newton_jacobian,
 				)
-
-N = 2
+def test_problem(ph, T, ID):
+	u = FEM_SYS(ph.N, T, ph, None)
+	u_sol = np.asarray([1,1,1,0,0,0])
+	print(ID, u.newton_solve(None,None,0))
+	print('Sol', u.newton_residual_norm(u_sol,u_sol,0))
 T = 1
 
-kph  = lambda x, t, ph_uq, th_uq: x
-Dkph = lambda x, t, ph_uq, th_uq: 1
+N = 2
+kph  = lambda x, t, ph_uq, th_uq: 1
+Dkph = lambda x, t, ph_uq, th_uq: 0
 Qph  = lambda x, t, ph_uq, th_uq: 0
 BCph = (2,lambda t: 1,2,lambda t: 1)
+ph_1 = diffusion_system(N, kph, Dkph, Qph, BCph, offset=0)
+test_problem(ph_1, T, 'u=1')
 
-kth  = lambda x, t, ph_uq, th_uq: x
-Dkth = lambda x, t, ph_uq, th_uq: 1
-Qth  = lambda x, t, ph_uq, th_uq: 0
-BCth = (2,lambda t: 1,2,lambda t: 1)
+'''
+N = 2
+kph  = lambda x, t, ph_uq, th_uq: x
+Dkph = lambda x, t, ph_uq, th_uq: 0
+Qph  = lambda x, t, ph_uq, th_uq: 1
+BCph = (2,lambda t: 0,2,lambda t: 1)
+ph_x = diffusion_system(N, kph, Dkph, Qph, BCph, offset=0)
+test_problem(ph_x, T, 'u=x')
 
-ph = diffusion_system(N, kph, Dkph, Qph, BCph)
-th = diffusion_system(N, kth, Dkth, Qth, BCth)
-
-constant = FEM_SYS(N, T, ph, th)
-
-u_0 = np.asarray([0,0,0,0,0,0])
-u_sol = np.asarray([1,1,1,1,1,1])
-
-print(constant.newton_residual(u_0,0))
-print(constant.newton_residual(u_sol,0))
-
-print(constant.newton_solve(None,0))
+N = 2
+kph  = lambda x, t, ph_uq, th_uq: 1
+Dkph = lambda x, t, ph_uq, th_uq: 0
+Qph  = lambda x, t, ph_uq, th_uq: 2*x
+BCph = (2,lambda t: 0,2,lambda t: 1)
+ph_x2 = diffusion_system(N, kph, Dkph, Qph, BCph, offset=0)
+test_problem(ph_x2, T, 'u=x²')
+'''

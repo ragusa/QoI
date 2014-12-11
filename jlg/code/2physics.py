@@ -25,28 +25,62 @@ class boundary_condition:
 			self.rtype = BC[2]
 			self.left  = BC[1] if callable(BC[1]) else lambda t: BC[1]
 			self.right = BC[3] if callable(BC[3]) else lambda t: BC[3]
-
+def quadmaker(N, p):
+	'''
+	Return quadrature points, weights, basis functions, and basis derivatives
+	for order p
+	'''
+	[xq, wq] = np.polynomial.legendre.leggauss(p)
+	xd = np.linspace(-1,1,p)
+	b = np.zeros((p,p))
+	gn = np.zeros((N+1,p),dtype='int')
+	gn[0,:] = [i for i in range(p)]
+	for i in range(1,N+1):
+		gn[i,:] = gn[i-1]+1
+	for i in range(p):
+		NUM = 1
+		DEN = 1
+		for j in range(p):
+			if j != i:
+				NUM *= xq - xd[j]
+				DEN *= xd[i] - xd[j]
+		b[:,i] = NUM/DEN
+	dbdx = np.zeros((p,p))
+	for i in range(p):
+		SUM = 0
+		DEN = 1
+		for j in range(p):
+			if j != i:
+				NUM = 1
+				for k in range(p):
+					if k!=i and k!=j:
+						NUM *= xq - xd[k]
+				SUM += NUM
+				DEN *= xd[i]-xd[j]
+		dbdx[:,i] = SUM/DEN
+	print(xq)
+	print(wq)
+	print(b)
+	print(dbdx)
+	print(gn)
+	return xq,wq,b,dbdx,gn
 class diffusion_system:
-	def __init__(self, N, T, k, Dk, Q, BC, offset, sig=0, order=2):
+	def __init__(self, N, T, k, Dk, Q, BC, offset, sig=0, order=3):
 		self.offset = offset
 		self.N   = N
 		self.dx  = 1/N
 		self.T   = T
 		self.dt  = 1/T
 		self.x   = np.linspace(0,1,N+1) # X values of nodes (N+1)
-		self.k   = vectorize(k  ) if callable(k)   else vectorize(lambda x,t,uph,uth: k  )
-		self.Dk  = vectorize(Dk ) if callable(Dk)  else vectorize(lambda x,t,uph,uth: Dk )
-		self.Q   = vectorize(Q  ) if callable(Q)   else vectorize(lambda x,t,uph,uth: Q  )
-		self.sig = vectorize(sig) if callable(sig) else vectorize(lambda x,t,uph,uth: sig)
+		self.k   = vectorize(k  ) if callable(k)   else vectorize(lambda x,t,uph,uth,duphdx: k  )
+		self.Dk  = vectorize(Dk ) if callable(Dk)  else vectorize(lambda x,t,uph,uth,duphdx: Dk )
+		self.Q   = vectorize(Q  ) if callable(Q)   else vectorize(lambda x,t,uph,uth,duphdx: Q  )
+		self.sig = vectorize(sig) if callable(sig) else vectorize(lambda x,t,uph,uth,duphdx: sig)
 		
 		# Quadrature points used for integration
-		# Weights of quadrature
+		# Quadrature
 		self.qorder = order
-		[self.xq, self.wq] = np.polynomial.legendre.leggauss(self.qorder)
-		# Basis functions at quadrature points
-		self.b = np.array([(1-self.xq)/2, (1+self.xq)/2])
-		# Derivative of the basis functions at quadrature points
-		self.dbdx = np.array([[-.5, .5],[-.5, .5]])
+		[self.xq, self.wq, self.b, self.dbdx, self.gn] = quadmaker(self.N, self.qorder)
 		# Boundary Conditions
 		self.BC = boundary_condition(BC)
 		# Generate and save the mass matrix
@@ -112,23 +146,24 @@ class diffusion_system:
 		#M(Δu)/dt
 		Mudt = self.M.dot(this1-this0)/dt
 		F = np.zeros(self.N+1)
-
-		k0s =   self.k(self.x,t0,u0ph,u0th)
-		k1s =   self.k(self.x,t1,u1ph,u1th)
-		S0s = self.sig(self.x,t0,u0ph,u0th)
-		S1s = self.sig(self.x,t1,u1ph,u1th)
-		Q0s =   self.Q(self.x,t0,u0ph,u0th)
-		Q1s =   self.Q(self.x,t1,u1ph,u1th)
+		dup0dx = 0
+		dup1dx = 0
+		k0s =   self.k(self.x,t0,u0ph,u0th,dup0dx)
+		k1s =   self.k(self.x,t1,u1ph,u1th,dup1dx)
+		S0s = self.sig(self.x,t0,u0ph,u0th,dup0dx)
+		S1s = self.sig(self.x,t1,u1ph,u1th,dup1dx)
+		Q0s =   self.Q(self.x,t0,u0ph,u0th,dup0dx)
+		Q1s =   self.Q(self.x,t1,u1ph,u1th,dup1dx)
 		for i in range(self.N):
 			x0 = self.x[i]
 			x1 = self.x[i+1]
 			x01 = self.x[i:i+self.qorder]
 			jacob = (x1-x0)/2
 			# Quadrature points mapped to the element
-			x = (x1+x0)/2 + self.xq*jacob
+			xq = (x1+x0)/2 + self.xq*jacob
 			# u values at quadrature points
-			u0q = np.dot(self.b, this0[i:i+self.qorder]) # This Physics
-			u1q = np.dot(self.b, this1[i:i+self.qorder]) # This Physics
+			u0q = np.dot(self.b, this0[self.gn[i]])
+			u1q = np.dot(self.b, this1[i:i+self.qorder])
 			uq  = (u0q + u1q)/2
 			ph0q = np.dot(self.b, u0ph[i:i+self.qorder])
 			ph1q = np.dot(self.b, u1ph[i:i+self.qorder])
@@ -139,46 +174,47 @@ class diffusion_system:
 			du1dxq = np.dot(self.dbdx, this1[i:i+self.qorder])
 			dudxq = (du0dxq + du1dxq)/2
 			# k(x,u) values at quadrature points
-			k0q  =  np.dot(self.b, k0s[i:i+self.qorder])#self.k(x, t0, ph0q, th0q)
-			k1q  =  np.dot(self.b, k1s[i:i+self.qorder])#self.k(x, t1, ph1q, th1q)
+			k0q  =  np.dot(self.b, k0s[i:i+self.qorder]*du0dxq)
+			k1q  =  np.dot(self.b, k1s[i:i+self.qorder]*du1dxq)
 			kq   = (k0q + k1q)/2
 			# Sigma(x,u) values at quadrature points
-			Su0q  = np.dot(self.b, S0s[i:i+self.qorder]*this0[i:i+self.qorder])#self.sig(x, t0, ph0q, th0q)*jacob
-			Su1q  = np.dot(self.b, S1s[i:i+self.qorder]*this1[i:i+self.qorder])#self.sig(x, t1, ph1q, th1q)*jacob
+			Su0q = np.dot(self.b, self.sig(xq,t0,ph0q,th0q,du0dxq)*(th0q**4 - ph0q))
+			Su1q = np.dot(self.b, self.sig(xq,t1,ph1q,th1q,du1dxq)*(th1q**4 - ph1q))
 			Suq  = (Su0q+Su1q)/2
 			# q(x) at the quadrature points
-			Q0q = np.dot(self.b, Q0s[i:i+self.qorder])#self.Q(x, t0, ph0q, th0q)*jacob
-			Q1q = np.dot(self.b, Q1s[i:i+self.qorder])#self.Q(x, t1, ph1q, th1q)*jacob
+			Q0q = np.dot(self.b, self.Q(xq,t0,ph0q,th0q,du0dxq))
+			Q1q = np.dot(self.b, self.Q(xq,t1,ph1q,th1q,du1dxq))
 			Qq  = (Q0q + Q1q)/2
 			# M(Δu)/dt at the quadrature points
 			Mudtq = np.dot(self.b, Mudt[i:i+self.qorder])
 			local = np.zeros(self.qorder)
-			if self.offset==1 and i==1 and verbose:
-				print(Suq - Qq)
 			for j in range(self.qorder):
-				local[j]	= np.dot(Mudtq*self.wq, self.b[:,j])\
-							+ np.dot(  Suq*self.wq, self.b[:,j])*jacob\
-							- np.dot(   Qq*self.wq, self.b[:,j])*jacob\
-							+ np.dot(   kq*self.wq*self.dbdx[:,j], dudxq)/jacob
-				if self.offset==1 and j!=i and verbose:
+				local[j]	= sum(self.wq * Mudtq * self.b[:,j])               \
+							- sum(self.wq *   Suq * self.b[:,j])         *jacob\
+							- sum(self.wq *    Qq * self.b[:,j])         *jacob\
+							+ sum(self.wq *    kq * self.dbdx[:,j])/jacob
+				if self.offset==0 and verbose:
 					print(t_cur, i, '--------------------')
-					print("t", np.dot(Mudtq*self.wq, self.b[:,j])         )
-					print("S", np.dot(  Suq*self.wq, self.b[:,j])*jacob   )
-					print("Q",-np.dot(   Qq*self.wq, self.b[:,j])*jacob   )
-					print("k", np.dot(   kq*self.wq*self.dbdx[:,j], dudxq)/jacob)
+					print(S0s)
+					print(S1s)
+					print(Suq)
+					print("t", sum(self.wq * Mudtq * self.b[:,j])               )
+					print("S",-sum(self.wq *   Suq * self.b[:,j])         *jacob)
+					print("Q",-sum(self.wq *    Qq * self.b[:,j])         *jacob)
+					print("k", sum(self.wq *    kq * self.dbdx[:,j]*dudxq)/jacob)
 					print(local[j])
-			F[i:i+2] += local
+			F[i:i+self.qorder] += local
 		# Apply Boundary Conditions
 		if self.BC.ltype == 0: # Neumann
-			F[0] -= self.BC.left(t)
+			F[0] -= self.BC.left(t1)
 		elif self.BC.ltype  == 1: # Robin
-			F[0] += 1/2 * this1[0] - 2*self.BC.left(t1)
+			F[0] += 1/4 * this1[0] - (1/6/S1s[0])*self.BC.left(t1)
 		elif self.BC.ltype  == 2: # Dirichlet
 			F[0] = this1[0] - self.BC.left(t1)
 		if self.BC.rtype == 0: # Neumann
-			F[-1] -= self.BC.right(t)
+			F[-1] -= self.BC.right(t1)
 		elif self.BC.rtype == 1: # Robin
-			F[-1] += 1/2 * this1[-1] - 2*self.BC.right(t1)
+			F[-1] += 1/4 * this1[-1] - 2*self.BC.right(t1)
 		elif self.BC.rtype == 2: # Dirichlet
 			F[-1] = this1[-1] - self.BC.right(t1)
 		return F
@@ -219,10 +255,11 @@ class diffusion_system:
 			Solve
 			'''
 			us[tcur,:] = spsolve(LHS,RHS)
+		raise NotImplementedError("The Adjoint is not implemented")
 		return us
 
 class FEM_SYS:
-	def __init__(self, N, T, photon_system, thermal_system, order=2):
+	def __init__(self, N, T, photon_system, thermal_system):
 		# Discretation
 		self.N = N # Number of spatial steps
 		self.T = T # Number of temporal steps
@@ -234,15 +271,6 @@ class FEM_SYS:
 			else diffusion_system(N, T, 1, 0, 0, (2,lambda t: 1,2,lambda t: 1), 0)
 		self.th = thermal_system if thermal_system is not None \
 			else diffusion_system(N, T, 1, 0, 0, (2,lambda t: 1,2,lambda t: 1), 0)
-		
-		# Quadrature points used for integration
-		# Weights of quadrature
-		self.qorder = order
-		[self.xq, self.wq] = np.polynomial.legendre.leggauss(self.qorder)
-		# Basis functions at quadrature points
-		self.b = np.array([(1-self.xq)/2, (1+self.xq)/2])
-		# Derivative of the basis functions at quadrature points
-		self.dbdx = np.array([[-.5, .5],[-.5, .5]])
 	def forward_solve(self, u0, lastT=False):
 		if lastT:
 			u = np.copy(u0)
@@ -292,7 +320,7 @@ def manufacture_solution(N, T, uph_str, uth_str, k_str, s_str, is_ph):
 	from sympy.parsing.sympy_parser import parse_expr
 	from sympy import diff
 	# Declare Sympy symbols
-	t, x, up, ut = sympy.symbols('t x uph uth')
+	t, x, up, ut, dpdx = sympy.symbols('t x uph uth dpdx')
 	uph = parse_expr(uph_str)
 	uth = parse_expr(uth_str)
 	u = uph if is_ph else uth
@@ -307,21 +335,21 @@ def manufacture_solution(N, T, uph_str, uth_str, k_str, s_str, is_ph):
 	# Create  Q(x,t,uph,uth) function
 	ksub =   k.subs(up,uph).subs(ut,uth)
 	Ssub = Sig.subs(up,uph).subs(ut,uth)
-	Q = (diff(u,t) - diff(ksub*diff(u,x),x) + Ssub*u)
-	#print("Q",Q)
-	#print("k",k,  ' : ', ksub)
-	#print("S",Sig,' : ', Ssub)
-	#print("u",u)
+	Q = diff(u,t) - diff(ksub*diff(u,x),x) - Ssub*(uth**4 - uph)
+	print("Q",Q)
+	print("k",diff(ksub*diff(u,x),x))
+	print("S",Ssub*(uth**4 - uph))
+	print("u",diff(u,t),u)
 	# Create BC by solving u for x=0,1
 	ufun = sympy.lambdify((x,t),u,"numpy")
 	bc_left  = lambda t: ufun(0,t)
 	bc_right = lambda t: ufun(1,t)
 	
 	# Lambdify for construction of diffusion_system
-	kfun     = sympy.lambdify((x,t,up,ut),k,"numpy")
-	Dkfun    = sympy.lambdify((x,t,up,ut),Dk,"numpy")
-	Qfun     = sympy.lambdify((x,t,up,ut),Q,"numpy")
-	sigfun   = sympy.lambdify((x,t,up,ut),Sig,"numpy")
+	kfun     = sympy.lambdify((x,t,up,ut,dpdx),k,"numpy")
+	Dkfun    = sympy.lambdify((x,t,up,ut,dpdx),Dk,"numpy")
+	Qfun     = sympy.lambdify((x,t,up,ut,dpdx),Q,"numpy")
+	sigfun   = sympy.lambdify((x,t,up,ut,dpdx),Sig,"numpy")
 	BC       = (2,bc_left,2,bc_right)
 	
 	# Create diffusion system
@@ -387,7 +415,20 @@ def L2Err(uh, ue_fun, response, N=None,T=None,order=2):
 			I_e = jacob * dt * dx * sum(wq*R(xs,t/T)*np.dot(b,ue[t,i:i+order]))
 			L2 += (mod*I_h - mod*I_e)**2
 	return L2
-
+def Richardson(Series, Steps, p, known, disp=True):
+	L = len(Series)
+	R = np.zeros((L,L))
+	R[:,0] = Series
+	for r in range(1,L):
+		for i in range(r,L):
+			t = Steps[i-1]/Steps[i]
+			k = p+r-1
+			R[i,r] = (t**k*R[i,r-1] - R[i-1,r-1])/(t**k-1)
+	if disp:
+		print(R)
+		print(abs(known-R))
+		print(known)
+	return(R[-1,-1])
 def make_sys(N, T, PH, TH):
 	ph, uph0, uphfun = manufacture_solution(N, T, PH[0], TH[0], PH[1], PH[2], True)
 	th, uth0, uthfun = manufacture_solution(N, T, PH[0], TH[0], TH[1], TH[2], False) 
@@ -407,72 +448,102 @@ def test_problem(ID, N, T, R_ph, R_th, PH, TH):
 	absErrph = abs(solp - qoifph)
 	absErrth = abs(solt - qoifth)
 	print("%16s | %8E %8E %8E %8E | %8E %8E %8E %8E"%(ID, solp, qoifph, errph, absErrph, solt, qoifth, errth, absErrth))
-	#print(res)
-	#print(u.newton_residual(u1,u0,1,verbose=True))
+	print(res)
+	print(u.newton_residual(u1,u0,1,verbose=True))
 	return u, res, qoifph, errph, qoifth, errth
-def Richardson(Series, Steps, p, known, disp=True):
-	L = len(Series)
-	R = np.zeros((L,L))
-	R[:,0] = Series
-	for r in range(1,L):
-		for i in range(r,L):
-			t = Steps[i-1]/Steps[i]
-			k = p+r-1
-			R[i,r] = (t**k*R[i,r-1] - R[i-1,r-1])/(t**k-1)
-	if disp:
-		print(R)
-		print(abs(known-R))
-		print(known)
-	return(R[-1,-1])
-print("%16s | %12s %12s %12s %12s | %12s %12s %12s %12s"%("Problem","QOI(PH)","","L2(PH)","AbsErr(PH)","QOI(TH)","","L2(TH)","AbsErr(TH)"))
-print("-"*(124))
+def Tests():
+	print("%16s | %12s %12s %12s %12s | %12s %12s %12s %12s"%("Problem","QOI(PH)","","L2(PH)","AbsErr(PH)","QOI(TH)","","L2(TH)","AbsErr(TH)"))
+	print("-"*(124))
+	R_ph = lambda x,t: 1
+	R_th = lambda x,t: 1
+	# Constants used: z=12
+	# k = 0
+	kph = "1/3/(12/uth)**3"
+	sph = "(12/uth)**3"
+	kth = "0"
+	sth = "-(12/uth)**3"
+	# Constant
+	uph = "1"
+	uth = "1"
+	T = 2
+	N = 2
+	test_problem("Constant", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Linear in Time
+	uph = "t+1"
+	uth = "t+1"
+	T = 2
+	N = 2
+	test_problem("Linear t+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Linear in Space
+	uph = "x+1"
+	uth = "x+1"
+	T = 2
+	N = 2
+	test_problem("Linear x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Linear in both
+	uph = "x+t+1"
+	uth = "x+t+1"
+	T = 2
+	N = 2
+	test_problem("Linear t+x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Quadratic in both
+	uph = "t**2+1"
+	uth = "x**2+1"
+	T = 2
+	N = 2
+	test_problem("Quadradic t&x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Cubic in both
+	uph = "t**3+1"
+	uth = "x**3+1"
+	T = 10
+	N = 10
+	test_problem("Cubic t&x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+	# Sines Cosine
+	uph = "x*sin(t)+1"
+	uth = "x*cos(t)+1"
+	T = 10
+	N = 3
+	test_problem("x*trig(t)+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+def WaveProblem():
+	T = 10
+	N = 10
+	k = 0  # Constant the defines the material, conductivity
+	z = 12 # Constant the defines the material, atomic mass number
+	SIGPH = lambda x,t,uph,uth,duphdx: (z/uth)**3
+	SIGTH = lambda x,t,uph,uth,duphdx: -SIGPH(x,t,uph,uth,duphdx)
+	K_TH  = lambda x,t,uph,uth,duphdx: k * abs(uth)**(5/2)
+	K_PH  = lambda x,t,uph,uth,duphdx: 1/(3*SIGPH(x,t,uph,uth,duphdx))# + 1/uph*abs(duphdx))
+	BC_PH = (2,1,2,0)
+	BC_TH = (2,1,2,1)
+	
+	UP = diffusion_system(N, T, K_PH, 0, 0, BC_PH, 0, SIGPH)
+	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
+	U  = FEM_SYS(N, T, UP, UT)
+	
+	U0 = np.concatenate((np.zeros((N+1)), np.ones((N+1))))
+	U_FOR = U.forward_solve(U0)
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	for t in range(T+1):
+		ax.plot(U_FOR[t,N+1:], label='Time '+str(t))
+	hand, labels = ax.get_legend_handles_labels()
+	ax.legend(hand, labels)
+	plt.show()
+
+#Tests()
+#WaveProblem()
+
+# Linear in Space
 R_ph = lambda x,t: 1
 R_th = lambda x,t: 1
-kph = "uth"
-sph = "uth"
-kth = "uph"
-sth = "uth"
-
-# Constant
-uph = "1"
-uth = "1"
-T = 2
+# Constants used: z=12
+# k = 0
+kph = "1/3/(12/uth)**3"
+sph = "(12/uth)**3"
+kth = "0"
+sth = "-(12/uth)**3"
+uph = "x+1"
+uth = "x+1"
+T = 1000
 N = 2
-test_problem("Constant", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Linear in Space
-uph = "x"
-uth = "x"
-T = 1
-N = 2
-test_problem("Linear x", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Linear in Time
-uph = "t"
-uth = "t"
-T = 2
-N = 2
-test_problem("Linear t", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Linear in both
-uph = "t"
-uth = "x"
-T = 1
-N = 2
-test_problem("Linear t&x", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Quadratic in both
-uph = "t**2"
-uth = "x**2"
-T = 2
-N = 2
-test_problem("Quadradic t&x", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Cubic in both
-uph = "t**3"
-uth = "x**3"
-T = 20
-N = 20
-test_problem("Cubic t&x", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-# Sines Cosine
-uph = "x*sin(t)"
-uth = "x*cos(t)"
-T = 10
-N = 3
-test_problem("x*trig(t)", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
-
+test_problem("Linear x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))

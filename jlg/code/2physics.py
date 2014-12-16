@@ -58,14 +58,14 @@ def quadmaker(N, p):
 				SUM += NUM
 				DEN *= xd[i]-xd[j]
 		dbdx[:,i] = SUM/DEN
-	print(xq)
-	print(wq)
-	print(b)
-	print(dbdx)
-	print(gn)
+	#print(xq)
+	#print(wq)
+	#print(b)
+	#print(dbdx)
+	#print(gn)
 	return xq,wq,b,dbdx,gn
 class diffusion_system:
-	def __init__(self, N, T, k, Dk, Q, BC, offset, sig=0, order=3):
+	def __init__(self, N, T, k, Dk, Q, BC, offset, sig=0, order=2):
 		self.offset = offset
 		self.N   = N
 		self.dx  = 1/N
@@ -176,7 +176,7 @@ class diffusion_system:
 			# k(x,u) values at quadrature points
 			k0q  =  np.dot(self.b, k0s[i:i+self.qorder]*du0dxq)
 			k1q  =  np.dot(self.b, k1s[i:i+self.qorder]*du1dxq)
-			kq   = (k0q + k1q)/2
+			kq   = (k0q**-1 + k1q**-1)**-1/2
 			# Sigma(x,u) values at quadrature points
 			Su0q = np.dot(self.b, self.sig(xq,t0,ph0q,th0q,du0dxq)*(th0q**4 - ph0q))
 			Su1q = np.dot(self.b, self.sig(xq,t1,ph1q,th1q,du1dxq)*(th1q**4 - ph1q))
@@ -188,9 +188,16 @@ class diffusion_system:
 			# M(Δu)/dt at the quadrature points
 			Mudtq = np.dot(self.b, Mudt[i:i+self.qorder])
 			local = np.zeros(self.qorder)
+			# The Paper's
+			if (ph1q+ph0q)[0] != 0 and (ph1q+ph0q)[1] != 0:
+				kq   = (3*((th0q+th1q)/2)**-3 + 2/self.dx * abs(ph1q-ph0q)/(ph1q+ph0q))**-1#
+			else:
+				kq   = (3*((th0q+th1q)/2)**-3)**-1
+			if self.offset == 1:
+				kq = np.array([0,0])
 			for j in range(self.qorder):
 				local[j]	= sum(self.wq * Mudtq * self.b[:,j])               \
-							- sum(self.wq *   Suq * self.b[:,j])         *jacob\
+							+ sum(self.wq *   Suq * self.b[:,j])         *jacob\
 							- sum(self.wq *    Qq * self.b[:,j])         *jacob\
 							+ sum(self.wq *    kq * self.dbdx[:,j])/jacob
 				if self.offset==0 and verbose:
@@ -214,7 +221,7 @@ class diffusion_system:
 		if self.BC.rtype == 0: # Neumann
 			F[-1] -= self.BC.right(t1)
 		elif self.BC.rtype == 1: # Robin
-			F[-1] += 1/4 * this1[-1] - 2*self.BC.right(t1)
+			F[-1] += 1/4 * this1[-1] + (1/6/S1s[-1])*self.BC.right(t1)
 		elif self.BC.rtype == 2: # Dirichlet
 			F[-1] = this1[-1] - self.BC.right(t1)
 		return F
@@ -222,6 +229,7 @@ class diffusion_system:
 		"""
 		Takes the forward solutions uph, uth and the response function R(x,t)
 		"""
+		raise NotImplementedError("The Adjoint is not implemented")
 		R = vectorize(response) # For easy mass solving.
 		us = np.empty((self.T+1,(self.N+1)*2)) # Adjoint solution [t,x]
 
@@ -255,9 +263,7 @@ class diffusion_system:
 			Solve
 			'''
 			us[tcur,:] = spsolve(LHS,RHS)
-		raise NotImplementedError("The Adjoint is not implemented")
 		return us
-
 class FEM_SYS:
 	def __init__(self, N, T, photon_system, thermal_system):
 		# Discretation
@@ -505,16 +511,16 @@ def Tests():
 	N = 3
 	test_problem("x*trig(t)+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
 def WaveProblem():
-	T = 10
+	T = 4
 	N = 10
 	k = 0  # Constant the defines the material, conductivity
-	z = 12 # Constant the defines the material, atomic mass number
+	z = 1  # Constant the defines the material, atomic mass number
 	SIGPH = lambda x,t,uph,uth,duphdx: (z/uth)**3
 	SIGTH = lambda x,t,uph,uth,duphdx: -SIGPH(x,t,uph,uth,duphdx)
 	K_TH  = lambda x,t,uph,uth,duphdx: k * abs(uth)**(5/2)
-	K_PH  = lambda x,t,uph,uth,duphdx: 1/(3*SIGPH(x,t,uph,uth,duphdx))# + 1/uph*abs(duphdx))
-	BC_PH = (2,1,2,0)
-	BC_TH = (2,1,2,1)
+	K_PH  = lambda x,t,uph,uth,duphdx: 1/(3*SIGPH(x,t,uph,uth,duphdx) + uph)# + 1/uph*abs(duphdx))
+	BC_PH = (1,1,1,0)
+	BC_TH = (0,0,0,0)
 	
 	UP = diffusion_system(N, T, K_PH, 0, 0, BC_PH, 0, SIGPH)
 	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
@@ -529,21 +535,28 @@ def WaveProblem():
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	plt.show()
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	for t in range(T+1):
+		ax.plot(U_FOR[t,:N+1], label='Time '+str(t))
+	hand, labels = ax.get_legend_handles_labels()
+	ax.legend(hand, labels)
+	plt.show()
 
 #Tests()
-#WaveProblem()
 
-# Linear in Space
-R_ph = lambda x,t: 1
-R_th = lambda x,t: 1
-# Constants used: z=12
-# k = 0
-kph = "1/3/(12/uth)**3"
-sph = "(12/uth)**3"
-kth = "0"
-sth = "-(12/uth)**3"
-uph = "x+1"
-uth = "x+1"
-T = 1000
-N = 2
-test_problem("Linear x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+## Linear in Space
+#R_ph = lambda x,t: 1
+#R_th = lambda x,t: 1
+## Constants used: z=12
+## k = 0
+#kph = "1/3/(12/uth)**3"
+#sph = "(12/uth)**3"
+#kth = "0"
+#sth = "-(12/uth)**3"
+#uph = "x+1"
+#uth = "x+1"
+#T = 1000
+#N = 2
+#test_problem("Linear x+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
+WaveProblem()

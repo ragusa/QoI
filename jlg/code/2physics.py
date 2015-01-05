@@ -22,8 +22,8 @@ np.set_printoptions(linewidth=200)
 class boundary_condition:
 		def __init__(self, BC):
 			self.ltype = BC[0]
-			self.rtype = BC[2]
 			self.left  = BC[1] if callable(BC[1]) else lambda t: BC[1]
+			self.rtype = BC[2]
 			self.right = BC[3] if callable(BC[3]) else lambda t: BC[3]
 def quadmaker(N, p):
 	'''
@@ -32,7 +32,8 @@ def quadmaker(N, p):
 	'''
 	[xq, wq] = np.polynomial.legendre.leggauss(p)
 	xd = np.linspace(-1,1,p)
-	b = np.zeros((p,p))
+	b    = np.zeros((p,p))
+	dbdx = np.zeros((p,p))
 	gn = np.zeros((N+1,p),dtype='int')
 	gn[0,:] = [i for i in range(p)]
 	for i in range(1,N+1):
@@ -45,7 +46,6 @@ def quadmaker(N, p):
 				NUM *= xq - xd[j]
 				DEN *= xd[i] - xd[j]
 		b[:,i] = NUM/DEN
-	dbdx = np.zeros((p,p))
 	for i in range(p):
 		SUM = 0
 		DEN = 1
@@ -76,7 +76,7 @@ class diffusion_system:
 		self.Dk  = vectorize(Dk ) if callable(Dk)  else vectorize(lambda x,t,uph,uth,duphdx: Dk )
 		self.Q   = vectorize(Q  ) if callable(Q)   else vectorize(lambda x,t,uph,uth,duphdx: Q  )
 		self.sig = vectorize(sig) if callable(sig) else vectorize(lambda x,t,uph,uth,duphdx: sig)
-		
+		self.cond = 0 #Thermal conductivity
 		# Quadrature points used for integration
 		# Quadrature
 		self.qorder = order
@@ -148,8 +148,8 @@ class diffusion_system:
 		F = np.zeros(self.N+1)
 		dup0dx = 0
 		dup1dx = 0
-		k0s =   self.k(self.x,t0,u0ph,u0th,dup0dx)
-		k1s =   self.k(self.x,t1,u1ph,u1th,dup1dx)
+		#k0s =   self.k(self.x,t0,u0ph,u0th,dup0dx)
+		#k1s =   self.k(self.x,t1,u1ph,u1th,dup1dx)
 		S0s = self.sig(self.x,t0,u0ph,u0th,dup0dx)
 		S1s = self.sig(self.x,t1,u1ph,u1th,dup1dx)
 		Q0s =   self.Q(self.x,t0,u0ph,u0th,dup0dx)
@@ -173,10 +173,12 @@ class diffusion_system:
 			du0dxq = np.dot(self.dbdx, this0[i:i+self.qorder])
 			du1dxq = np.dot(self.dbdx, this1[i:i+self.qorder])
 			dudxq = (du0dxq + du1dxq)/2
+			dph0dxq = np.dot(self.dbdx, u0ph[i:i+self.qorder])
+			dph1dxq = np.dot(self.dbdx, u1ph[i:i+self.qorder])
 			# k(x,u) values at quadrature points
-			k0q  =  np.dot(self.b, k0s[i:i+self.qorder]*du0dxq)
-			k1q  =  np.dot(self.b, k1s[i:i+self.qorder]*du1dxq)
-			kq   = (k0q**-1 + k1q**-1)**-1/2
+			#k0q  =  np.dot(self.b, k0s[i:i+self.qorder]*du0dxq)
+			#k1q  =  np.dot(self.b, k1s[i:i+self.qorder]*du1dxq)
+			#kq   = (k0q**-1 + k1q**-1)**-1/2
 			# Sigma(x,u) values at quadrature points
 			Su0q = np.dot(self.b, self.sig(xq,t0,ph0q,th0q,du0dxq)*(th0q**4 - ph0q))
 			Su1q = np.dot(self.b, self.sig(xq,t1,ph1q,th1q,du1dxq)*(th1q**4 - ph1q))
@@ -189,15 +191,13 @@ class diffusion_system:
 			Mudtq = np.dot(self.b, Mudt[i:i+self.qorder])
 			local = np.zeros(self.qorder)
 			# The Paper's
-			if (ph1q+ph0q)[0] != 0 and (ph1q+ph0q)[1] != 0:
-				kq   = (3*((th0q+th1q)/2)**-3 + 2/self.dx * abs(ph1q-ph0q)/(ph1q+ph0q))**-1#
-			else:
-				kq   = (3*((th0q+th1q)/2)**-3)**-1
+			if self.offset == 0:
+				kq = (3*((th0q+th1q)/2)**-3 + (dph1dxq+dph0dxq)/(ph1q+ph0q))**-1#
 			if self.offset == 1:
-				kq = np.array([0,0])
+				kq = ((th0q+th1q)/2)**2.5
 			for j in range(self.qorder):
 				local[j]	= sum(self.wq * Mudtq * self.b[:,j])               \
-							+ sum(self.wq *   Suq * self.b[:,j])         *jacob\
+							- sum(self.wq *   Suq * self.b[:,j])         *jacob\
 							- sum(self.wq *    Qq * self.b[:,j])         *jacob\
 							+ sum(self.wq *    kq * self.dbdx[:,j])/jacob
 				if self.offset==0 and verbose:
@@ -225,6 +225,54 @@ class diffusion_system:
 		elif self.BC.rtype == 2: # Dirichlet
 			F[-1] = this1[-1] - self.BC.right(t1)
 		return F
+	def res2(self, u, t, verbose=False):
+		dx = 1/self.N
+		limiter = 1
+		m = 1
+		z = 1
+		F = np.zeros(self.N+1)
+		for i in range(self.N):
+			gnE = np.array([i,i+1])
+			gnT = gnE + self.N+1
+			x0 = self.x[i]
+			x1 = self.x[i+1]
+			jacob = (x1-x0)/2
+			
+			local_E    = np.dot(self.b, u[gnE])
+			local_T    = np.dot(self.b, u[gnT])
+			local_dEdx = np.dot(self.dbdx, u[gnE])
+			local_dTdx = np.dot(self.dbdx, u[gnT])
+			k_T = self.cond * local_T**2.5
+			SigA = z / local_T**3
+			E = sum(self.wq * local_E)/2
+			gradE = np.absolute(local_dEdx)/jacob
+			k_E = 1/((3*SigA)**m + (limiter*gradE/E)**m)**(1/m)
+			local_F = np.zeros(self.qorder)
+			aux1 = self.wq*(local_T**4-local_E)*SigA
+			aux2 = self.wq*(local_dTdx)*k_T
+			aux3 = self.wq*(local_dEdx)*k_E
+			for j in range(self.qorder):
+				if self.offset == 0:
+					local_F[j]  = -sum(aux1*self.b[:,j]   )*jacob
+					local_F[j] +=  sum(aux3*self.dbdx[:,j])/jacob
+				elif self.offset == 1:
+					local_F[j]  =  sum(aux1*self.b[:,j]   )*jacob
+					local_F[j] +=  sum(aux2*self.dbdx[:,j])/jacob
+			F[i:i+self.qorder] += local_F
+		# Apply BCs
+		if   self.BC.ltype == 0:
+			F[0]  -= self.BC.left(t)
+		elif self.BC.ltype == 1:
+			F[0]  += 1/2*u[self.offset*(self.N+1)] - 2*self.BC.left(t)
+		elif self.BC.ltype == 2:
+			F[0]   = u[self.offset*(self.N+1)] - self.BC.left(t)
+		if   self.BC.rtype == 0:
+			F[-1] -= self.BC.right(t)
+		elif self.BC.rtype == 1:
+			F[-1] += 1/2*u[self.N+self.offset*(self.N+1)] - 2*self.BC.right(t)
+		elif self.BC.rtype == 2:
+			F[-1]  = u[self.N+self.offset*(self.N+1)] - self.BC.right(t)
+		return self.M.dot(F)
 	def solve_adjoint(self, uph, uth, response):
 		"""
 		Takes the forward solutions uph, uth and the response function R(x,t)
@@ -277,6 +325,9 @@ class FEM_SYS:
 			else diffusion_system(N, T, 1, 0, 0, (2,lambda t: 1,2,lambda t: 1), 0)
 		self.th = thermal_system if thermal_system is not None \
 			else diffusion_system(N, T, 1, 0, 0, (2,lambda t: 1,2,lambda t: 1), 0)
+		self.M = spar.csr_matrix((2*(self.N+1),2*(self.N+1)))
+		self.M[:N+1,:N+1] = self.ph.M
+		self.M[N+1:,N+1:] = self.th.M
 	def forward_solve(self, u0, lastT=False):
 		if lastT:
 			u = np.copy(u0)
@@ -285,9 +336,31 @@ class FEM_SYS:
 			return u
 		u_for = np.empty((self.T+1,(self.N+1)*2))
 		u_for[0,:] = u0
-		for t in range(1, self.T+1):
+		for t in range(1, 2):#self.T+1):
 			u_for[t,:] = self.solve(u_for[t-1,:],u_for[t-1,:],t/self.T)
 		return u_for
+	def res2(self, u,t):
+		N = self.N
+		F = np.zeros(2*(N+1))
+		F[:N+1] = self.ph.res2(u,t)
+		F[N+1:] = self.th.res2(u,t)
+		return F
+	def CrankNicholson(self,u0,dt):
+		u_for = np.empty((self.T+1,(self.N+1)*2))
+		u_for[0,:] = u0
+		for tstep in range(1, self.T+1):
+			t = tstep*dt
+			u_for[tstep,:] = self.CrankNicholsonStep(u_for[tstep-1,:], t-dt, dt)
+		return u_for
+	def CrankNicholsonStep(self, u0, t0, dt):
+		g = 0.5
+		t1 = t0+dt
+		G = lambda u_try: self.M.dot(u_try-u0)+g*dt*(self.res2(u_try,t1))
+		tol = max(1E-15, 1E-10*norm(G(u0)))
+		u_ans = opt.leastsq(func = G, x0 = u0, ftol=tol)
+		#print(G(u_ans[0]))
+		print('t =',t1,'completed',norm(G(u0)),norm(G(u_ans[0])))
+		return u_ans[0]
 	def newton_residual(self, u_cur, u_old, t, verbose=False):
 		"""
 		Calculate the residual
@@ -309,13 +382,14 @@ class FEM_SYS:
 		Use newton's method to solve using the initial guess u0
 		"""
 		if u_guess is None:
-			u_guess = np.zeros((self.N+1)*2)
+			u_guess = np.copy(u_old)
 		ans = opt.leastsq(
 				func = self.newton_residual,
 				x0 = u_guess,
 				args = (u_old,t),
 				ftol=1E-15
 				)
+		print(self.newton_residual(ans[0],u_old,t))
 		return ans[0]
 
 def manufacture_solution(N, T, uph_str, uth_str, k_str, s_str, is_ph):
@@ -511,14 +585,14 @@ def Tests():
 	N = 3
 	test_problem("x*trig(t)+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
 def WaveProblem():
-	T = 4
+	T = 100
 	N = 10
 	k = 0  # Constant the defines the material, conductivity
 	z = 1  # Constant the defines the material, atomic mass number
-	SIGPH = lambda x,t,uph,uth,duphdx: (z/uth)**3
+	SIGPH = lambda x,t,uph,uth,duphdx: (1/uth)**3
 	SIGTH = lambda x,t,uph,uth,duphdx: -SIGPH(x,t,uph,uth,duphdx)
-	K_TH  = lambda x,t,uph,uth,duphdx: k * abs(uth)**(5/2)
-	K_PH  = lambda x,t,uph,uth,duphdx: 1/(3*SIGPH(x,t,uph,uth,duphdx) + uph)# + 1/uph*abs(duphdx))
+	K_TH  = lambda x,t,uph,uth,duphdx: k * uth**(5/2)
+	K_PH  = lambda x,t,uph,uth,duphdx: 1/(3*SIGPH(x,t,uph,uth,duphdx))# + 1/uph*abs(duphdx))
 	BC_PH = (1,1,1,0)
 	BC_TH = (0,0,0,0)
 	
@@ -526,19 +600,18 @@ def WaveProblem():
 	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
 	U  = FEM_SYS(N, T, UP, UT)
 	
-	U0 = np.concatenate((np.zeros((N+1)), np.ones((N+1))))
-	U_FOR = U.forward_solve(U0)
+	U0 = 1E-4 * np.ones(2*(N+1))
+	U0[N+1:] = U0[N+1:]**0.25
+	U_FOR = U.CrankNicholson(U0,1E-8)
 	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	for t in range(T+1):
-		ax.plot(U_FOR[t,N+1:], label='Time '+str(t))
+	ax = fig.add_subplot(121)
+	for t in range(0,T+1,10):
+		ax.plot(U_FOR[t,N+1:], 'o-', label='Time '+str(t))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
-	plt.show()
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	for t in range(T+1):
-		ax.plot(U_FOR[t,:N+1], label='Time '+str(t))
+	ax = fig.add_subplot(122)
+	for t in range(0,T+1,10):
+		ax.plot(U_FOR[t,:N+1], 'o-', label='Time '+str(t))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	plt.show()

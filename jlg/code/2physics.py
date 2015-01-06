@@ -11,6 +11,7 @@ from numpy.linalg import norm
 import scipy as sp
 import scipy.sparse as spar
 from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import inv as spinv
 import scipy.optimize as opt
 from scipy.integrate import dblquad
 import sympy
@@ -85,6 +86,7 @@ class diffusion_system:
 		self.BC = boundary_condition(BC)
 		# Generate and save the mass matrix
 		self.M = self.generate_mass_matrix(N)
+		self.iM = spinv(self.M)
 	def generate_mass_matrix(self, N):
 		"""
 		Mass matrix with a flux = u and at time = t
@@ -97,7 +99,7 @@ class diffusion_system:
 		M /= 2
 		M[0,1] *= 2
 		M[-1,-2] *= 2
-		return M*h/2
+		return M/2
 	def stiffness(self, t, uph, uth):
 		"""
 		Generate the stiffness matrix -∇k(t,uph,uth)∇ + Σ(t,uph,uth)
@@ -227,7 +229,7 @@ class diffusion_system:
 		return F
 	def res2(self, u, t, verbose=False):
 		dx = 1/self.N
-		limiter = 1
+		limiter = 2
 		m = 1
 		z = 1
 		F = np.zeros(self.N+1)
@@ -248,16 +250,20 @@ class diffusion_system:
 			gradE = np.absolute(local_dEdx)/jacob
 			k_E = 1/((3*SigA)**m + (limiter*gradE/E)**m)**(1/m)
 			local_F = np.zeros(self.qorder)
-			aux1 = self.wq*(local_T**4-local_E)*SigA
-			aux2 = self.wq*(local_dTdx)*k_T
-			aux3 = self.wq*(local_dEdx)*k_E
+			aux1 = SigA * self.wq*(local_T**4-local_E)
+			aux2 =  k_T * self.wq*(local_dTdx)
+			aux3 =  k_E * self.wq*(local_dEdx)
 			for j in range(self.qorder):
 				if self.offset == 0:
-					local_F[j]  = -sum(aux1*self.b[:,j]   )*jacob
-					local_F[j] +=  sum(aux3*self.dbdx[:,j])/jacob
+					local_F[j]  = -np.dot(aux1, self.b[:,j]   )*jacob
+					local_F[j] +=  np.dot(aux3, self.dbdx[:,j])/jacob
+					if i==0 and j==1:
+						print(i,SigA[j], local_E[j], aux1[j])
+					if i==1 and j==0:
+						print(i,SigA[j], local_E[j], aux1[j])
 				elif self.offset == 1:
-					local_F[j]  =  sum(aux1*self.b[:,j]   )*jacob
-					local_F[j] +=  sum(aux2*self.dbdx[:,j])/jacob
+					local_F[j]  =  np.dot(aux1, self.b[:,j]   )*jacob
+					local_F[j] +=  np.dot(aux2, self.dbdx[:,j])/jacob
 			F[i:i+self.qorder] += local_F
 		# Apply BCs
 		if   self.BC.ltype == 0:
@@ -272,7 +278,9 @@ class diffusion_system:
 			F[-1] += 1/2*u[self.N+self.offset*(self.N+1)] - 2*self.BC.right(t)
 		elif self.BC.rtype == 2:
 			F[-1]  = u[self.N+self.offset*(self.N+1)] - self.BC.right(t)
-		return self.M.dot(F)
+		#print(F)
+		#x = input("pause")
+		return -F
 	def solve_adjoint(self, uph, uth, response):
 		"""
 		Takes the forward solutions uph, uth and the response function R(x,t)
@@ -328,6 +336,10 @@ class FEM_SYS:
 		self.M = spar.csr_matrix((2*(self.N+1),2*(self.N+1)))
 		self.M[:N+1,:N+1] = self.ph.M
 		self.M[N+1:,N+1:] = self.th.M
+		#self.iM = spinv(self.M)
+		self.iM = spar.csr_matrix((2*(self.N+1),2*(self.N+1)))
+		self.iM[:N+1,:N+1] = self.ph.iM
+		self.iM[N+1:,N+1:] = self.th.iM
 	def forward_solve(self, u0, lastT=False):
 		if lastT:
 			u = np.copy(u0)
@@ -342,12 +354,13 @@ class FEM_SYS:
 	def res2(self, u,t):
 		N = self.N
 		F = np.zeros(2*(N+1))
-		F[:N+1] = self.ph.res2(u,t)
-		F[N+1:] = self.th.res2(u,t)
+		F[:N+1] = self.ph.iM.dot(self.ph.res2(u,t))
+		F[N+1:] = self.th.iM.dot(self.th.res2(u,t))
 		return F
 	def CrankNicholson(self,u0,dt):
 		u_for = np.empty((self.T+1,(self.N+1)*2))
 		u_for[0,:] = u0
+		print('Beginning CN')
 		for tstep in range(1, self.T+1):
 			t = tstep*dt
 			u_for[tstep,:] = self.CrankNicholsonStep(u_for[tstep-1,:], t-dt, dt)
@@ -355,11 +368,16 @@ class FEM_SYS:
 	def CrankNicholsonStep(self, u0, t0, dt):
 		g = 0.5
 		t1 = t0+dt
-		G = lambda u_try: self.M.dot(u_try-u0)+g*dt*(self.res2(u_try,t1))
-		tol = max(1E-15, 1E-10*norm(G(u0)))
+
+		Res0 = self.res2(u0,t0)
+		G = lambda utry: (utry-u0) - 1/2 * dt * (Res0 + self.res2(utry,t1))
+		
+		R0 = norm(G(u0))
+		tol = max(1E-15, 1E-10*R0)
 		u_ans = opt.leastsq(func = G, x0 = u0, ftol=tol)
-		#print(G(u_ans[0]))
-		print('t =',t1,'completed',norm(G(u0)),norm(G(u_ans[0])))
+		
+		R1 = norm(G(u_ans[0]))
+		print('t = %.2E completed %.2E %.2E'%(t1,R0,R1))
 		return u_ans[0]
 	def newton_residual(self, u_cur, u_old, t, verbose=False):
 		"""
@@ -585,7 +603,7 @@ def Tests():
 	N = 3
 	test_problem("x*trig(t)+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
 def WaveProblem():
-	T = 100
+	T = 10
 	N = 10
 	k = 0  # Constant the defines the material, conductivity
 	z = 1  # Constant the defines the material, atomic mass number
@@ -599,19 +617,19 @@ def WaveProblem():
 	UP = diffusion_system(N, T, K_PH, 0, 0, BC_PH, 0, SIGPH)
 	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
 	U  = FEM_SYS(N, T, UP, UT)
-	
-	U0 = 1E-4 * np.ones(2*(N+1))
+	dt = 1E-8
+	U0 = 1E-8 * np.ones(2*(N+1))
 	U0[N+1:] = U0[N+1:]**0.25
-	U_FOR = U.CrankNicholson(U0,1E-8)
+	U_FOR = U.CrankNicholson(U0,dt)
 	fig = plt.figure()
 	ax = fig.add_subplot(121)
-	for t in range(0,T+1,10):
-		ax.plot(U_FOR[t,N+1:], 'o-', label='Time '+str(t))
+	for t in range(0,T+1,T//10):
+		ax.plot(U_FOR[t,N+1:], 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	ax = fig.add_subplot(122)
-	for t in range(0,T+1,10):
-		ax.plot(U_FOR[t,:N+1], 'o-', label='Time '+str(t))
+	for t in range(0,T+1,T//10):
+		ax.plot(U_FOR[t,:N+1], 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	plt.show()

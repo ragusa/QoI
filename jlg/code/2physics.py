@@ -32,6 +32,8 @@ def quadmaker(N, p):
 	for order p
 	'''
 	[xq, wq] = np.polynomial.legendre.leggauss(p)
+	xq = np.array([-1,1])
+	wq = np.array([1,1])
 	xd = np.linspace(-1,1,p)
 	b    = np.zeros((p,p))
 	dbdx = np.zeros((p,p))
@@ -95,7 +97,7 @@ class diffusion_system:
 		# Create the mass matrix
 		d_main = 4/3 * np.ones(N+1) # Diagonal Entries
 		d_off = 1/3 * np.ones(N+1) # Off diagonals
-		M = spar.spdiags([d_off, d_main, d_off], [-1,0,1], N+1, N+1, format='csr')
+		M = spar.spdiags([d_off, d_main, d_off], [-1,0,1], N+1, N+1, format='csc')
 		M /= 2
 		M[0,1] *= 2
 		M[-1,-2] *= 2
@@ -229,7 +231,7 @@ class diffusion_system:
 		return F
 	def res2(self, u, t, verbose=False):
 		dx = 1/self.N
-		limiter = 2
+		limiter = 1
 		m = 1
 		z = 1
 		F = np.zeros(self.N+1)
@@ -246,9 +248,9 @@ class diffusion_system:
 			local_dTdx = np.dot(self.dbdx, u[gnT])
 			k_T = self.cond * local_T**2.5
 			SigA = z / local_T**3
-			E = sum(self.wq * local_E)/2
+			E = sum(self.wq * local_E)/sum(self.wq)
 			gradE = np.absolute(local_dEdx)/jacob
-			k_E = 1/((3*SigA)**m + (limiter*gradE/E)**m)**(1/m)
+			k_E = np.power(np.power((3*SigA), m) + np.power(limiter*gradE/E, m), -1/m)
 			local_F = np.zeros(self.qorder)
 			aux1 = SigA * self.wq*(local_T**4-local_E)
 			aux2 =  k_T * self.wq*(local_dTdx)
@@ -257,17 +259,19 @@ class diffusion_system:
 				if self.offset == 0:
 					local_F[j]  = -np.dot(aux1, self.b[:,j]   )*jacob
 					local_F[j] +=  np.dot(aux3, self.dbdx[:,j])/jacob
-					if i==0 and j==1:
-						print(i,SigA[j], local_E[j], aux1[j])
-					if i==1 and j==0:
-						print(i,SigA[j], local_E[j], aux1[j])
 				elif self.offset == 1:
 					local_F[j]  =  np.dot(aux1, self.b[:,j]   )*jacob
 					local_F[j] +=  np.dot(aux2, self.dbdx[:,j])/jacob
 			F[i:i+self.qorder] += local_F
+			if verbose:
+				print('local ', local_F)
 		# Apply BCs
 		if   self.BC.ltype == 0:
+			if verbose:
+				print(F[0])
 			F[0]  -= self.BC.left(t)
+			if verbose:
+				print(F[0])
 		elif self.BC.ltype == 1:
 			F[0]  += 1/2*u[self.offset*(self.N+1)] - 2*self.BC.left(t)
 		elif self.BC.ltype == 2:
@@ -280,6 +284,8 @@ class diffusion_system:
 			F[-1]  = u[self.N+self.offset*(self.N+1)] - self.BC.right(t)
 		#print(F)
 		#x = input("pause")
+		if verbose:
+			print('F ', F)
 		return -F
 	def solve_adjoint(self, uph, uth, response):
 		"""
@@ -337,7 +343,7 @@ class FEM_SYS:
 		self.M[:N+1,:N+1] = self.ph.M
 		self.M[N+1:,N+1:] = self.th.M
 		#self.iM = spinv(self.M)
-		self.iM = spar.csr_matrix((2*(self.N+1),2*(self.N+1)))
+		self.iM = spar.csc_matrix((2*(self.N+1),2*(self.N+1)))
 		self.iM[:N+1,:N+1] = self.ph.iM
 		self.iM[N+1:,N+1:] = self.th.iM
 	def forward_solve(self, u0, lastT=False):
@@ -351,11 +357,11 @@ class FEM_SYS:
 		for t in range(1, 2):#self.T+1):
 			u_for[t,:] = self.solve(u_for[t-1,:],u_for[t-1,:],t/self.T)
 		return u_for
-	def res2(self, u,t):
+	def res2(self, u,t, verbose=False):
 		N = self.N
 		F = np.zeros(2*(N+1))
-		F[:N+1] = self.ph.iM.dot(self.ph.res2(u,t))
-		F[N+1:] = self.th.iM.dot(self.th.res2(u,t))
+		F[:N+1] = (self.ph.res2(u,t, verbose))
+		F[N+1:] = (self.th.res2(u,t, verbose))
 		return F
 	def CrankNicholson(self,u0,dt):
 		u_for = np.empty((self.T+1,(self.N+1)*2))
@@ -364,18 +370,16 @@ class FEM_SYS:
 		for tstep in range(1, self.T+1):
 			t = tstep*dt
 			u_for[tstep,:] = self.CrankNicholsonStep(u_for[tstep-1,:], t-dt, dt)
+			print(u_for[tstep,:])
 		return u_for
 	def CrankNicholsonStep(self, u0, t0, dt):
 		g = 0.5
 		t1 = t0+dt
-
 		Res0 = self.res2(u0,t0)
 		G = lambda utry: (utry-u0) - 1/2 * dt * (Res0 + self.res2(utry,t1))
-		
 		R0 = norm(G(u0))
 		tol = max(1E-15, 1E-10*R0)
 		u_ans = opt.leastsq(func = G, x0 = u0, ftol=tol)
-		
 		R1 = norm(G(u_ans[0]))
 		print('t = %.2E completed %.2E %.2E'%(t1,R0,R1))
 		return u_ans[0]
@@ -617,19 +621,22 @@ def WaveProblem():
 	UP = diffusion_system(N, T, K_PH, 0, 0, BC_PH, 0, SIGPH)
 	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
 	U  = FEM_SYS(N, T, UP, UT)
-	dt = 1E-8
-	U0 = 1E-8 * np.ones(2*(N+1))
-	U0[N+1:] = U0[N+1:]**0.25
+	dt = 1E-5
+	U0 = 1E-5 * np.ones(2*(N+1))
+	U0[:N+1] = 1E-5 * np.ones(N+1)
+	U0[N+1:] = np.power(1E-5,1/4) * np.ones(N+1)
 	U_FOR = U.CrankNicholson(U0,dt)
 	fig = plt.figure()
 	ax = fig.add_subplot(121)
-	for t in range(0,T+1,T//10):
-		ax.plot(U_FOR[t,N+1:], 'o-', label='Time %.2E'%(t*dt))
+	ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+	for t in range(0,T+1,max(T//10,1)):
+		ax.plot(U_FOR[t,:N+1], 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	ax = fig.add_subplot(122)
-	for t in range(0,T+1,T//10):
-		ax.plot(U_FOR[t,:N+1], 'o-', label='Time %.2E'%(t*dt))
+	ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+	for t in range(0,T+1,max(T//10,1)):
+		ax.plot(U_FOR[t,N+1:], 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	plt.show()

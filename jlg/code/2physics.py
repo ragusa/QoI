@@ -18,6 +18,11 @@ import sympy
 import matplotlib.pyplot as plt
 from copy import deepcopy
 
+import time
+import datetime
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+
 np.set_printoptions(linewidth=200)
 
 class boundary_condition:
@@ -370,7 +375,6 @@ class FEM_SYS:
 		for tstep in range(1, self.T+1):
 			t = tstep*dt
 			u_for[tstep,:] = self.CrankNicholsonStep(u_for[tstep-1,:], t-dt, dt)
-			print(u_for[tstep,:])
 		return u_for
 	def CrankNicholsonStep(self, u0, t0, dt):
 		g = 0.5
@@ -379,10 +383,10 @@ class FEM_SYS:
 		G = lambda utry: (utry-u0) - 1/2 * dt * (Res0 + self.res2(utry,t1))
 		R0 = norm(G(u0))
 		tol = max(1E-15, 1E-10*R0)
-		u_ans = opt.leastsq(func = G, x0 = u0, ftol=tol)
-		R1 = norm(G(u_ans[0]))
+		u_ans = opt.root(G, u0, method='krylov')
+		R1 = norm(G(u_ans.x))
 		print('t = %.2E completed %.2E %.2E'%(t1,R0,R1))
-		return u_ans[0]
+		return u_ans.x
 	def newton_residual(self, u_cur, u_old, t, verbose=False):
 		"""
 		Calculate the residual
@@ -607,8 +611,8 @@ def Tests():
 	N = 3
 	test_problem("x*trig(t)+1", N, T, R_ph, R_th, (uph, kph, sph), (uth, kth, sth))
 def WaveProblem():
-	T = 10
-	N = 10
+	T = 30000
+	N = 200
 	k = 0  # Constant the defines the material, conductivity
 	z = 1  # Constant the defines the material, atomic mass number
 	SIGPH = lambda x,t,uph,uth,duphdx: (1/uth)**3
@@ -621,21 +625,22 @@ def WaveProblem():
 	UP = diffusion_system(N, T, K_PH, 0, 0, BC_PH, 0, SIGPH)
 	UT = diffusion_system(N, T, K_TH, 0, 0, BC_TH, 1, SIGTH)
 	U  = FEM_SYS(N, T, UP, UT)
-	dt = 1E-5
+	dt = 1E-4
 	U0 = 1E-5 * np.ones(2*(N+1))
 	U0[:N+1] = 1E-5 * np.ones(N+1)
 	U0[N+1:] = np.power(1E-5,1/4) * np.ones(N+1)
 	U_FOR = U.CrankNicholson(U0,dt)
+	np.save('2nd 2PHYSICS RUN '+st, U_FOR)
 	fig = plt.figure()
 	ax = fig.add_subplot(121)
 	ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-	for t in range(0,T+1,max(T//10,1)):
-		ax.plot(U_FOR[t,:N+1], 'o-', label='Time %.2E'%(t*dt))
+	for t in range(0,T+1,max(T//1000,1)):
+		ax.plot(U_FOR[t,:N+1]**0.25, 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)
 	ax = fig.add_subplot(122)
 	ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-	for t in range(0,T+1,max(T//10,1)):
+	for t in range(0,T+1,max(T//1000,1)):
 		ax.plot(U_FOR[t,N+1:], 'o-', label='Time %.2E'%(t*dt))
 	hand, labels = ax.get_legend_handles_labels()
 	ax.legend(hand, labels)

@@ -29,7 +29,7 @@ def testMatLabProb():
 	(qoif, qoia) = fem.qoi(res)
 	print(qoif)
 	print(qoia)
-	assert abs(qoif - qoia) < 1E-8
+	assert abs(qoif - qoia) < 1E-12
 
 def testOneCellLinear():
 	sigma = lambda u,x: 0

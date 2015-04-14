@@ -92,6 +92,7 @@ class femsys:
 			A[ :,-1] = 0
 			A[-1,-1] = 1
 			b[-1] = self.bc.rval
+			print(A-A_nobc)
 		return (A, b, A_nobc, b_nobc)
 	def newton_jacobian(self, u0):
 		'''
@@ -181,9 +182,7 @@ class femsys:
 		k = 0
 		resi = self.newton_residual(ustart)
 		norm0 = norm(resi)
-		uk = ustart.copy()
-		if norm0 == 0:
-			return (uk, True, 0)
+		uk = ustart
 		while norm(resi)/norm0 > tol and k < max_iter:
 			k+=1
 			jaco = self.newton_jacobian(uk)

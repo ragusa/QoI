@@ -19,7 +19,7 @@ iters = 100 # Number of steps to take
 t = lambda i: i/(iters-1) if i >= 0 else (iters - i)/(iters - 1) # Convert an step number to a time between 0 and 1
 h = t(1)-t(0) # Step Width
 
-u0 = 0
+u0 = 1
 u = np.array([None for x in range(iters)])
 u[0] = u0
 

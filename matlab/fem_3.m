@@ -105,7 +105,7 @@ end
 % % u=A\b;
 % % 
 % % return
-% % end
+% % end 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [QoIf] = QoIforward(fct_ptr,npar,dat,u)

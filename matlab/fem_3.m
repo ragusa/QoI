@@ -3,21 +3,23 @@ function F=driver
 % clear the console screen
 clc; close all; 
 % load the data structure with info pertaining to the physical problem
-dat.material_type='constant_coefficients';
-dat.response_type='constant';
-dat.source_type='constant';
+dat.material_type = 'constant_coefficients';
+dat.response_type = 'half';
+dat.source_type   = 'constant';
+dat.source_type   = 'half';
 
 dat.diff=@diffu;
 dat.siga=@siga;
 dat.esrc=@esrc;
 dat.resp=@resp;
+npar.building_adjoint=false;
 
 dat.width=10;
 % BCs
-bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=0; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
+bc.left.type=2; % 0=neumann, 1=robin, 2=dirichlet
+bc.left.C=10; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
 bc.rite.type=1;
-bc.rite.C=0;
+bc.rite.C=0.3;
 dat.bc=bc; clear bc;
 
 % load the numerical parameters, npar, structure pertaining to numerics
@@ -49,29 +51,26 @@ plot(npar.x,u,'.-'); hold all
 % verification is always good
 % verif_diff_eq(dat)
 [QoI_f] = QoIforward(dat.resp,npar,dat,u)
-% u'*b/dat.esrc*dat.siga
-
-% % us=u/dat.esrc*dat.siga;
-% % bs=b/dat.esrc*dat.siga;
-% % bs(1)  =dat.bc.left.C;
-% % bs(end)=dat.bc.rite.C;
-% % us=A\bs;
+% \int r(x) u(x) dx = \sum_i U_i \int r(x) b_i(x) dx = dot(U,R)
 
 % <us|b_mod>=<us|A_mod.u>
 %           =<us.(A_mod)'|u>
 %           =<u|(A_mod)'.us>
 %           =<u|r>
+
 % assemble the matrix and the rhs
-dat2=dat; dat2.esrc=respo; 
-% we pass homog Neumann BC soo that the adjoint rhs 
+dat2=dat; 
+dat2.esrc=@resp; 
+npar.building_adjoint=true;
+% we pass homog Neumann BC so that the adjoint rhs 
 % is untouched by the application of the BCs
-dat2.bc.left.type=0; dat2.bc.rite.type=0;
-dat2.bc.left.C=0;    dat2.bc.rite.C=0;
+% 0=neumann, 1=robin, 2=dirichlet
+% dat2.bc.left.type=0; dat2.bc.rite.type=0;
+dat2.bc.left.C=0;dat2.bc.rite.C=0;
 [As,bs,npar]=assemble_system(npar,dat2);
-% we do not care about As
-clear As As_nobc;
-% us=As\bs;
-us=A\bs;
+% max(max(abs(As-A)))
+us=As\bs;
+% us=A\bs;
 plot(npar.x,us,'r-'); hold all
 
 
@@ -235,15 +234,18 @@ switch dat.bc.rite.type
         Dirichlet_nodes=[Dirichlet_nodes n];
         Dirichlet_val=[Dirichlet_val dat.bc.rite.C];
 end
+
 % apply Dirichlet BC
 for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     id=Dirichlet_nodes(i);      % extract the dof of a constraint
-    bcval=Dirichlet_val(i);
-    rhs=rhs-bcval*A(:,id);  % modify the rhs using constrained value
+    if ~npar.building_adjoint
+        bcval=Dirichlet_val(i);
+        rhs=rhs-bcval*A(:,id);  % modify the rhs using constrained value
+        rhs(id)=bcval;         % put the constrained value in the rhs
+    end
     A(id,:)=0; % set all the id-th row to zero
     A(:,id)=0; % set all the id-th column to zero (symmetrize A)
     A(id,id)=1;            % set the id-th diagonal to unity
-    rhs(id)=bcval;         % put the constrained value in the rhs
 end
 
 return
@@ -385,7 +387,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function y=diffu(x,field,dat);
 if(strcmp(dat.material_type,'constant_coefficients'))
-    y=3/10;
+    y=1;
 else
     error('non constant diffu not entered yet');
 end
@@ -408,7 +410,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function y=esrc(x,dat);
 if(strcmp(dat.source_type,'constant'))
-    y=1;
+    y=3;
+elseif(strcmp(dat.source_type,'half'))
+    if x< .5*dat.width
+        y=3;
+    else
+        y=0;
+    end
 else
     error('non constant esrc not entered yet');
 end
@@ -420,6 +428,12 @@ function y=resp(x,dat);
 % make the problem-data a global variable
 if(strcmp(dat.response_type,'constant'))
     y=1;
+elseif(strcmp(dat.response_type,'half'))
+    if x< .5*dat.width
+        y=0;
+    else
+        y=1;
+    end
 else
     error('non constant response not entered yet');
 end

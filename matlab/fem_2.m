@@ -7,7 +7,7 @@ dat.diff=1;
 dat.siga=3/10;
 dat.esrc=3;
 dat.width=10;
-bc.left.type=1; %0=neumann, 1=robin, 2=dirichlet
+bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
 bc.left.C=0; % (that data is C in: -Ddu/dn=C // u/4+D/2du/dn=C // u=C)
 bc.rite.type=1;
 bc.rite.C=0;
@@ -15,7 +15,7 @@ dat.bc=bc; clear bc;
 
 % load the numerical parameters, npar, structure pertaining to numerics
 % number of elements
-npar.nel = 5000;
+npar.nel = 50;
 % domain
 npar.x = linspace(0,dat.width,npar.nel+1);
 % polynomial degree

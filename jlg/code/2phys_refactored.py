@@ -87,16 +87,18 @@ class fem_system:
       raise IOError('Unknown minimizing routine "%s"'%(mini))
 
     self.verbose = verbose
-  def CN_tr_residual(self, u1, u0, dt, old_res):
-    new_res = self.ss_residual(u1)
+  def CN_tr_residual(self, u1, u0, dt, old_res, adj=False, uf=0):
     #if self.verbose:
       #print(new_res)
-    return (u1-u0) - 1/2 * dt * (old_res+self.ss_residual(u1))
-  def ss_residual(self, u):
+    f = 1 if not adj else -1
+    TR = f*((u1-u0) - 1/2 * dt * (old_res+self.ss_residual(u1, adj, uf)))
+    return TR
+  def ss_residual(self, u, adj=False, uf=None):
     """
     Calculate the steady state residual
     """
     F = np.zeros(2*(self.N+1))
+    #print(uf)
     for i in range(self.N):
       gnE = np.array([i,i+1])
       gnT = gnE + (self.N+1)
@@ -106,21 +108,29 @@ class fem_system:
 
       local_E    = np.dot(self.b, u[gnE])
       local_T    = np.dot(self.b, u[gnT])
+      if adj:
+        T_f = uf[gnT]
+      else:
+        T_f = local_T
       local_dEdx = np.dot(self.dbdx, u[gnE])
       local_dTdx = np.dot(self.dbdx, u[gnT])
-      DT = self.k * np.power(local_T, 2.5)
-      SIGMA = self.z / np.power(local_T, 3)
+      DT = self.k * np.power(T_f, 2.5)
+      SIGMA = self.z / np.power(T_f, 3)
       E = sum(self.wq*local_E) / sum(self.wq)
       grad_E = np.absolute(local_dEdx) / jacob
       DE = np.power(np.power(3*SIGMA, self.m) + np.power(self.limiter*grad_E/E, self.m), -1/self.m)
-
       local_F = np.zeros((2,self.qorder))
-      aux1 = SIGMA * self.wq * (np.power(local_T, 4) - local_E)
+      if not adj:
+        aux1_E = SIGMA * self.wq * (np.power(local_T, 4) - local_E)
+        aux1_T = aux1_E
+      else:
+        aux1_E = SIGMA * self.wq * (local_T - local_E)
+        aux1_T =         self.wq * (local_T - local_E)
       aux2 =    DT * self.wq * (local_dTdx)
       aux3 =    DE * self.wq * (local_dEdx)
       for j in range(self.qorder):
-        local_F[0,j] = -np.dot(aux1, self.b[:,j])*jacob + np.dot(aux3, self.dbdx[:,j])/jacob
-        local_F[1,j] =  np.dot(aux1, self.b[:,j])*jacob + np.dot(aux2, self.dbdx[:,j])/jacob
+        local_F[0,j] = -np.dot(aux1_E, self.b[:,j])*jacob + np.dot(aux3, self.dbdx[:,j])/jacob
+        local_F[1,j] =  np.dot(aux1_T, self.b[:,j])*jacob + np.dot(aux2, self.dbdx[:,j])/jacob
       F[gnE] += local_F[0,:]
       F[gnT] += local_F[1,:]
     for physics in [0,1]:
@@ -155,6 +165,22 @@ class fem_system:
       if self.verbose:
         print('Step %i done. t_cur = %f. Step Time = %f seconds. Total Elapsed Time = %f seconds'%(i, t_cur, time.time()-step_time, time.time()-start_time))
     return u
+  def adjoint_solve(self, u0, dts, uf):
+    if self.verbose:
+      start_time = time.time()
+      print('Beginning solve')
+    us = np.empty(((self.N+1)*2, len(dts)+1))
+    us[:,-1] = u0
+    t_cur = sum(dts)
+    for i in range(-2, -len(dts)-1, -1):
+      if self.verbose:
+        step_time = time.time()
+      old_res = self.ss_residual(us[:,i+1], True, uf[:,i+1])
+      us[:,i] = self.mini(self.tr_residual, us[:,i+1], args=(us[:,i+1], dts[i+1], old_res, True, uf[:,i])).x
+      t_cur -= dts[i+1]
+      if self.verbose:
+        print('Step %i done. t_cur = %f. Step Time = %f seconds. Total Elapsed Time = %f seconds'%(i, t_cur, time.time()-step_time, time.time()-start_time))
+    return us
 def plotter(u):
   (N, T) = (u.shape)
   N = N//2 - 1
@@ -182,10 +208,25 @@ def test():
   filename = 'P1 %s'%(str(datetime.datetime.now()).split(' ')[0])
   np.save(filename, u)
   plotter(u)
+def test_adjoint():
+  u_f = np.load("P1 2015-01-14.npy")
+  N = len(u_f[:,0])/2-2
+  Tmax = 3
+  Tsteps = 100
+  dts = (Tmax/Tsteps) * np.ones(Tsteps)
+  N = 100
+  Tmax = 3
+  Tsteps = 100
+  FEM = fem_system(N, (1,1,1,0), (0,0,0,0), mini='krylov', verbose=True)
+  u_init = 1E-5 * np.ones(2*N+2)
+  u_init[N+1:] = (1E-5)**(1/4)
+  us = FEM.adjoint_solve(u_init, dts, u_f)
+  filename = "adjoint P1 2015-01-14.npy"
+  np.save(filename, us)
 def load_and_plot(fn):
   u = np.load(fn)
   plotter(u)
 print(":-) Hello World")
-test()
-#load_and_plot("2nd 2PHYSICS RUN 2015-01-13.npy")
+load_and_plot("P1 2015-01-14.npy")
+load_and_plot("adjoint P1 2015-01-14.npy")
 print(":-( Goodbye World")

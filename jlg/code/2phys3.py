@@ -21,8 +21,8 @@ def mass_matrix(N):
   M[0,0] /= 2
   M[-1,-1] /= 2
   B = sp.csc_matrix((2*(N+1),2*(N+1)))
-  B[:N+1,:N+1] = M
-  B[N+1:,N+1:] = M
+  B[:N+1,:N+1] = M/4
+  B[N+1:,N+1:] = M/4
   return B*h/2
 def parseBC(BC):
   boundary = namedtuple('boundary', ['ltype', 'lvalue', 'rtype', 'rvalue'])
@@ -34,8 +34,8 @@ def quadmaker(N, p):
   for order p
   """
   #[xq, wq] = np.polynomial.legendre.leggauss(p)
-  xq = np.array([-1,1])
-  wq = np.array([1,1])
+  xq = np.array([-1.0,1.0])
+  wq = np.array([ 1.0,1.0])
   xd = np.linspace(-1,1,p)
   b    = np.zeros((p,p))
   dbdx = np.zeros((p,p))
@@ -79,15 +79,16 @@ class fem:
     self.bT = bT
     self.qE = qE
     self.qT = qT
-    #self.mass = np.array(mass_matrix(N).todense())
+    self.mass = np.array(mass_matrix(N).todense())
     self.N = N
     self.dx = 1/N
     self.x = np.linspace(0,1,N+1)
-
     self.BC = (parseBC(BCE), parseBC(BCT))
 
     self.qorder = 2
     [self.xq, self.wq, self.b, self.dbdx, self.gn] = quadmaker(self.N, self.qorder)
+    self.wq /= sum(self.wq)
+    self.xq /= 2.0*(N)
 
     if meth == 'CN':
       self.TR_residual = self.CN_TR_residual
@@ -101,9 +102,9 @@ class fem:
     if mini == 'leastsqs':
       self.mini = opt.leastsq
     elif mini == 'krylov':
-      self.mini = lambda f, u, args: opt.root(f, u, args=args, method='krylov')
+      self.mini = lambda f, u, args: opt.root(f, u, args=args, method='krylov', tol=1E-15)
     elif mini == 'hybr':
-      self.mini = lambda f, u, args: opt.root(f, u, args=args, method='hybr')
+      self.mini = lambda f, u, args: opt.root(f, u, args=args, method='hybr', tol=1E-15)
     else:
       raise IOError('Unknown minimizing routine "%s"'%(mini))
 
@@ -116,51 +117,52 @@ class fem:
       x0 = self.x[i]
       x1 = self.x[i+1]
       jacob = (x1-x0)/2
-      xq = self.xq + sum(self.x[i:i+2])/2
+      xq = (self.xq) + (x0+x1)/2
       local_E    = np.dot(self.b, u[gnE])   # if u_for==None else np.dot(self.b, u_for[gnE])   
       local_T    = np.dot(self.b, u[gnT])   # if u_for==None else np.dot(self.b, u_for[gnT])   
       local_dEdx = np.dot(self.dbdx, u[gnE])# if u_for==None else np.dot(self.dbdx, u_for[gnE])
       local_dTdx = np.dot(self.dbdx, u[gnT])# if u_for==None else np.dot(self.dbdx, u_for[gnT])
-      local_aE   = self.wq*self.aE(xq, t, local_E)#*jacob
-      local_aT   = self.wq*self.aT(xq, t, local_T)#*jacob
-      local_bE   = self.wq*self.bE(xq, t, local_T)#*jacob
-      local_bT   = self.wq*self.bT(xq, t, local_E)#*jacob
-      local_qE   = self.wq*self.qE(xq, t)         #*jacob
-      local_qT   = self.wq*self.qT(xq, t)         #*jacob
-      #print(local_aT, local_bT, - local_qT)
-      #print(self.bT(xq[1], t, local_E), xq, local_E)
-      #print(self.qT(xq[1], t), -xq[1]**2+1)
-      #oia=input("Pause")
+      local_aE   = self.aE(xq, t, local_E)
+      local_aT   = self.aT(xq, t, local_T)
+      local_bE   = self.bE(xq, t, local_T)
+      local_bT   = self.bT(xq, t, local_E)
+      local_qE   = self.qE(xq, t)         
+      local_qT   = self.qT(xq, t)         
+      #print(local_aE, local_bE, -self.qE(xq, t), local_dEdx)
+      #print(local_aT, local_bT, -self.qT(xq, t), local_dTdx)
       local_F = np.zeros((2,self.qorder))
-      #print(gnE)
       for j in range(self.qorder):
-        local_F[0,j] =  sum((adj*local_aE + adj*local_bE - local_qE)*self.b[:,j]) + adj*np.dot(self.wq*local_dEdx, self.dbdx[:,j])/jacob
-        local_F[1,j] =  sum((adj*local_aT + adj*local_bT - local_qT)*self.b[:,j]) + adj*np.dot(self.wq*local_dTdx, self.dbdx[:,j])/jacob
+        local_F[0,j] =  sum(self.wq*(adj*local_aE + adj*local_bE - local_qE)*jacob*self.b[:,j]) + adj*np.dot(self.wq*local_dEdx, self.dbdx[:,j])/jacob
+        local_F[1,j] =  sum(self.wq*(adj*local_aT + adj*local_bT - local_qT)*jacob*self.b[:,j]) + adj*np.dot(self.wq*local_dTdx, self.dbdx[:,j])/jacob
       F[gnE] += local_F[0,:]
       F[gnT] += local_F[1,:]
     F[1:N] *= 1/2
     F[N+2:-1] *= 1/2
+    return -F
+
+  def CN_TR_residual(self, u1, u0, t, dt, old_res=None):
+    if old_res == None:
+      old_res = self.SS_residual(u0, t-dt)
+    #print(old_res)
+    #print(self.SS_residual(u1, t))
+    #print(self.mass.dot(u1-u0), - 1/2 * dt * (old_res+self.SS_residual(u1, t)))
+    F = self.mass.dot(u1-u0) - 1/2 * dt * (old_res+self.SS_residual(u1, t))
     for physics in [0,1]:
       start = physics * (self.N+1)
       end = start + self.N
       if self.BC[physics].ltype == 0:
         F[start] -= self.BC[physics].lvalue(t)
       elif self.BC[physics].ltype == 1:
-        F[start] += 1/2 * u[start] - 2*self.BC[physics].lvalue(t)
+        F[start] += 1/2 * u1[start] - 2*self.BC[physics].lvalue(t)
       elif self.BC[physics].ltype == 2:
-        F[start]  = u[start] - self.BC[physics].lvalue(t)
+        F[start]  = u1[start] - self.BC[physics].lvalue(t)
       if self.BC[physics].rtype == 0:
         F[end] -= self.BC[physics].rvalue(t)
       elif self.BC[physics].rtype == 1:
-        F[end] += 1/2 * u[end] - 2*self.BC[physics].rvalue(t)
+        F[end] += 1/2 * u1[end] - 2*self.BC[physics].rvalue(t)
       elif self.BC[physics].rtype == 2:
-        F[end]  = u[end] - self.BC[physics].rvalue(t)
-    return -F
-
-  def CN_TR_residual(self, u1, u0, t, dt, old_res=None):
-    if old_res == None:
-      old_res = self.SS_residual(u0, t+dt, None)
-    return (u1-u0) - 1/2 * dt * (old_res+self.SS_residual(u1, t, None))
+        F[end]  = u1[end] - self.BC[physics].rvalue(t)
+    return F
   def CNadj_TR_residual(self, u1, u0, t, dt, old_res=None, u_for=None):
     if old_res == None:
       old_res = self.SS_residual(u0, t-dt, u_for)
@@ -177,7 +179,8 @@ class fem:
       t_cur += dts[i-1]
       if self.verbose:
         step_time = time.time()
-      TR_Residual = lambda u1: (u1 - u[:,i-1]) - 1/2 * dts[i-1] * (self.SS_residual(u1, t_cur)+old_res)
+      TR_Residual = lambda u1: self.CN_TR_residual(u1, u[:,i-1], t_cur, dts[i-1], old_res)
+      
       u[:,i] = self.mini(TR_Residual, u[:,i-1], args=()).x
       if self.verbose:
         print("  Old res", self.SS_residual(u[:,i-1], t_cur-dts[i-1]))
@@ -265,26 +268,28 @@ def plotter(u):
   for t in range(0,T,max(1, T//10)):
     ax1.plot(u[:N+1,t], 'o-')
     ax2.plot(u[N+1:,t], 'o-')
+  ax1.set_ylim([-2,1.5])
+  ax2.set_ylim([-2,1.5])
   plt.show()
   
 kE = lambda x, t, E, T: 1
 kT = lambda x, t, E, T: 1
 aE = lambda x,t,E:  E   
-aT = lambda x,t,T:  T 
 bE = lambda x,t,T: -2*T 
+aT = lambda x,t,T:  2*T 
 bT = lambda x,t,E: -E   
 
 
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import diff
-from sympy import tanh
+from sympy import tanh,sinh,cosh,sin,cos
 x, t = sym.symbols("x t")
-E = x# 1/2 * (1-tanh(x-5*t))
-T = 1# 1/2 * (1-tanh(x-5*t))
+E = sin(x) #1/2 * (1-tanh(x-5*t))
+T = sin(x) #1/2 * (1-tanh(x-5*t))
 
 
 fE_expr = diff(E,t) - diff(diff(E,x),x) + E - 2*T
-fT_expr = diff(T,t) - diff(diff(T,x),x) + T - E
+fT_expr = diff(T,t) - diff(diff(T,x),x) + 2*T - E
 E_fun = sym.lambdify((x,t), E, "numpy")
 T_fun = sym.lambdify((x,t), T, "numpy")
 qE = sym.lambdify((x,t), fE_expr, "numpy")
@@ -293,11 +298,8 @@ qT = sym.lambdify((x,t), fT_expr, "numpy")
 gradE = sym.lambdify((x,t), diff(E, x), "numpy")
 gradT = sym.lambdify((x,t), diff(T, x), "numpy")
 
-BCE = (0, lambda t: -gradE(0,t), 0, lambda t: gradE(1,t))
-BCT = (0, lambda t: -gradT(0,t), 0, lambda t: gradT(1,t))
-
-print(gradT(1,1))
-print(gradT(0,1))
+BCE = (2, lambda t:  E_fun(0,t), 2, lambda t: E_fun(1,t))
+BCT = (2, lambda t:  T_fun(0,t), 2, lambda t: T_fun(1,t))
 
 print("QE = ", fE_expr)
 print("QT = ", fT_expr)
@@ -305,20 +307,23 @@ print("QT = ", fT_expr)
 rE = lambda x,t: 1
 rT = lambda x,t: 1
 
-N = 2
+N = 100
 
 sys = fem(kE, kT, aE, aT, bE, bT, BCE, BCT, qE, qT, N, verbose=False)
 
 Tmax = 1
-Tsteps = 10
+Tsteps = 1
 dts = (Tmax/Tsteps) * np.ones(Tsteps)
-u0 = [E_fun(i/N,0) if i<N+1 else T_fun((i-N-1)/N, 0) for i in range(N*2+2)]
+u0 = np.array([E_fun(i/(N),0) if i<N+1 else T_fun((i-N-1)/N, 0) for i in range(N*2+2)])
+u_ans = np.array([E_fun(i/(N),1) if i<N+1 else T_fun((i-N-1)/N, 1) for i in range(N*2+2)])
+
+print(u0)
+print(u_ans)
+print("Opt Res", sys.CN_TR_residual(u_ans, u0, 1, 1))
 
 u_for = sys.CN_for(u0, dts)
-
 qoi_f_E = innerproduct(u_for[:N+1], rE, N+1, Tsteps)
 qoi_f_T = innerproduct(u_for[N+1:], rT, N+1, Tsteps)
-
 
 print("QoI Forward, E ", qoi_f_E)
 print("QoI Forward, T ", qoi_f_T)
@@ -355,4 +360,3 @@ print("QoI Forward, T ", qoi_f_T)
 #
 plotter(u_for)
 #plotter(u_adj)
-

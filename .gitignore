@@ -30,5 +30,12 @@
 *.vrb
 *.xdy
 *.tdo
-adjoint-nonlinear.pdf
 *.asv
+*.dvi
+*.spl
+*.zip
+*.gz
+.DS_Store
+Plots
+*.txt
+*.pdf

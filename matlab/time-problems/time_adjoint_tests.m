@@ -4,8 +4,8 @@ close all
 global pbID
 
 % intiial value
-pbID=1;
-y0=1;
+pbID=3;
+y0=0;
 
 
 fprintf('Entering reference solution computation \n');
@@ -45,7 +45,22 @@ switch pbID
 %         QoI_quad_ref2=quad(@(time)myintegrant(time,y0),0,tend,tol);
 %         [QoI_quad_ref QoI_quad_ref2 QoI_trap_ref2]'
 %         [QoI_quad_ref QoI_quad_ref2 QoI_trap_ref2]'-QoI_quad_ref
+   
+    case{3}
+        tend=2;
+        % tolerances for odesolvers
+        rtol = 1e-13; atol = 1e-13;
+        options = odeset('RelTol',rtol,'AbsTol',atol,'InitialStep',1e-10,'OutputFcn',@odeplot,'OutputSel',[1]);
+        tspan=[0 tend];
+        [t_ref,y_ref]=ode15s(@myfunc,tspan,y0,options);
+
+        QoI_trap_ref=dot(diff(t_ref),(y_ref(1:end-1)+y_ref(2:end))/2);
+        fprintf('Using the ODE solver data, the QoI using trapezoidal rule is    %g \n',QoI_trap_ref);
         
+        tol=1e-10;
+        QoI_quad_ref=quad(@(time)myintegrant(time,y0),0,tend,tol);
+        fprintf('Using the quad function and calls to the ODE solver, the QoI is %g  (tol=%g)\n',QoI_quad_ref,tol);
+
 end
         
 % initial number of time steps 
@@ -111,7 +126,7 @@ dt=tend/nsteps;
 % initialize output structure
 y=zeros(nsteps+1,1);y(1)=y0;
 if(nargout==2)
-    A=[];bb=[]
+    A=[];bb=[];
 else
     A=spalloc(nsteps+1,nsteps+1,3*nsteps+2);A(1,1)=1;
     bb=zeros(nsteps+1,1); bb(1)=y0;
@@ -147,6 +162,8 @@ switch pbID
         out=-2*time;
     case{2}
         out=2;
+    case{3}
+        out=0.*time;
 end
 end
 
@@ -160,6 +177,8 @@ switch pbID
         out=sqrt(time);
     case{2}
         out=time;
+    case{3}
+        out=time.^2;
 end
 end
 

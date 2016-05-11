@@ -65,11 +65,11 @@ end
         
 % initial number of time steps 
 nsteps0=20;
-nbr_time_refinement=10;
+nbr_time_refinement=15;
 for i=1:nbr_time_refinement
     % fprintf('CN evaluation %g out of %g\n',i,nbr_time_refinement);
     nsteps(i)=nsteps0*2^(i-1);
-    [dt(i), yforward{i}, ~, ~] = forward_crank_nicholson(nsteps(i),y0,tend);
+    [dt(i), yforward{i}, Aforward{i}, bforward{i}] = forward_crank_nicholson(nsteps(i),y0,tend);
     QoI_trap(i)=dt(i)*sum((yforward{i}(1:end-1)+yforward{i}(2:end))/2);
     y_err(i)= abs(yforward{i}(end)-y_ref(end));
 end
@@ -92,28 +92,35 @@ loglog(dt,abs(QoI_trap'-QoI_trap_ref),'r+-',dt,C*dt.^order,'m-'); axis tight; le
 figure(4); C=abs(QoI_trap(1)-QoI_quad_ref)/dt(1)^order;
 loglog(dt,abs(QoI_trap'-QoI_quad_ref),'r+-',dt,C*dt.^order,'m-'); axis tight; legend('QoI error',sprintf('slope %g',order))
 
-QoI_trap'
+% QoI_trap'
 % QoI_trap'-QoI_trap_ref
 % QoI_trap'-QoI_quad_ref
 
-nsteps=nsteps(end);
-[dt, yforward, Aforward, bforward] = forward_crank_nicholson(nsteps,y0,tend);
-K=speye(nsteps+1);K(1,1)=0.5; K(end,end)=0.5;K=K*dt;
-r=ones(nsteps+1,1);
+% nsteps=nsteps(end);
+% [dt, yforward, Aforward, bforward] = forward_crank_nicholson(nsteps,y0,tend);
 
-% trapezoidal rule for QoI. should be the same answer as before, 
-% just written differently with operators
-qoi_ur=dot(yforward,K*r)
+for i=1:nbr_time_refinement
+    K{i}=speye(nsteps(i)+1);K{i}(1,1)=0.5; K{i}(end,end)=0.5;K{i}=K{i}*dt(i);
+    r{i}=ones(nsteps(i)+1,1);
+    % trapezoidal rule for QoI. should be the same answer as before,
+    % just written differently with operators
+    qoi_ur(i)=dot(yforward{i},K{i}*r{i});
+end
+[QoI_trap' qoi_ur']
 
-% create adjoint operator without caring about the adjoint final conditions
-A_adj=K\Aforward'*K;
-% solve for adjoint solution
-u_adj=A_adj\r;
+for i=1:nbr_time_refinement
+    % create adjoint operator without caring about the adjoint final conditions
+    A_adj=K{i}\Aforward{i}'*K{i};
+    % solve for adjoint solution
+    u_adj=A_adj\r{i};
+    
+    % verify that the qoi computed the adjoint yields the same answer!
+    qoi_uadjb(i)=dot(u_adj,K{i}*bforward{i});
+    
+    diff_(i)=qoi_uadjb(i)-qoi_ur(i);
+end
+diff_'
 
-% verify that the qoi computed the adjoint yields the same answer!
-qoi_uadjb=dot(u_adj,K*bforward)
-
-diff_=qoi_uadjb-qoi_ur
 end
 
 %%%%--------------------------------------%%%%

@@ -124,6 +124,229 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{QoI}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the following heat conduction problem
+\be
+\label{eq:ex_heat_conduction}
+-\frac{d}{dx}k\frac{dT}{dx}=q \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc}
+\be
+T(a) = T_{\text{dir}} 
+\ee
+\be
+-k \left.\frac{dT}{dx}\right|_b = h(T(b)-T_{\infty})
+\ee
+\end{subequations}
+
+Our QoI is a functional of the solution
+\be
+\label{eq:ex_heat_conduction_qoi}
+J = \int_a^b r(x) T(x) dx
+\ee
+where $r(x)$ is the response function.
+
+Consider the following adjoint problem
+\be
+\label{eq:ex_heat_conduction_adjoint}
+-\frac{d}{dx}k\frac{d\phi}{dx}=r \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc_adjoint}
+\be
+\phi(a) = \phi_{\text{dir}} = 0 
+\ee
+\be
+-k \left.\frac{d\phi}{dx}\right|_b = h(\phi(b)-\phi_{\infty}) = h\phi(b)
+\ee
+\end{subequations}
+where we have chosen $\phi_{\text{dir}} = 0$ and $\phi_{\infty}=0$ for reasons that will become clear later.
+
+We now show that we can compute the QoI, $J$, using the adjoint solution. Multiply the forward problem, \eqt{eq:ex_heat_conduction}, by $\phi$; multiply the adjoint problem, \eqt{eq:ex_heat_conduction_adjoint}, by $T$;  integrate over the whole domain; subtract the two quantities. We get:
+\be
+\label{eq:hc_qoi_derivation1}
+\int_a^b \left( -\frac{d}{dx}k\frac{dT   }{dx} \right) \phi dx - 
+\int_a^b \left( -\frac{d}{dx}k\frac{d\phi}{dx} \right) T    dx = \int_a^b ( q \phi - r T ) dx = \int_a^b q \phi dx - J
+\ee
+Integrate by parts once the first integral on the LHS of \eqt{eq:hc_qoi_derivation1}. We get:
+\begin{align}
+\label{eq:hc_qoi_derivation2}
+\int_a^b \left( -\frac{d}{dx}k\frac{dT   }{dx} \right) \phi dx 
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
+- \left\{\left.k\frac{dT}{dx}\right|_b \phi(b) - 
+         \left.k\frac{dT}{dx}\right|_a \phi(a) \right\} 
+\nonumber \\
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
+- \left\{-h(T(b)-T_{\infty})\phi(b) - 0 \right\}
+\end{align}
+Repeat for the second integral on the LHS of \eqt{eq:hc_qoi_derivation1}. We get:
+\begin{align}
+\label{eq:hc_qoi_derivation3}
+\int_a^b \left( -\frac{d}{dx}k\frac{d\phi}{dx} \right) T    dx 
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
+- \left\{\left.k\frac{d\phi}{dx}\right|_b T(b) - 
+         \left.k\frac{d\phi}{dx}\right|_a T(a) \right\} 
+\nonumber \\
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
+- \left\{-h\phi(b)T(b) - \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}} \right\}
+\end{align}
+
+Subtract \eqt{eq:hc_qoi_derivation2} and \eqt{eq:hc_qoi_derivation3} to get the LHS of \eqt{eq:hc_qoi_derivation1}. Re-arrange the result to have:
+\be
+\int_a^b q \phi dx - J
+=
+h(T(b)-T_{\infty})\phi(b) 
++
+\left\{-h\phi(b)T(b) - \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}} \right\}
+= - h T_{\infty} \phi(b) - \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}}
+\ee
+
+So finally, we have
+\be
+\label{eq:ex_heat_conduction_qoi_final_expr}
+\boxed{
+J := \int_a^b rT dx = \int_a^b q \phi dx + h T_{\infty} \phi(b) + \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}}
+}
+\ee
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sensitivity}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We now suppose that the parameters can be perturbed (denoted by the use of $^\prime$).
+
+
+\be
+\label{eq:ex_heat_conduction_pert}
+-\frac{d}{dx}k^\prime\frac{dT^\prime}{dx}=q^\prime \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc}
+\be
+T(a) = T^\prime_{\text{dir}} 
+\ee
+\be
+-k^\prime \left.\frac{dT^\prime}{dx}\right|_b = h^\prime(T(b)-T^\prime_{\infty})
+\ee
+\end{subequations}
+where
+\[ 
+k^\prime = k + \delta k\,, 
+q^\prime = q + \delta q\,, 
+h^\prime = h + \delta h\,, 
+T^\prime_{\text{dir}}  = T_{\text{dir}} + \delta T_{\text{dir}} \,, 
+T^\prime_{\infty}      = T_{\infty}     + \delta T_{\infty}     \,, 
+T^\prime = T + \delta T
+\]
+ 
+Our new QoI is 
+\be
+\label{eq:ex_heat_conduction_qoi_pert}
+J^\prime = \int_a^b r(x) T^\prime(x) dx = J + \delta J = J + \int_a^b r(x) \delta T(x) dx.
+\ee
+
+We now show that we can compute the perturbed QoI, $J^\prime$, using the original adjoint solution. 
+Multiply the perturbed forward problem, \eqt{eq:ex_heat_conduction_pert}, by $\phi$; multiply the original adjoint problem, \eqt{eq:ex_heat_conduction_adjoint}, by $\boxed{T^\prime}$;  integrate over the whole domain; subtract the two quantities. We get:
+
+\be
+\label{eq:hc_pert_qoi_derivation1}
+\int_a^b \left( -\frac{d}{dx}k^\prime\frac{dT^\prime   }{dx} \right) \phi dx - 
+\int_a^b \left( -\frac{d}{dx}k\frac{d\phi}{dx} \right) T^\prime    dx = \int_a^b ( q^\prime \phi - r T^\prime ) dx = \int_a^b q^\prime \phi dx - J^\prime
+\ee
+Integrate by parts once the first integral on the LHS of \eqt{eq:hc_pert_qoi_derivation1}. We get:
+\begin{align}
+\label{eq:hc_pert_qoi_derivation2}
+\int_a^b \left( -\frac{d}{dx}k^\prime\frac{dT^\prime   }{dx} \right) \phi dx 
+&= 
+\int_a^b \left( k^\prime\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \left\{\left.k^\prime\frac{dT^\prime}{dx}\right|_b \phi(b) - 
+         \left.k^\prime\frac{dT^\prime}{dx}\right|_a \phi(a) \right\} 
+\nonumber \\
+&= 
+\int_a^b \left( k^\prime\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \left\{-h^\prime(T^\prime(b)-T^\prime_{\infty})\phi(b) - 0 \right\}
+\end{align}
+Repeat for the second integral on the LHS of \eqt{eq:hc_pert_qoi_derivation1}. We get:
+\begin{align}
+\label{eq:hc_pert_qoi_derivation3}
+\int_a^b \left( -\frac{d}{dx}k\frac{d\phi}{dx} \right) T^\prime    dx 
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \left\{\left.k\frac{d\phi}{dx}\right|_b T^\prime(b) - 
+         \left.k\frac{d\phi}{dx}\right|_a T^\prime(a) \right\} 
+\nonumber \\
+&= 
+\int_a^b \left( k\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \left\{-h\phi(b)T^\prime(b) - \left.k\frac{d\phi}{dx}\right|_a T^\prime_{\text{dir}} \right\}
+\end{align}
+
+Subtract \eqt{eq:hc_pert_qoi_derivation2} and \eqt{eq:hc_pert_qoi_derivation3} to get the LHS of \eqt{eq:hc_pert_qoi_derivation1}. Re-arrange the result to have:
+\be
+\int_a^b q^\prime \phi dx - J^\prime
+=
+\int_a^b \left( \delta k\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
++
+\delta h T^\prime(b) \phi(b) - h^\prime T^\prime_{\infty} \phi(b) 
+- \left.k\frac{d\phi}{dx}\right|_a T^\prime_{\text{dir}} 
+\ee
+
+So finally, we have
+\be
+\label{eq:ex_heat_conduction_pert_qoi_final_expr}
+\boxed{
+J^\prime := \int_a^b r T^\prime dx 
+= 
+\int_a^b q^\prime \phi dx 
+- \int_a^b \left( \delta k\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \delta h T^\prime(b) \phi(b) + h^\prime T^\prime_{\infty} \phi(b) 
++ \left.k\frac{d\phi}{dx}\right|_a T^\prime_{\text{dir}} 
+}
+\ee
+
+
+Subtracting \eqt{eq:ex_heat_conduction_pert_qoi_final_expr} and \eqt{eq:ex_heat_conduction_qoi_final_expr}, we get:
+\be
+\label{eq:ex_heat_conduction_delta_qoi_expr}
+\boxed{
+\delta J := \int_a^b r \delta T dx 
+= 
+\int_a^b \delta q \phi dx 
+- \int_a^b \left( \delta k\frac{d\phi}{dx}\frac{dT^\prime}{dx} \right) dx 
+- \delta h T^\prime(b) \phi(b) + \left[ h^\prime T^\prime_{\infty} - h T_{\infty} \right] \phi(b) 
++ \left.k\frac{d\phi}{dx}\right|_a \delta T_{\text{dir}} 
+}
+\ee
+To first order, we can now replace $T^\prime:= T + \delta T$ with simply the unperturbed function $T$ (dropping terms that would then be $\delta ^2$):
+\be
+\label{eq:ex_heat_conduction_delta_qoi_expr_final}
+\boxed{
+\delta J := \int_a^b r \delta T dx 
+= 
+\int_a^b \delta q \phi dx 
+- \int_a^b \left( \delta k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
+- \delta h T(b) \phi(b) + \left[ h^\prime T^\prime_{\infty} - h T_{\infty} \right] \phi(b) 
++ \left.k\frac{d\phi}{dx}\right|_a \delta T_{\text{dir}} 
+}
+\ee
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

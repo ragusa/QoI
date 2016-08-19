@@ -6,10 +6,12 @@ a=1; b=10;
 k=3; q=100; h=100; T_dir=200; T_inf=50;
 % region of interest
 x1=a; x2=b;
-% qoi response
-r=1;
+% qoi response. r is used in compute adjoint. fh_r is used for the QoI
+% using fh_T. Always make sure that r and fh_r(x) are consistent!
+r=1/(x2-x1);
+fh_r = @(x) (x<x1).*0 + (x>=x1&x<x2).*r + (x>=x2).*0;
 % 
-do_plot = false;
+do_plot = true;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward problem for unperturbed temperature
@@ -17,11 +19,11 @@ do_plot = false;
 [fh_T,fh_dTdx] = compute_temperature(a,b,k,q,T_dir,h,T_inf);
 % plot temperature
 if do_plot
-    x=linspace(a,b);
-    figure(1); plot(x,fh_T(x));
+    x=linspace(a,b,1000);
+    figure(1); subplot(1,2,1); plot(x,fh_T(x)); axis tight; title('Temperature');
 end
 % compute functional using forward solution
-J_for = integral(fh_T,x1,x2); %/(x2-x1);
+J_for = integral(@(x) fh_T(x).*fh_r(x),x1,x2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve adjoint problem
@@ -30,7 +32,7 @@ phi_dir=0; phi_inf=0;
 [fh_phi,fh_dphidx] = compute_adjoint(a,b,x1,x2,k,r,phi_dir,h,phi_inf);
 % plot adjoint
 if do_plot
-    figure(2); plot(x,fh_phi(x),'+');
+    subplot(1,2,2); plot(x,fh_phi(x)); axis tight; title('Adjoint');
 end
 % compute functional using adjoint
 J_adj_vol = q * integral(fh_phi,a,b);
@@ -53,7 +55,7 @@ fh_T0 = fh_T; fh_dT0dx = fh_dTdx; J_for0 = J_for;
 % save unperturbed parameters
 k0=k; q0=q; h0=h; T_dir0=T_dir; T_inf0=T_inf;
 % perturbed values
-pert = 1e-4;
+pert = 1e-1;
 q     = q0     * (1 + pert*1); 
 k     = k0     * (1 + pert*1);
 h     = h0     * (1 + pert*1);
@@ -68,10 +70,9 @@ T_dir1=T_dir-T_dir0; T_inf1=T_inf-T_inf0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [fh_T,fh_dTdx] = compute_temperature(a,b,k,q,T_dir,h,T_inf);
 if do_plot
-    figure(1); hold all;
-    plot(x,fh_T(x)); hold off;
+    subplot(1,2,1); hold all; plot(x,fh_T(x)); axis tight; hold off; 
 end
-J_for = integral(fh_T,x1,x2);
+J_for = integral(@(x) fh_T(x).*fh_r(x),x1,x2);
 fprintf('\nPerturbed QoI values: \nForward %g\n',J_for);
 % forward sensitivity
 dJ_for = (J_for - J_for0)  ;
@@ -168,7 +169,7 @@ function [fh_phi, fh_dphidx] = compute_adjoint(a,b,x1,x2,k,r,phi_dir,h,phi_inf)
 % if 2 regions (case x2=b)
 %    phi{1}(x) = alpha{1}(x-a) + beta{1}
 %    phi{2}(x) = alpha{2}(x-x1)(x-b) + beta{2}(x-b) + gamma{2}
-% if 1 region. same as solve for T routine
+% if 1 region. same as solving for T routine
 
 my_case='not_defined';
 

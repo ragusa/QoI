@@ -9,10 +9,10 @@ function hc_ss_x_CG
 clc; close all;
 
 % load the data and numerical parameters
-pert_k    = 1e-1 *.1;
-pert_s    = 1e-1 *.1;
+pert_k    = 1e-1 *1;
+pert_s    = 1e-1 *0;
 pert_bc_L = 1e-1 *0;
-pert_bc_R = 1e-1 *1;
+pert_bc_R = 1e-1 *0;
 [dat,npar] = load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R);
 
 % type of data used to run the simulation
@@ -50,7 +50,11 @@ dJ_adj_exact = phi'*(dq-dA*Tu-dA*dT)
 % (Tp,Aa.phi) = (Tp,r) = (Ap^{-1}qp,r) = (qp,Ap^{-T}r)
 % plot solution
 figure(1)
-plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-',npar.xf,phi,'r-');
+subplot(1,2,1)
+plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-');
+legend(['Tmp';'Adj']);
+subplot(1,2,2)
+plot(npar.xf,phi,'r-');
 legend(['Tmp';'Adj']);
 
 return
@@ -256,21 +260,28 @@ end
 
 function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
+triga = false;
 % load the data structure with info pertaining to the physical problem
-dat.k{1}=@k_zr; % W/m-K
-dat.k{2}=@k_fuel; % W/m-K
-dat.k{3}=@k_fuel; % W/m-K
-dat.k{4}=@k_clad; % W/m-K
-% forward calculation source
-dat.fsrc{1}=@zero_function; % W/m3
-dat.fsrc{2}=@esrc; % W/m3
-dat.fsrc{3}=@esrc; % W/m3
-dat.fsrc{4}=@zero_function; % W/m3
-% adjoint calculation source
-dat.asrc{1}=@response_function; 
-dat.asrc{2}=@zero_function; 
-dat.asrc{3}=@zero_function; 
-dat.asrc{4}=@zero_function; % W/m3
+if triga
+    dat.k{1}=@k_zr; % W/m-K
+    dat.k{2}=@k_fuel; % W/m-K
+    dat.k{3}=@k_fuel; % W/m-K
+    dat.k{4}=@k_clad; % W/m-K
+    % forward calculation source
+    dat.fsrc{1}=@zero_function; % W/m3
+    dat.fsrc{2}=@esrc; % W/m3
+    dat.fsrc{3}=@esrc; % W/m3
+    dat.fsrc{4}=@zero_function; % W/m3
+    % adjoint calculation source
+    dat.asrc{1}=@response_function;
+    dat.asrc{2}=@zero_function;
+    dat.asrc{3}=@zero_function;
+    dat.asrc{4}=@zero_function; % W/m3
+else
+    dat.k{1}=@(x) 2150/200*(1+0*x);
+    dat.fsrc{1}=@(x) 10000*(1+0*x);
+    dat.asrc{1}=@(x) 2*(1+0*x);
+end
 % create perturbations
 for i=1:length(dat.k)
     dat.dk{i}    = @(x) pert_k*dat.k{i}(x);
@@ -278,19 +289,29 @@ for i=1:length(dat.k)
 end
 
 % dimensions
-% dat.hcv = 1612.414; % W/m^2-C
-dat.hcv = 100; % W/m^2-C
-% dat.width = [0.003175 0.01 0.0174115 0.0179195]; % m
-dat.width = [1 3 4 7]; % m
-% mesh resolution per region
-nel_zone = [ 5 5 5 2];
-
+if triga
+    % dat.hcv = 1612.414; % W/m^2-C
+    dat.hcv = 100; % W/m^2-C
+    % dat.width = [0.003175 0.01 0.0174115 0.0179195]; % m
+    dat.width = [1 3 4 7]; % m
+    % mesh resolution per region
+    nel_zone = [ 5 5 5 2];
+else
+    dat.hcv = 16;
+    dat.width = 0.5;
+    nel_zone = [ 10 ];
+end
 % forward bc
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
 bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
-bc.rite.type=2;
-bc.rite.C=15;
-dat.bc_for=bc; 
+if triga
+    bc.rite.type=2;
+    bc.rite.C=15;
+else
+    bc.rite.type=1;
+    bc.rite.C=300;
+end
+dat.bc_for=bc;
 % create perturbations
 dat.bc_for.left.dC = pert_bc_L*dat.bc_for.left.C;
 dat.bc_for.rite.dC = pert_bc_R*dat.bc_for.rite.C;

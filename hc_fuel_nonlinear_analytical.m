@@ -14,13 +14,13 @@ do_plot = true;
 % solve forward problem for unperturbed temperature
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % int_0^x (eq) = -k.dT/dx = qx  
-%   ==> -k.dTdx|_L=qL=h(T(L)-T_inf) ==>  T(L)=(qL+T_inf)/h
+%   ==> -k.dTdx|_L=qL=h(T(L)-T_inf) ==>  T(L)=(qL/h+T_inf)
 % int_x^L (new.eq) => nonlinear solve: a Ln((b+T(x))/b+T_L) + c(T(x)-T_L) = q/2.(L^2-x^2)
 %
 T_L=q*L/h+T_inf;
 %
 if (abs(c)>eps)
-    my_fun = @(T,x) a*log((b+T)/(b+T_L))+c*(T-T_L)-q/2*(L^2-x^2)
+    my_fun = @(T,x) a*log((b+T)/(b+T_L))+c*(T-T_L)-q/2*(L^2-x^2);
     x=linspace(0,L,1000);
     for i=1:length(x)
         T(i) = fsolve(@(T) my_fun(T,x(i)),T_L,optimoptions('fsolve','Display','off'));

@@ -9,12 +9,12 @@ function hc_ss_x_CG_nonlinear
 clc; close all;
 
 % load the data and numerical parameters
-pert.a    = 1e-1 *0;
-pert.b    = 1e-1 *0;
+pert.a    = 1e-1 *0.;
+pert.b    = 1e-1 *0.;
 pert.c    = 0;
-pert.q    = 1e-1 *1e-4;
+pert.q    = 1e-1 *0;
 pert.bc_L = 1e-1 *0;
-pert.bc_R = 1e-1 *0;
+pert.bc_R = 1e-1 *1;
 [dat,npar] = load_simulation_data(pert);
 
 % solve unperturbed forward problem
@@ -53,17 +53,17 @@ dq = qp-qu; % this is how the bc mods to the rhs get eliminated. need to check. 
 % dA = Ap-Au; caveat: application of bc disappear whend oing this !!!!
 dJ_for = dT'*ru;
 fprintf('J forward perturbed \t%14.8g \n',J_for_pert);
-fprintf('dJ forward \t%14.8g \t%14.8g\n',J_for_pert-J_for_unpert,dJ_for);
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
 % assembly system to compute sitffness matrix with conductivity=dkdp
 npar.adjoint=false; 
 npar.pert_status = 'delta_p';
 [dAdp,~]=assemble_system(npar,dat,Tu);
 dJ_adj = phip'*(dq - dAdp*Tu);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
-dJ_adj = phiu'*(dq - dAdp*Tu);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_R);
+% dJ_adj = phiu'*(dq - dAdp*Tu);
+% fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
 
-phiu'*dAdp*Tu
+phip'*dAdp*Tu
 
 
 
@@ -238,7 +238,7 @@ for iel=1:npar.nel
         dkdT=dat.dkdT{my_zone}(T_qp);
         for i=1:porder+1
             for j=1:porder+1
-                k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j));
+                k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac;
             end
         end
     end

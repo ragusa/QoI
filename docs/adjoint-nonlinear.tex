@@ -93,6 +93,8 @@
 \newcommand{\ti}{ {t^{\text{init}}} }
 \newcommand{\te}{ {t^{\text{end }}} }
 
+\newcommand{\tcr}[1]{\textcolor{red}{#1}}
+
 %-----------------------------------------------------------
 \addtolength{\hoffset}{-2.0cm}
 \addtolength{\textwidth}{4cm}
@@ -124,12 +126,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{An example}
+\section{An analytical example: linear heat conduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{QoI}
+\subsection{QoI: quantity of interest}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Consider the following heat conduction problem
@@ -191,7 +193,8 @@ Integrate by parts once the first integral on the LHS of \eqt{eq:hc_qoi_derivati
 \int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
 - \left\{-h(T(b)-T_{\infty})\phi(b) - 0 \right\}
 \end{align}
-Repeat for the second integral on the LHS of \eqt{eq:hc_qoi_derivation1}. We get:
+The goal of an adjoint simulation is to be able to compute $J$ without having access to $T$ (at least for linear problems). We know $\left.\frac{dT}{dx}\right|_b$ from the boundary conditions on $T$ but we do not know $\left.\frac{dT}{dx}\right|_a$, so it is advantageous to select $\phi(a)=0$.\\
+Now, repeat the integration by parts for the second integral on the LHS of \eqt{eq:hc_qoi_derivation1}. We get:
 \begin{align}
 \label{eq:hc_qoi_derivation3}
 \int_a^b \left( -\frac{d}{dx}k\frac{d\phi}{dx} \right) T    dx 
@@ -204,8 +207,9 @@ Repeat for the second integral on the LHS of \eqt{eq:hc_qoi_derivation1}. We get
 \int_a^b \left( k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
 - \left\{-h\phi(b)T(b) - \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}} \right\}
 \end{align}
-
-Subtract \eqt{eq:hc_qoi_derivation2} and \eqt{eq:hc_qoi_derivation3} to get the LHS of \eqt{eq:hc_qoi_derivation1}. Re-arrange the result to have:
+Now, you may wonder about $T(b)$ which is not a given (thus one would have to solve the equation for $T$ to get $T(b)$). However, the choice of boundary conditions on $\phi$ at $x=b$ allows for the terms $h\phi(b)T(b)$ to cancel out when 
+subtracting \eqt{eq:hc_qoi_derivation2} and \eqt{eq:hc_qoi_derivation3} . 
+Next, subtract \eqt{eq:hc_qoi_derivation2} and \eqt{eq:hc_qoi_derivation3} to get the LHS of \eqt{eq:hc_qoi_derivation1}. Re-arrange the result to have:
 \be
 \int_a^b q \phi dx - J
 =
@@ -222,6 +226,7 @@ So finally, we have
 J := \int_a^b rT dx = \int_a^b q \phi dx + h T_{\infty} \phi(b) + \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}}
 }
 \ee
+Hence, given the boundary conditions for $T$ and given the adjoint solution $\phi$, we can compute the QoI in $T$ for any source distribution without the need to compute $T$ at each time.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Sensitivity}
@@ -244,7 +249,7 @@ T(a) = T^\prime_{\text{dir}}
 -k^\prime \left.\frac{dT^\prime}{dx}\right|_b = h^\prime(T(b)-T^\prime_{\infty})
 \ee
 \end{subequations}
-where
+where we express the perturbed quantities in terms of unperturbed ones + an increment:
 \[ 
 k^\prime = k + \delta k\,, 
 q^\prime = q + \delta q\,, 
@@ -335,7 +340,7 @@ To first order, we can now replace $T^\prime:= T + \delta T$ with simply the unp
 \be
 \label{eq:ex_heat_conduction_delta_qoi_expr_final}
 \boxed{
-\delta J := \int_a^b r \delta T dx 
+\delta J \simeq \int_a^b r \delta T dx 
 = 
 \int_a^b \delta q \phi dx 
 - \int_a^b \left( \delta k\frac{d\phi}{dx}\frac{dT}{dx} \right) dx 
@@ -343,8 +348,261 @@ To first order, we can now replace $T^\prime:= T + \delta T$ with simply the unp
 + \left.k\frac{d\phi}{dx}\right|_a \delta T_{\text{dir}} 
 }
 \ee
+Now, we only need to compute the unperturbed $T$, the (unperturbed) adjoint $\phi$, and we can compute sensitivities to any parameter without having to compute the perturbed $T^\prime=T+\delta T$.
+
+An important note: I find it easier to start with the perturbed problem (the equation in $T^\prime$) rather than starting from a equation for the perturbation only ($\delta T$). The reason is that the boundary conditions for the governing equation in $\delta T$ are not necessarily obvious.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{In operator notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We can also write these matters succinctly. Let the forward problem be
+\[
+A T = q
+\]
+and the adjoint problem be
+\[
+A^\star \phi = r
+\]
+If we define an inner product of the phase-space as
+\[
+\langle f,g \rangle
+\]
+then the QoI functional is
+\begin{equation}
+J = \langle T, r \rangle = \langle T, A^\star \phi \rangle = \langle \left(A^{\star}\right)^t T, \phi \rangle 
+\end{equation}
+where $^t$ denotes the transpose operation. Then, we have the following $J = \langle T, r \rangle = \langle q, \phi \rangle$ 
+\[
+\text{only if } \quad \left(A^{\star}\right)^t = A, \text{  that is, if  } \quad A^{\star} = A^t
+\]
+Note that for symmetric operator $A^t=A$, and thus the operator $A$ is self-adjoint, $A=A^{\star}$.
+
+Also note that this discussion omits details about boundary conditions, so the operator notation should be used carefully,
+
+Let's finish by the sensitivity expression using operators. Consider the unperturbed and perturbed forward problems and the unperturbed adjoint problem:
+\begin{subequations}
+\begin{equation}\label{eq:linear_oper_for_unpert}
+A T =q
+\end{equation}
+\begin{equation}\label{eq:linear_oper_for_pert}
+(A+\delta A)(T+\delta T) = q + \delta q
+\end{equation}
+\begin{equation}\label{eq:linear_oper_adj_unpert}
+A^\star \phi = r
+\end{equation}
+\end{subequations}
+Compute the following inner products
+\begin{align}
+&\langle \phi, q+\delta q\rangle = \langle \phi, (A+\delta A)(T+\delta T)\rangle  = \langle \phi, AT \rangle + \langle \phi, A\delta T\rangle + \langle \phi, \delta A T \rangle + \mathcal{O}(\delta^2) \\
+&\langle T+\delta T, A^\star \phi  \rangle = \langle T+\delta T, r \rangle = J + \delta J
+\end{align}
+Simplifying each expression yields
+\begin{align}
+&\langle \phi, \delta q\rangle =  \langle \phi, A\delta T\rangle + \langle \phi, \delta A T \rangle + \mathcal{O}(\delta^2) \\
+&\langle (A^\star)^t\delta T, \phi  \rangle = \delta J
+\end{align}
+
+If $(A^\star)^t=A$ (that's how we define the adjoint operator), then
+\[
+\delta J = \langle \phi, A \delta T \rangle = \langle \phi, \delta q - \delta A T \rangle + \mathcal{O}(\delta^2)
+\]
+that is, the variation of $J$ due to a change in the source $q$ (i.e., $\delta q$) or in the operator $A$ (i.e., $\delta A$), can be computed using only the solutions to the unperturbed forward and adjoint problems, $T$ and $\phi$.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The adjoint operator in this linear example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Previous, we admitted the functional for of the adjoint operator for the linear heat conduction. The adjoint equation was given in \eqt{eq:ex_heat_conduction_adjoint} without much justification.
+
+Basically, the adjoint operator is obtained by reversing the operations in the following integral:
+\[
+\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
+\]
+The goal is to remove $T$ from the differential operators. This is obtained by integrating the following expression by part, twice:
+\begin{align}
+\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
+&= \int \frac{d\phi}{dx}k\frac{dT}{dx}  - \left. k\frac{dT}{dx}\phi\right|_0^L \nonumber\\
+&=
+\int \left(-\frac{d}{dx}k\frac{d\phi}{dx} \right)T  + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b 
+\end{align}
+
+From this, we note that we have
+\[
+\int q \phi = \int T r + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b \,,
+\] 
+expression which we derived and used previously to link $J=\int Tr$ with the adjoint solution $\phi$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A nonlinear example: nonlinear heat conduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{QoI: quantity of interest}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the following \tcr{nonlinear} heat conduction problem
+\be
+\label{eq:ex_heat_conduction}
+-\frac{d}{dx}k\tcr{(T)}\frac{dT}{dx}=q \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc}
+\be
+T(a) = T_{\text{dir}} 
+\ee
+\be
+-k(T) \left.\frac{dT}{dx}\right|_b = h(T(b)-T_{\infty})
+\ee
+\end{subequations}
+
+Our QoI is a functional of the solution
+\be
+\label{eq:ex_heat_conduction_qoi}
+J = \int_a^b r(x) T(x) dx
+\ee
+where $r(x)$ is the response function.
+
+Consider the following adjoint problem
+\be
+\label{eq:ex_heat_conduction_adjoint}
+-\frac{d}{dx}k(T)\frac{d\phi}{dx}=r \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc_adjoint}
+\be
+\phi(a) = \phi_{\text{dir}} = 0 
+\ee
+\be
+-k(T) \left.\frac{d\phi}{dx}\right|_b = h(\phi(b)-\phi_{\infty}) = h\phi(b)
+\ee
+\end{subequations}
+where we have chosen $\phi_{\text{dir}} = 0$ and $\phi_{\infty}=0$ for reasons that were explained previously. Do note that the adjoint problem is now \tcr{linear} but requires that the forward solution $T$ be known.
+
+The rest of the derivation for the QoI, $J$, is identical to the one for the linear heat conduction problem. We do not reproduce here and just give the final result
+\be
+\boxed{
+J := \int_a^b rT dx = \int_a^b q \phi dx + h T_{\infty} \phi(b) + \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}}
+}
+\ee
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sensitivity for a nonlinear problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Now things get really interesting. Notably the adjoint problem will be different than the previous ones seen so far.
+
+Let us consider the unperturbed and perturbed forward problems ($p$ denotes a parameter):
+\[
+-\frac{d}{dx}k(T,p)\frac{dT}{dx} = q \qquad \text{with bc: } \left.\frac{dT}{dx}\right|_0=0 \ \text{  and } -k(T,p)\left.\frac{dT}{dx}\right|_L=h(T(L)-T_\infty)
+\]
+and
+\[
+-\frac{d}{dx}\left[\left(k(T,p)+\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p\right) \frac{d(T+\delta T)}{dx}\right] = q+\delta q \]
+where we have used a first-order expansion for the perturbations in conductivity
+\[
+k(T+\delta T, p+\delta p) \simeq k(T,p)+\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p
+\]
+The perturbed boundary conditions are as follows: 
+\[
+ \left.\frac{d(T+\delta T)}{dx}\right|_0=0 \ \text{ and } -k(T+\delta T, p+\delta p)\left.\frac{d(T+\delta T)}{dx}\right|_L=(h+\delta h)(T(L)+\delta T(L)-T_\infty-\delta T_\infty)
+\]
+
+/We would like to subtract these two equations to obtain an equation for $\delta T$. However, in order to include the boundary conditions, we multiply both unperturbed and perturbed forward equations by $\phi$ and integrate by parts. This yields, for both equations,
+\begin{equation}
+\int q\phi = \int k(T,p)\frac{dT}{dx}\frac{d\phi}{dx} - \left.k(T,p)\frac{dT}{dx}\phi\right|_0^L  
+= \int k(T,p)\frac{dT}{dx}\frac{d\phi}{dx} +h(T(L)-T_\infty) \phi(L) 
+\end{equation}
+and
+\begin{equation}
+\int (q+\delta q)\phi = \int k(T+\delta T,p+\delta p)\frac{d(T+\delta T)}{dx}\frac{d\phi}{dx} +(h+\delta h)(T(L)+\delta T(L)-T_\infty-\delta T_\infty) \phi(L) 
+\end{equation}
+
+Subtract the above two equations (now, we will obtain the weak form of the equation for $\delta T$ and the appropriate bc will naturally be evaluated in that process). We only keep first-order terms in the unknowns.
+\begin{multline}
+\int \delta q\phi = \int \left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p\right) \frac{dT}{dx}\frac{d\phi}{dx} + \int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} \\
++h(\delta T(L)-\delta T_\infty)  \phi(L)
++\delta h(T(L)-T_\infty)  \phi(L)
+\end{multline}
+
+Let us place everything that does not depend on $\delta T$ on the RHS:
+\begin{multline}
+\label{eq:sensitivity_nonlinear_hc_1}
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\delta h(T(L)-T_\infty)  \phi(L)
+\\=
+\int \left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{dT}{dx}\frac{d\phi}{dx} 
++ \int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} 
++h(\delta T(L)-\delta T_\infty)  \phi(L)
+\end{multline}
+
+Remember that we seek 
+\[
+\delta J = \langle \delta T, r \rangle = \langle \delta T, A^\star \phi \rangle 
+\]
+hence we need to remove all differential operators for $\delta T$ in \eqt{eq:sensitivity_nonlinear_hc_1}. Thus, we need to integrate by parts the second integral in the RHS of \eqt{eq:sensitivity_nonlinear_hc_1}:
+\[
+\int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} 
+=
+-\int \frac{d}{dx}k(T,p)\frac{d\phi}{dx} \delta T + \left.k(T,p)\frac{d\phi}{dx}\delta T\right|_0^L
+\]
+
+This tells us two things
+\begin{enumerate}
+\item the boundary conditions for $\phi$ should be
+\[
+\left.k(T,p)\frac{d\phi}{dx}\right|_L = -h\phi(L) \quad \text{and} \quad \left.\frac{d\phi}{dx}\right|_0 = 0
+\]
+\item The adjoint operator is (recall, the response function $r$ is the adjoint source)
+\[
+r=A^\star \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
+\]
+$A^\star$ is linear in $\phi$ and depends ont he unperturbed solution $T$.
+\end{enumerate}
+
+Now, \eqt{eq:sensitivity_nonlinear_hc_1} becomes
+\begin{multline}
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\delta h(T(L)-T_\infty)  \phi(L)
+\\=
+\underbrace{
+\int \left(
+- \frac{d}{dx}k(T,p)\frac{d\phi}{dx} 
++ \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
+\right) 
+\delta T 
+}
+_{=\langle r,\delta T \rangle = \delta J}
+%-h\phi(L)\delta T(L)
+%+h(\delta T(L)-\delta T_\infty)  \phi(L)
+-h\delta T_\infty \phi(L)
+\end{multline}
+
+Finally, we have
+\be
+\boxed{
+\delta J = 
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\left(\delta h(T(L)-T_\infty)  - h\delta T_\infty \right)\phi(L)
+}
+\ee
+where $\phi$ is the adjoint solution of the following problem:
+\[
+A^\star \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} = r
+\]
+with boundary conditions:
+\[
+-\left.k(T,p)\frac{d\phi}{dx}\right|_L = h\phi(L) \quad \text{and} \quad \left.\frac{d\phi}{dx}\right|_0 = 0
+\]
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}

@@ -9,10 +9,10 @@ function hc_ss_x_CG
 clc; close all;
 
 % load the data and numerical parameters
-pert_k    = 1e-1 *1;
-pert_s    = 1e-1 *0;
-pert_bc_L = 1e-1 *0;
-pert_bc_R = 1e-1 *0;
+pert_k    = 1e-1 *0;
+pert_s    = 1e-1 *1;
+pert_bc_L = 1e-1 *1;
+pert_bc_R = 1e-1 *1;
 [dat,npar] = load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R);
 
 % type of data used to run the simulation
@@ -21,9 +21,9 @@ npar.pert_status = 'perturbed';
 % assemble the matrix and the rhs
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
-[Au,qu]=assemble_system(npar,dat);
+[Au,qu,Tdiru]=assemble_system(npar,dat);
 npar.pert_status = 'perturbed';
-[Ap,qp]=assemble_system(npar,dat);
+[Ap,qp,Tdirp]=assemble_system(npar,dat);
 % solve forward system
 Tu=Au\qu;
 Tp=Ap\qp;
@@ -31,38 +31,44 @@ Tp=Ap\qp;
 % assemble the matrix and the rhs
 npar.adjoint=true; 
 npar.pert_status = 'unperturbed';
-[Aa,r]=assemble_system(npar,dat);
+[Aa,r,r_functional_u]=assemble_system(npar,dat);
 % solve forward system
 phi=Aa\r;
+
+J_for_unpert = Tu'*r   +dot(r_functional_u,Tdiru)
+J_adj_unpert = phi'*qu +dot(r_functional_u,Tdiru)
+% check
+dx=diff(npar.xf);
+JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
+JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
 
 dT = Tp-Tu;
 dq = qp-qu;
 dA = Ap-Au;
 
-J_for_unpert = Tu'*r
-J_for_pert   = Tp'*r
-dJ_for = dT'*r
+J_for_pert   = Tp'*r  +dot(r_functional_u,Tdirp)
+dJ_for = dT'*r        +dot(r_functional_u,Tdirp-Tdiru)
+PPPP_UUUU=JJJJPPPP-JJJJUUUU
 
-J_adj_unpert = phi'*qu
-dJ_adj = phi'*(dq - dA*Tu)
-dJ_adj_exact = phi'*(dq-dA*Tu-dA*dT)
+dJ_adj = phi'*(dq - dA*Tu)  +dot(r_functional_u,Tdirp-Tdiru)
+dJ_adj_exact = phi'*(dq-dA*Tu-dA*dT) +dot(r_functional_u,Tdirp-Tdiru)
 
 % (Tp,Aa.phi) = (Tp,r) = (Ap^{-1}qp,r) = (qp,Ap^{-T}r)
 % plot solution
 figure(1)
 subplot(1,2,1)
 plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-');
-legend(['Tmp';'Adj']);
+legend(['Tu';'Tp']);
 subplot(1,2,2)
 plot(npar.xf,phi,'r-');
-legend(['Tmp';'Adj']);
+legend(['Adj']);
 
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs]=assemble_system(npar,dat)
+function [A,rhs, out]=assemble_system(npar,dat)
 
 % assemble the matrix, the rhs, apply BC
 
@@ -150,6 +156,7 @@ end
 % apply natural BC
 Dirichlet_nodes=[];
 Dirichlet_val=[];
+r_functional=[];
 switch bc.left.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
         rhs(1)=rhs(1)+bc.left.C;
@@ -159,6 +166,7 @@ switch bc.left.type
     case 2 % Dirichlet
         Dirichlet_nodes=[Dirichlet_nodes 1];
         Dirichlet_val=[Dirichlet_val bc.left.C];
+        r_functional=[r_functional rhs(1)];
 end
 switch bc.rite.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
@@ -169,6 +177,7 @@ switch bc.rite.type
     case 2 % Dirichlet
         Dirichlet_nodes=[Dirichlet_nodes n];
         Dirichlet_val=[Dirichlet_val bc.rite.C];
+        r_functional=[r_functional rhs(n)];
 end
 % apply Dirichlet BC
 for i=1:length(Dirichlet_nodes);% loop on the number of constraints
@@ -179,6 +188,12 @@ for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     A(:,id)=0; % set all the id-th column to zero (symmetrize A)
     A(id,id)=1;            % set the id-th diagonal to unity
     rhs(id)=bcval;         % put the constrained value in the rhs
+end
+    
+if npar.adjoint
+    out=r_functional;
+else
+    out=Dirichlet_val;
 end
 
 return
@@ -297,19 +312,19 @@ if triga
     % mesh resolution per region
     nel_zone = [ 5 5 5 2];
 else
-    dat.hcv = 16;
+    dat.hcv = 100;
     dat.width = 0.5;
     nel_zone = [ 10 ];
 end
 % forward bc
-bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
+bc.left.C=200; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if triga
     bc.rite.type=2;
     bc.rite.C=15;
 else
-    bc.rite.type=1;
-    bc.rite.C=300;
+    bc.rite.type=2;
+    bc.rite.C=110;
 end
 dat.bc_for=bc;
 % create perturbations
@@ -355,7 +370,7 @@ npar.x=x;
 npar.iel2zon=iel2zon;
 
 % polynomial degree
-npar.porder=2;
+npar.porder=1;
 % nbr of dofs per variable
 npar.ndofs = npar.porder*npar.nel+1;
 

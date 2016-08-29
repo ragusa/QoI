@@ -2,8 +2,8 @@ function hc_analytical
 clc; close all;
 
 % problem definition
-a=1; b=10;
-k=3; q=100; h=100; T_dir=200; T_inf=50;
+a=0; b=0.5;
+k=2150/200; q=10000; h=100; T_dir=200; T_inf=50;
 % region of interest
 x1=a; x2=b;
 % qoi response. r is used in compute adjoint. fh_r is used for the QoI
@@ -55,7 +55,7 @@ fh_T0 = fh_T; fh_dT0dx = fh_dTdx; J_for0 = J_for;
 % save unperturbed parameters
 k0=k; q0=q; h0=h; T_dir0=T_dir; T_inf0=T_inf;
 % perturbed values
-pert = 1e-1;
+pert = 1e-1*0;
 q     = q0     * (1 + pert*1); 
 k     = k0     * (1 + pert*1);
 h     = h0     * (1 + pert*1);

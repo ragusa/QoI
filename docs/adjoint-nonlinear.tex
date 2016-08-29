@@ -352,6 +352,31 @@ Now, we only need to compute the unperturbed $T$, the (unperturbed) adjoint $\ph
 
 An important note: I find it easier to start with the perturbed problem (the equation in $T^\prime$) rather than starting from a equation for the perturbation only ($\delta T$). The reason is that the boundary conditions for the governing equation in $\delta T$ are not necessarily obvious.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The adjoint operator in this linear example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Previous, we admitted the functional for of the adjoint operator for the linear heat conduction. The adjoint equation was given in \eqt{eq:ex_heat_conduction_adjoint} without much justification.
+
+Basically, the adjoint operator is obtained by reversing the operations in the following integral:
+\[
+\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
+\]
+The goal is to remove $T$ from the differential operators. This is obtained by integrating the following expression by part, twice:
+\begin{align}
+\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
+&= \int \frac{d\phi}{dx}k\frac{dT}{dx}  - \left. k\frac{dT}{dx}\phi\right|_0^L \nonumber\\
+&=
+\int \left(-\frac{d}{dx}k\frac{d\phi}{dx} \right)T  + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b 
+\end{align}
+
+From this, we note that we have
+\[
+\int q \phi = \int T r + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b \,,
+\] 
+expression which we derived and used previously to link $J=\int Tr$ with the adjoint solution $\phi$.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{In operator notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -409,29 +434,86 @@ If $(A^\star)^t=A$ (that's how we define the adjoint operator), then
 \]
 that is, the variation of $J$ due to a change in the source $q$ (i.e., $\delta q$) or in the operator $A$ (i.e., $\delta A$), can be computed using only the solutions to the unperturbed forward and adjoint problems, $T$ and $\phi$.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{The adjoint operator in this linear example}
+\subsection{FEM discretization and boundary conditions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Previous, we admitted the functional for of the adjoint operator for the linear heat conduction. The adjoint equation was given in \eqt{eq:ex_heat_conduction_adjoint} without much justification.
+\subsubsection{Neumann bc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Basically, the adjoint operator is obtained by reversing the operations in the following integral:
+Consider the general analytical expression 
 \[
-\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
+J := \int_a^b rT dx 
+= \int_a^b q \phi dx + \left( \left.k \frac{dT}{dx}\right|_b\phi(b) -\left.k \frac{dT}{dx}\right|_a\phi(a) \right)
+-\left( \left.k \frac{d\phi}{dx}\right|_bT(b) -\left.k \frac{d\phi}{dx}\right|_aT(a) \right) 
 \]
-The goal is to remove $T$ from the differential operators. This is obtained by integrating the following expression by part, twice:
-\begin{align}
-\int \left( -\frac{d}{dx}k\frac{dT}{dx} \right) \phi 
-&= \int \frac{d\phi}{dx}k\frac{dT}{dx}  - \left. k\frac{dT}{dx}\phi\right|_0^L \nonumber\\
-&=
-\int \left(-\frac{d}{dx}k\frac{d\phi}{dx} \right)T  + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b 
-\end{align}
-
-From this, we note that we have
+For a forward problem with non-homogeneous Neumann boundary conditions, e.g.,
 \[
-\int q \phi = \int T r + \left. k\frac{d\phi}{dx}T\right|_a^b  - \left. k\frac{dT}{dx}\phi\right|_a^b \,,
+\left.+k \frac{dT}{dx}\right|_a = \Psi_a
+\qquad 
+\left.-k \frac{dT}{dx}\right|_b = \Psi_b
+\]
+we have an adjoint problem with homogeneous Neumann bc, $\left.\frac{d\phi}{dx}\right|_a = \left.\frac{d\phi}{dx}\right|_b=0$.
+Hence, the analytical expression becomes
+\[
+J := \int_a^b rT dx 
+= \int_a^b q \phi dx + \left( -\Psi_b\phi(b) -\Psi_a\phi(a) \right)
+\]
+
+In the FEM discreetization, the RHS of the adjoint problem $r$, is unchanged because of the homogeneous bc. For the forward problem,
+leads to the RHS vector $q$ which contains $\int q b_i$ is augmented by the values $-\Psi_a$ and $-\Psi_b$ in the appropriate row (here $q_1$ and $q_N$).
+
+Thus, the discrete expression 
+\[
+J = \langle T, r \rangle = \langle q, \phi \rangle
+\]
+already contains the modifications needed in the analytical expression and nothing is required to compare the numerical $J$ and the analytical $J$.
+
+\subsubsection{Robin bc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The principle is the same as for Neumann bc. The forward problem has a non-homogeneous Robin bc, e.g., $h(T(b)-T_{\infty,b})$, while the adjoint problem has an homogeneous Robin bc, e.g., $h\phi(b)$. 
+
+The parts that contains the solution variables, $hT(b)$ for the forward problem and $h\phi(b)$ for the adjoint problem become part of the linear system matrices $A$ and $A^\star=A^t$.
+
+The forward RHS vector $q$ is augmented by the non-homogeneous portion, $hT_{\infty,b}$ in the appropriate row. The adjoint RHS vector $r$ is unchanged due to the homogeneous nature of the bc.
+
+What is left of the analytical $J$ is
+\[
+J := \int_a^b rT dx 
+= \int_a^b q \phi dx + hT_{\infty,b}\phi(b) + hT_{\infty,a}\phi(a)
+\]
+The discrete expression 
+\[
+J = \langle T, r \rangle = \langle q, \phi \rangle
+\]
+already contains the modifications needed in the analytical expression and nothing is required to compare the numerical $J$ and the analytical $J$.
+
+\subsubsection{Dirichlet bc}
+Here, we impose the non-homogeneous bc in the forward problem, $T(a)=T_{\text{dir},a}$ and $T(b)=T_{\text{dir},b}$, while the adjoint problem has homogeneous Dirichlet bc, $\phi(a)=\phi(b)=0$.
+
+The Dirichlet bc impose a modification of the linear system (the same modifications are applied to $A$ and $A^\star$, thus we still have $A^\star=A^t$). Now we have $q_1=T_{\text{dir},a}$ and $q_N=T_{\text{dir},b}$ for the forward problem and $r_1=r_N=0$ for the adjoint problem. In addition, in order \ keep the linear system matrix symmetric, the following modifications are made to $q$
+\[
+q_2 \leftarrow q_2 -A_{2,1}T_{\text{dir},a} \qquad
+q_{N-1} \leftarrow q_{N-1} -A_{N-1,N}T_{\text{dir},b}
 \] 
-expression which we derived and used previously to link $J=\int Tr$ with the adjoint solution $\phi$.
+
+The analytcial expression for $J$ is (we used $\phi(a)=\phi(b)=0$)
+\[
+J := \int_a^b rT dx 
+= \int_a^b q \phi dx 
+-\left( \left.k \frac{d\phi}{dx}\right|_b T_{\text{dir},b} -\left.k \frac{d\phi}{dx}\right|_a T_{\text{dir},a}\right) 
+\]
+
+The discrete expression is missing the original values of $r_1$ and $r_N$ in the inner product so the numerical $J$ 
+\[
+J = \langle T, r \rangle = \langle q, \phi \rangle
+\]
+must be augmented by 
+\[
+T_{\text{dir},a} \int r(x) b_1(x) + T_{\text{dir},b} \int r(x) b_N(x)
+\]
+to yield the correct answer.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

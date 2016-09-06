@@ -40,3 +40,6 @@ Plots
 *.txt
 *.pdf
 *~
+# allow this file to be synch-ed
+!/matlab/hc_ss_discrete/ReadMe.txt
+!\matlab\hc_ss_discrete\ReadMe.txt

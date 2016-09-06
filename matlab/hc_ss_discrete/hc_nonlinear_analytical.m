@@ -242,7 +242,7 @@ switch my_case
         mat(6,5) = 1; mat(6,3) = -1; rhs(6)=-alpha2*(x1-x2);
         % solve system
         coef = mat\rhs;
-        % assgin coefficients
+        % assign coefficients
         alpha1 = coef(1);
         beta1  = coef(2);
         beta2  = coef(3);
@@ -282,7 +282,7 @@ switch my_case
         mat(4,1) = 1; mat(4,3) = -1; rhs(4)= -alpha1*(x2-a);
         % solve system
         coef = mat\rhs;
-        % assgin coefficients
+        % assign coefficients
         beta1  = coef(1);
         gamma1 = coef(2);
         alpha2 = coef(3);
@@ -320,7 +320,7 @@ switch my_case
         mat(4,1) = 1; mat(4,3) = -1; rhs(4)= alpha2*(x1-b);
         % solve system
         coef = mat\rhs;
-        % assgin coefficients
+        % assign coefficients
         alpha1 = coef(1);
         beta1  = coef(2);
         beta2  = coef(3);

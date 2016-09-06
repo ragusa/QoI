@@ -48,3 +48,11 @@ B. Second, some 1D FEM code for heat conduction problems
 
 2. hc_ss_x_CG_nonlinear:
   Nonlinear version of hc_ss_x_CG. Noty finished yet, notably the Dirichlet bc stuff.
+
+
+
+
+*. auxiliary functions. 
+  k_clad, k_fuel, k_zr are (possibly) spatially dependent function to compute conductivities in these materials.
+  zero_function: a spatially dependent function that returns 0 (useful to define a 0 zero region)
+  esrc: a spatially dependent function that returns the non-zero source strength.

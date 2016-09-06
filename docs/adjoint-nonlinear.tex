@@ -525,7 +525,7 @@ to yield the correct answer.
 \subsection{QoI: quantity of interest}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Consider the following \tcr{nonlinear} heat conduction problem
+Consider the following \tcr{nonlinear} heat conduction problem ($A(\tcr{T})T=q$)
 \be
 \label{eq:ex_heat_conduction}
 -\frac{d}{dx}k\tcr{(T)}\frac{dT}{dx}=q \qquad x\in [a,b]
@@ -548,7 +548,7 @@ J = \int_a^b r(x) T(x) dx
 \ee
 where $r(x)$ is the response function.
 
-Consider the following adjoint problem
+Consider the following adjoint problem ($A^\star(\tcr{T})T=r$)
 \be
 \label{eq:ex_heat_conduction_adjoint}
 -\frac{d}{dx}k(T)\frac{d\phi}{dx}=r \qquad x\in [a,b]
@@ -643,9 +643,9 @@ This tells us two things
 \]
 \item The adjoint operator is (recall, the response function $r$ is the adjoint source)
 \[
-r=A^\star \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
+r=A^\star(\tcr{T}) \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
 \]
-$A^\star$ is linear in $\phi$ and depends ont he unperturbed solution $T$.
+$A^\star(\tcr{T})$ is linear in $\phi$ and depends on the unperturbed solution $T$.
 \end{enumerate}
 
 Now, \eqt{eq:sensitivity_nonlinear_hc_1} becomes
@@ -678,7 +678,7 @@ Finally, we have
 \ee
 where $\phi$ is the adjoint solution of the following problem:
 \[
-A^\star \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} = r
+A^\star(T) \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} = r
 \]
 with boundary conditions:
 \[

@@ -50,7 +50,11 @@ dx=diff(npar.xf);
 JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
 JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
 JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000
-
+disp('phi''*qu');
+phi'*qu
+disp('dot(r_functional_u,Tdiru)');
+dot(r_functional_u,Tdiru)
+ 
 fprintf('QoI unperturbed: \n----------------\n');
 fprintf('\t Forward: inner: %g\n',J_for_unpert);
 fprintf('\t Forward: num. : %g\n',J_num_for_unpert);
@@ -458,7 +462,7 @@ end
 
 % forward bc
 bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=200*0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.left.C=200; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if triga
     bc.rite.type=2;
     bc.rite.C=15;

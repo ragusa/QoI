@@ -29,26 +29,49 @@ Tu=Au\qu;
 Tp=Ap\qp;
 
 % assemble the matrix and the rhs
-npar.adjoint=true; 
+npar.adjoint=true;
 npar.pert_status = 'unperturbed';
 [Aa,r,r_functional_u]=assemble_system(npar,dat);
 % solve forward system
 phi=Aa\r;
 
-J_for_unpert = Tu'*r   +dot(r_functional_u,Tdiru)
-J_adj_unpert = phi'*qu +dot(r_functional_u,Tdiru)
-% check
+% calculation of the QoI using inner products
+J_for_unpert = Tu'*r   +dot(r_functional_u,Tdiru);
+J_adj_unpert = phi'*qu +dot(r_functional_u,Tdiru);
+J_for_pert   = Tp'*r   +dot(r_functional_u,Tdirp);
+
+% calculation of the QoI using definition and numerical quadrature
+npar.adjoint=false;
+J_num_for_unpert = qoi_num_eval(Tu,npar,dat);
+J_num_for_pert   = qoi_num_eval(Tp,npar,dat);
+npar.adjoint=true;
+J_num_adj_unpert = qoi_num_eval(phi,npar,dat);
 dx=diff(npar.xf);
 JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
 JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
+JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000
+
+fprintf('QoI unperturbed: \n----------------\n');
+fprintf('\t Forward: inner: %g\n',J_for_unpert);
+fprintf('\t Forward: num. : %g\n',J_num_for_unpert);
+fprintf('QoI unperturbed: \n----------------\n');
+fprintf('\t Adjoint: inner: %g\n',J_adj_unpert);
+fprintf('\t Adjoint: num. : %g\n\n',J_num_adj_unpert);
+fprintf('QoI perturbed: \n----------------\n');
+fprintf('\t Forward: inner: %g\n',J_for_pert);
+fprintf('\t Forward: num. : %g\n',J_num_for_pert);
 
 dT = Tp-Tu;
 dq = qp-qu;
 dA = Ap-Au;
 
-J_for_pert   = Tp'*r  +dot(r_functional_u,Tdirp)
 dJ_for = dT'*r        +dot(r_functional_u,Tdirp-Tdiru)
 PPPP_UUUU=JJJJPPPP-JJJJUUUU
+
+fprintf('QoI unperturbed: \n----------------\n');
+fprintf('\t Forward: inner: %g\n',J_for_unpert);
+fprintf('\t Forward: num. : %g\n',J_num_for_unpert);
+
 
 dJ_adj = phi'*(dq - dA*Tu)  +dot(r_functional_u,Tdirp-Tdiru)
 dJ_adj_exact = phi'*(dq-dA*Tu-dA*dT) +dot(r_functional_u,Tdirp-Tdiru)
@@ -189,13 +212,128 @@ for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     A(id,id)=1;            % set the id-th diagonal to unity
     rhs(id)=bcval;         % put the constrained value in the rhs
 end
-    
+
 if npar.adjoint
     out=r_functional;
 else
     out=Dirichlet_val;
 end
 
+return
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function QoI = qoi_num_eval(fem_sol,npar,dat)
+
+% calculation of the QoI using definition and numerical quadrature
+% dx=diff(npar.xf);
+% JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
+% JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
+
+% shortcuts
+porder= npar.porder;
+gn    = npar.gn;
+nel   = npar.nel;
+
+% select quadrature
+poly_max=2*porder;
+[xq,wq] = GLNodeWt(porder+1);
+% store shapeset
+[b,~] =feshpln(xq,porder);
+
+% use adjoint source (response function)
+use_response_function = ~npar.adjoint;
+
+% switch between forward and adjoint calculations
+if use_response_function
+    src = dat.asrc;
+    %     bc  = dat.bc_adj;
+    %     kond = dat.k;
+else
+    bc  = dat.bc_for;
+    % what kind of material properties to use
+    switch npar.pert_status
+        case 'unperturbed'
+            kond = dat.k;
+            src = dat.fsrc;
+        case 'perturbed'
+            for i=1:length(dat.k)
+                kond{i} = @(T) dat.k{i}(T)    + dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
+                src{i}  = @(x) dat.fsrc{i}(x) + dat.dfsrc{i}(x);
+            end
+            bc.left.C = bc.left.C + bc.left.dC;
+            bc.rite.C = bc.rite.C + bc.rite.dC;
+        case 'delta_p'
+            for i=1:length(dat.k)
+                kond{i} = @(T) dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
+            end
+            src = dat.dfsrc;
+            bc.left.type =  0; % Neumann
+            bc.rite.type =  0;
+            bc.left.C =  0;
+            bc.rite.C =  0;
+    end
+end
+
+QoI = 0;
+% loop over elements
+for iel=1:npar.nel
+    % element extremities
+    x0=npar.x(iel);
+    x1=npar.x(iel+1);
+    % jacobian of the transformation to the ref. element
+    Jac=(x1-x0)/2;
+    % get x values in the interval
+    x=(x1+x0)/2+xq*(x1-x0)/2;
+    % get the mat zone ID
+    my_zone=npar.iel2zon(iel);
+    % evaluate external source at qp
+    q_or_r_qp=src{my_zone}(x);
+    % evaluate previous temperature at qp
+    fem_sol_qp = b(:,:) * fem_sol(gn(iel,:));
+    %     % evaluate
+    %     d=kond{my_zone}(fem_sol_qp);
+    % add to QoI
+    QoI = QoI + dot( wq.*fem_sol_qp ,q_or_r_qp)*Jac;
+end
+
+% add missing part to QoI when evaluating it with the adjoint function
+if ~use_response_function
+    % store shapeset at element extremities
+    [b,dbdx] = feshpln([-1 1],porder);
+    
+    switch npar.pert_status
+        case 'unperturbed'
+            switch bc.left.type
+                case {0,1} % Neumann/Robin
+                    iel=1;
+                    fem_sol_qp = b(:,:) * fem_sol(gn(iel,:));
+                    QoI = QoI +dat.hcv*bc.left.C*fem_sol_qp(1);
+                case 2 % Dirichlet
+                    iel=1;
+                    dfem_sol_qp = dbdx(:,:) * fem_sol(gn(iel,:));
+                    my_zone=npar.iel2zon(iel);
+                    d=kond{my_zone}(npar.x(iel));
+                    d*bc.left.C*dfem_sol_qp(1)
+                    dfem_sol_qp(1)
+                    QoI = QoI -d*bc.left.C*dfem_sol_qp(1);
+            end
+            switch bc.rite.type
+                case {0,1} % Neumann/Robin
+                    iel=npar.nel;
+                    fem_sol_qp = b(:,:) * fem_sol(gn(end,:));
+                    QoI = QoI +dat.hcv*bc.rite.C*fem_sol_qp(end);
+                case 2 % Dirichlet
+                    iel=npar.nel;
+                    dfem_sol_qp = dbdx(:,:) * fem_sol(gn(iel,:));
+                    my_zone=npar.iel2zon(iel);
+                    d=kond{my_zone}(npar.x(iel+1));
+%                     dfem_sol_qp(end)
+                    d*bc.rite.C*dfem_sol_qp(end);
+                    QoI = QoI +d*bc.rite.C*dfem_sol_qp(end);
+            end
+    end
+end
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -276,6 +414,21 @@ end
 function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
 triga = false;
+
+% dimensions
+if triga
+    % dat.hcv = 1612.414; % W/m^2-C
+    dat.hcv = 100; % W/m^2-C
+    % dat.width = [0.003175 0.01 0.0174115 0.0179195]; % m
+    dat.width = [1 3 4 7]; % m
+    % mesh resolution per region
+    nel_zone = [ 5 5 5 2];
+else
+    dat.hcv = 100;
+    dat.width = 0.5*5;
+    nel_zone = [ 1000 ];
+end
+
 % load the data structure with info pertaining to the physical problem
 if triga
     dat.k{1}=@k_zr; % W/m-K
@@ -295,7 +448,7 @@ if triga
 else
     dat.k{1}=@(x) 2150/200*(1+0*x);
     dat.fsrc{1}=@(x) 10000*(1+0*x);
-    dat.asrc{1}=@(x) 2*(1+0*x);
+    dat.asrc{1}=@(x) (1+0*x)/dat.width(end);
 end
 % create perturbations
 for i=1:length(dat.k)
@@ -303,28 +456,15 @@ for i=1:length(dat.k)
     dat.dfsrc{i} = @(x) pert_s*dat.fsrc{i}(x);
 end
 
-% dimensions
-if triga
-    % dat.hcv = 1612.414; % W/m^2-C
-    dat.hcv = 100; % W/m^2-C
-    % dat.width = [0.003175 0.01 0.0174115 0.0179195]; % m
-    dat.width = [1 3 4 7]; % m
-    % mesh resolution per region
-    nel_zone = [ 5 5 5 2];
-else
-    dat.hcv = 100;
-    dat.width = 0.5;
-    nel_zone = [ 10 ];
-end
 % forward bc
 bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=200; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.left.C=200*0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if triga
     bc.rite.type=2;
     bc.rite.C=15;
 else
     bc.rite.type=2;
-    bc.rite.C=110;
+    bc.rite.C=110*0;
 end
 dat.bc_for=bc;
 % create perturbations

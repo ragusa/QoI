@@ -14,7 +14,7 @@ pert.b    = 1e-1 *0.;
 pert.c    = 0;
 pert.q    = 1e-1 *0;
 pert.bc_L = 1e-1 *0;
-pert.bc_R = 1e-1 *1;
+pert.bc_R = 1e-1 *10;
 [dat,npar] = load_simulation_data(pert);
 
 % solve unperturbed forward problem
@@ -68,13 +68,13 @@ phip'*dAdp*Tu
 
 
 % plot solution
-figure(1)
+figure(3)
 subplot(1,2,1);
 plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-')
-legend(['Tmp';'Adj']);
+legend('Tu','Tp');
 subplot(1,2,2);
 plot(npar.xf,phiu,'.-',npar.xf,phip,'+-')
-legend(['Tmp';'Adj']);
+legend('phiu','phip');
 
 return
 end

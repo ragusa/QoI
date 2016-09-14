@@ -2,8 +2,8 @@ function hc_analytical
 clc; close all;
 
 % problem definition
-a=0; b=0.5;
-k=2150/200; q=10000; h=100; T_dir=200; T_inf=50;
+a=0; b=2.5;
+k=2150/200; q=10000; h=100; T_dir=100; T_inf=110;
 % region of interest
 x1=a; x2=b;
 % qoi response. r is used in compute adjoint. fh_r is used for the QoI

@@ -48,10 +48,10 @@ npar.adjoint=true;
 J_num_adj_unpert = qoi_num_eval(phi,npar,dat);
 dx=diff(npar.xf);
 JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
-JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
-JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000
-disp('phi''*qu');
-phi'*qu
+% JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
+% JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000
+% disp('phi''*qu');
+% phi'*qu
 disp('dot(r_functional_u,Tdiru)');
 dot(r_functional_u,Tdiru)
  
@@ -70,7 +70,7 @@ dq = qp-qu;
 dA = Ap-Au;
 
 dJ_for = dT'*r        +dot(r_functional_u,Tdirp-Tdiru)
-PPPP_UUUU=JJJJPPPP-JJJJUUUU
+% PPPP_UUUU=JJJJPPPP-JJJJUUUU
 
 fprintf('QoI unperturbed: \n----------------\n');
 fprintf('\t Forward: inner: %g\n',J_for_unpert);
@@ -302,39 +302,50 @@ for iel=1:npar.nel
 end
 
 % add missing part to QoI when evaluating it with the adjoint function
+% recall 0=neumann, 1=robin, 2=dirichlet
+% (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if ~use_response_function
     % store shapeset at element extremities
     [b,dbdx] = feshpln([-1 1],porder);
-    
+    QoI
     switch npar.pert_status
         case 'unperturbed'
             switch bc.left.type
-                case {0,1} % Neumann/Robin
-                    iel=1;
-                    fem_sol_qp = b(:,:) * fem_sol(gn(iel,:));
-                    QoI = QoI +dat.hcv*bc.left.C*fem_sol_qp(1);
+                case 0 % Neumann
+                    fem_sol_extremity = b(:,:) * fem_sol(gn(1,:));
+                    QoI = QoI +bc.left.C*fem_sol_extremity(1);
+                case 1 % Robin
+                    fem_sol_extremity = b(:,:) * fem_sol(gn(1,:));
+                    QoI = QoI +dat.hcv*bc.left.C*fem_sol_extremity(1);
                 case 2 % Dirichlet
                     iel=1;
-                    dfem_sol_qp = dbdx(:,:) * fem_sol(gn(iel,:));
+                    Jac = (npar.x(iel+1)-npar.x(iel))/2;
+                    dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
+                    bc.left.C
                     my_zone=npar.iel2zon(iel);
                     d=kond{my_zone}(npar.x(iel));
-                    d*bc.left.C*dfem_sol_qp(1)
-                    dfem_sol_qp(1)
-                    QoI = QoI -d*bc.left.C*dfem_sol_qp(1);
+                    disp('dir')
+                    d*bc.left.C*dfem_sol_extremity(1)
+%                     dfem_sol_extremity(1)
+                    QoI = QoI +d*bc.left.C*dfem_sol_extremity(1);
             end
             switch bc.rite.type
-                case {0,1} % Neumann/Robin
-                    iel=npar.nel;
-                    fem_sol_qp = b(:,:) * fem_sol(gn(end,:));
-                    QoI = QoI +dat.hcv*bc.rite.C*fem_sol_qp(end);
+                case 0 % Neumann
+                    fem_sol_extremity = b(:,:) * fem_sol(gn(end,:));
+                    QoI = QoI +bc.rite.C*fem_sol_extremity(end);
+                case 1 % Robin
+                    fem_sol_extremity = b(:,:) * fem_sol(gn(end,:));
+                    disp('rob')
+                    dat.hcv*bc.rite.C*fem_sol_extremity(end)
+                    QoI = QoI +dat.hcv*bc.rite.C*fem_sol_extremity(end);
                 case 2 % Dirichlet
                     iel=npar.nel;
-                    dfem_sol_qp = dbdx(:,:) * fem_sol(gn(iel,:));
+                    Jac = (npar.x(iel+1)-npar.x(iel))/2;
+                    dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
                     my_zone=npar.iel2zon(iel);
                     d=kond{my_zone}(npar.x(iel+1));
-%                     dfem_sol_qp(end)
-                    d*bc.rite.C*dfem_sol_qp(end);
-                    QoI = QoI +d*bc.rite.C*dfem_sol_qp(end);
+                    d*bc.rite.C*dfem_sol_extremity(end);
+                    QoI = QoI -d*bc.rite.C*dfem_sol_extremity(end);
             end
     end
 end
@@ -417,7 +428,7 @@ end
 
 function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
-triga = false;
+triga = true;
 
 % dimensions
 if triga
@@ -430,7 +441,7 @@ if triga
 else
     dat.hcv = 100;
     dat.width = 0.5*5;
-    nel_zone = [ 1000 ];
+    nel_zone = [ 10 ];
 end
 
 % load the data structure with info pertaining to the physical problem
@@ -462,13 +473,13 @@ end
 
 % forward bc
 bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=200; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.left.C=100; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if triga
     bc.rite.type=2;
     bc.rite.C=15;
 else
     bc.rite.type=2;
-    bc.rite.C=110*0;
+    bc.rite.C=110;
 end
 dat.bc_for=bc;
 % create perturbations

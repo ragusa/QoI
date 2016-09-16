@@ -15,7 +15,7 @@
 \usepackage{color} 
 
 \usepackage{array}
-\usepackage[section]{placeins} % force à mettre l'image où on veut
+\usepackage[section]{placeins} % force ï¿½ mettre l'image oï¿½ on veut
 \usepackage{lscape} %utilisation du mode paysage
 \usepackage{xspace}
 
@@ -612,7 +612,7 @@ Subtract the above two equations (now, we will obtain the weak form of the equat
 +\delta h(T(L)-T_\infty)  \phi(L)
 \end{multline}
 
-Let us place everything that does not depend on $\delta T$ on the RHS:
+Let us place everything that does not depend on $\delta T$ on the LHS:
 \begin{multline}
 \label{eq:sensitivity_nonlinear_hc_1}
 \int \delta q\phi 
@@ -684,6 +684,47 @@ with boundary conditions:
 \[
 -\left.k(T,p)\frac{d\phi}{dx}\right|_L = h\phi(L) \quad \text{and} \quad \left.\frac{d\phi}{dx}\right|_0 = 0
 \]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Non liner Operator Notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+As with the liner case Define forward, keeping in mind $A=A(T)$
+\[
+AT=q
+\]
+define adjoint
+\[
+A^* \phi =r
+\]
+We have the functional
+\[
+J=\langle T,r \rangle = \langle T, A^\star \phi \rangle = \langle (A^*)^t T,\phi \rangle
+\]
+We introduce our linear perturbation to the system, however, since the operator $A$ has a dependence on $T$, the perturbation to $A$ is nonlinear
+\begin{equation}
+(A+\der{A}{p} \delta p + \der{A}{T} \delta T)(T + \delta T)=(q+\delta q)
+\end{equation}
+Compute inner products
+\begin{align}
+& \langle \phi, q + \delta q \rangle = \langle \phi, (A+\der{A}{p} \delta p + \der{A}{T})(T + \delta T) \rangle = \langle \phi , AT \rangle + \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2) \\ 
+&\langle T+\delta T, A^\star \phi  \rangle = \langle T+\delta T, r \rangle = J + \delta J
+\end{align}
+Simplification yields
+\begin{align}
+& \langle \phi,\delta q \rangle =  \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2) \\ 
+&\langle (A^\star)^t \delta T,\phi  \rangle =  \delta J
+\end{align}
+If we define our adjoint operator so $(A^\star)^t = A$ , then
+\begin{equation}
+\delta J =  \langle \phi,\delta q \rangle - \langle \phi , \der{A}{p} \delta p T \rangle - \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2)
+\end{equation}
+simplified to 
+\begin{equation}
+\delta J =  \langle \phi,\delta q - T(\der{A}{p} \delta p +\der{A}{T} \delta T)\rangle + O(\delta^2)
+\end{equation}
+
+
+
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

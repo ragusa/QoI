@@ -11,8 +11,8 @@ clc; close all;
 % load the data and numerical parameters
 pert_k    = 1e-1 *0;
 pert_s    = 1e-1 *1;
-pert_bc_L = 1e-1 *1;
-pert_bc_R = 1e-1 *1;
+pert_bc_L = 1e-1 *0;
+pert_bc_R = 1e-1 *0;
 [dat,npar] = load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R);
 
 % type of data used to run the simulation

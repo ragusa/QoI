@@ -686,7 +686,7 @@ with boundary conditions:
 \]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Non liner Operator Notation}
+\subsection{Nonlinear operator notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 As with the liner case Define forward, keeping in mind $A=A(T)$
 \[
@@ -705,23 +705,35 @@ We introduce our linear perturbation to the system, however, since the operator 
 (A+\der{A}{p} \delta p + \der{A}{T} \delta T)(T + \delta T)=(q+\delta q)
 \end{equation}
 Compute inner products
-\begin{align}
-& \langle \phi, q + \delta q \rangle = \langle \phi, (A+\der{A}{p} \delta p + \der{A}{T})(T + \delta T) \rangle = \langle \phi , AT \rangle + \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2) \\ 
-&\langle T+\delta T, A^\star \phi  \rangle = \langle T+\delta T, r \rangle = J + \delta J
-\end{align}
-Simplification yields
-\begin{align}
-& \langle \phi,\delta q \rangle =  \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2) \\ 
-&\langle (A^\star)^t \delta T,\phi  \rangle =  \delta J
-\end{align}
-If we define our adjoint operator so $(A^\star)^t = A$ , then
 \begin{equation}
-\delta J =  \langle \phi,\delta q \rangle - \langle \phi , \der{A}{p} \delta p T \rangle - \langle \phi \der{A}{T} \delta T T \rangle + O(\delta^2)
+\langle \phi, q + \delta q \rangle = \langle \phi, (A+\der{A}{p} \delta p + \der{A}{T} \delta T)(T + \delta T) \rangle = \langle \phi , AT \rangle + \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle + O(\delta^2) 
 \end{equation}
-simplified to 
+Use the forward problem definition $AT=q$ to reduce to 
 \begin{equation}
-\delta J =  \langle \phi,\delta q - T(\der{A}{p} \delta p +\der{A}{T} \delta T)\rangle + O(\delta^2)
+\langle \phi, \delta q \rangle = \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle + O(\delta^2) 
 \end{equation}
+
+Drop second order terms and group all terms with a factor of $\delta T$
+\[
+\langle \phi , A \delta  T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle = \langle \phi, \delta q \rangle- \langle \phi , \der{A}{p} \delta p T \rangle 
+\]
+Moving the lhs operator to act on $\phi$ instead of $\delta T$
+\[
+\langle \Big(A+\der{A}{T} T \Big)^T \phi ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+The lhs operator on $\phi$ becomes our adjoint operator $A^\star$
+\[
+\langle A^\star \phi ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+This is just our response function however 
+\[
+\langle r ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+the response acting on $\delta T$ yields $\delta J$, so we arrive at our desired point
+\[
+\delta J = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+
 
 
 

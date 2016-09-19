@@ -10,55 +10,79 @@ clc; close all;
 
 % load the data and numerical parameters
 pert.a    = 1e-1 *0.;
-pert.b    = 1e-1 *0.;
+pert.b    = 1e-1 *1;
 pert.c    = 0;
 pert.q    = 1e-1 *0;
 pert.bc_L = 1e-1 *0;
-pert.bc_R = 1e-1 *10;
+pert.bc_R = 1e-1 *0;
 [dat,npar] = load_simulation_data(pert);
 
 % solve unperturbed forward problem
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 npar.do_analytical=false;
-[Tu,Au,qu]=solve_system(npar,dat);
+[Tu,Au,qu,Tdiru]=solve_system(npar,dat);
 
 % solve perturbed forward problem
 npar.adjoint=false;
 npar.pert_status = 'perturbed';
-[Tp,Ap,qp]=solve_system(npar,dat,Tu);
+[Tp,Ap,qp,Tdirp]=solve_system(npar,dat,Tu);
 %
 plot(npar.xf,Tu,npar.xf,Tp);
 
 % solve unperturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'unperturbed';
-[phiu,Aau,ru]=solve_system(npar,dat,Tu,Tu);
+[phiu,Aau,ru,r_functional_p]=solve_system(npar,dat,Tu,Tu);
 
 % solve perturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'perturbed';
-[phip,Aap,rp]=solve_system(npar,dat,Tu,Tu);
+[phip,Aap,rp,r_functional_u]=solve_system(npar,dat,Tu,Tu);
+
+disp('dot(r_functional_u,Tdiru)');
+dot(r_functional_u,Tdiru)
+
+disp('dot(r_functional_p,Tdirp)');
+dot(r_functional_p,Tdirp)
 
 % QoI summary
-J_for_unpert = Tu'*ru;
-J_for_pert   = Tp'*ru;
-J_adj_unpert = phiu'*qu;
+J_for_unpert = Tu'*ru   +dot(r_functional_u,Tdiru);
+J_for_pert   = Tp'*ru   +dot(r_functional_u,Tdiru);
+J_adj_unpert = phiu'*qu  +dot(r_functional_u,Tdirp);
 fprintf('-------------QoI------------\n')
 fprintf('J forward unperturbed\t%14.8g \n',J_for_unpert);
 fprintf('J adjoint unperturbed\t%14.8g \n',J_adj_unpert);
 % sensitivity
 dT = Tp-Tu;
 dq = qp-qu; % this is how the bc mods to the rhs get eliminated. need to check. especially for dirichlet !!!
-% dA = Ap-Au; caveat: application of bc disappear whend oing this !!!!
-dJ_for = dT'*ru;
+dA = Ap-Au; %caveat: application of bc disappear when doing this !!!!
+dJ_for = dT'*ru       +dot(r_functional_u,Tdirp-Tdiru);
 fprintf('J forward perturbed \t%14.8g \n',J_for_pert);
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
+%fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
+%fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
 % assembly system to compute sitffness matrix with conductivity=dkdp
 npar.adjoint=false; 
 npar.pert_status = 'delta_p';
 [dAdp,~]=assemble_system(npar,dat,Tu);
-dJ_adj = phip'*(dq - dAdp*Tu);
+dJ_adj = phiu'*(dq - dAdp*Tu)        +dot(r_functional_p,Tdirp-Tdiru);
+fprintf('------Sensitivity a------\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.a,dJ_for/pert.a);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.a);
+fprintf('------Sensitivity b------\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.b);
+fprintf('------Sensitivity c------\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.c,dJ_for/pert.c);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.c);
+fprintf('------Sensitivity q------\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.q,dJ_for/pert.q);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.q);
+fprintf('-----Sensitivity bcL-----\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_L,dJ_for/pert.bc_L);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_L);
+fprintf('-----Sensitivity bcR-----\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
 fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_R);
 % dJ_adj = phiu'*(dq - dAdp*Tu);
 % fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
@@ -76,12 +100,19 @@ subplot(1,2,2);
 plot(npar.xf,phiu,'.-',npar.xf,phip,'+-')
 legend('phiu','phip');
 
+%disp(dAdp)
+
+disp(r_functional_u)
+
+disp(Tdirp)
+
+disp(Tdiru)
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [T,A,q]=solve_system(npar,dat,T_init,T_for)
+function [T,A,q,out]=solve_system(npar,dat,T_init,T_for)
 
 %check
 if nargin==4 && npar.adjoint==false
@@ -102,7 +133,7 @@ for iter=1:npar.max_nl_iter
     else
         T_for_assembly=T;
     end
-    [A,q]=assemble_system(npar,dat,T_for_assembly);
+    [A,q,out]=assemble_system(npar,dat,T_for_assembly);
     % save old values
     T_old=T;
     % solve linear system
@@ -144,7 +175,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs]=assemble_system(npar,dat,T)
+function [A,rhs,out]=assemble_system(npar,dat,T)
 
 % assemble the matrix, the rhs, apply BC
 
@@ -250,6 +281,7 @@ end
 % apply natural BC
 Dirichlet_nodes=[];
 Dirichlet_val=[];
+r_functional=[];
 switch bc.left.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
         rhs(1)=rhs(1)+bc.left.C;
@@ -259,6 +291,7 @@ switch bc.left.type
     case 2 % Dirichlet
         Dirichlet_nodes=[Dirichlet_nodes 1];
         Dirichlet_val=[Dirichlet_val bc.left.C];
+        r_functional=[r_functional rhs(1)];
 end
 switch bc.rite.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
@@ -269,6 +302,7 @@ switch bc.rite.type
     case 2 % Dirichlet
         Dirichlet_nodes=[Dirichlet_nodes n];
         Dirichlet_val=[Dirichlet_val bc.rite.C];
+        r_functional=[r_functional rhs(n)];
 end
 % apply Dirichlet BC
 for i=1:length(Dirichlet_nodes);% loop on the number of constraints
@@ -279,6 +313,12 @@ for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     A(:,id)=0; % set all the id-th column to zero (symmetrize A)
     A(id,id)=1;            % set the id-th diagonal to unity
     rhs(id)=bcval;         % put the constrained value in the rhs
+end
+
+if npar.adjoint
+    out=r_functional;
+else
+    out=Dirichlet_val;
 end
 
 return
@@ -405,15 +445,15 @@ nel_zone = [ 10 ];
 % forward bc
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
 bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
-bc.rite.type=1;
-bc.rite.C=T_inf;
+bc.rite.type=2;
+bc.rite.C=600;
 dat.bc_for=bc; 
 % create perturbations
 dat.bc_for.left.dC = pert.bc_L*dat.bc_for.left.C;
 dat.bc_for.rite.dC = pert.bc_R*dat.bc_for.rite.C;
 % adjoint bc
 bc.left.C=0;
-bc.rite.C=0;
+bc.rite.C=2;
 dat.bc_adj=bc;
 clear bc;
 

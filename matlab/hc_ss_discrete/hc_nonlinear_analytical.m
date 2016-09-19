@@ -4,7 +4,7 @@ clc; close all;
 % problem definition
 % -d/dx (T^k dT/dx) = q = -1/(k+1).d^2(T^(k+1))/dx^2
 % dTdx|_0=0 T(L)=T_dir
-L=10; q=10000; T_dir=50; k=3;
+L=0.5; q=10000; T_dir=5; k=1;
 % region of interest
 % direc at 0
 % 
@@ -25,12 +25,14 @@ if do_plot
     figure(1); subplot(1,2,1); plot(x,fh_T(x)); axis tight; title('Temperature');
 end
 % compute functional using forward solution
-response = 'dirac';
+response = 'averaged';
 switch response
     case 'dirac'
         J_for = fh_T(0);
     case 'integrated'
         J_for = integral(fh_T,0,L);
+    case 'averaged'
+        J_for = integral(fh_T,0,L)/L;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +40,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % -d/dx (T^k dphi/dx) = dirac(x) = 0
 % phi(L)=phi_dir=0, 
-% for dirac at 0 repsonse : source condition at x=0: -2T^k(0) dphidx|_0 = 1
+% for dirac at 0 response : source condition at x=0: -2T^k(0) dphidx|_0 = 1
 % T^k.dphidx = C = -1/2
 % phi(L) - phi(x) = (-1/2) int_x^L 1/T^k(y) dy = -phi(x)
 %
@@ -49,7 +51,7 @@ switch response
         for i=1:length(x)
            phi(i) = integral(@(x) 1./(fh_T(x).^k), x(i),L)/2;
         end
-    case 'integrated'
+    case {'integrated','averaged'}
         for i=1:length(x)
            phi(i) = integral(@(x) x./(fh_T(x).^k), x(i),L);
         end
@@ -66,6 +68,8 @@ switch response
        J_adj_dir = (T_dir-fh_T(0))/2;
     case 'integrated'
        J_adj_dir = T_dir*L;
+    case 'averaged'
+       J_adj_dir = T_dir;
 end
 J_adj = J_adj_vol + J_adj_dir;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,6 +78,10 @@ J_adj = J_adj_vol + J_adj_dir;
 fprintf('Unperturbed QoI values: \nForward %g\nAdjoint %g\n',J_for,J_adj);
 fprintf('Splitting the adjoint values:\n\tvolume  \t%g\n\tDirichlet bc\t%g\n',...
     J_adj_vol,J_adj_dir);
+
+warning('What is below is a copy-paste formt he linear analytical solution');
+warning('Amend first if you want to use');
+return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % create perturbation 

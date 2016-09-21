@@ -21,9 +21,9 @@ npar.pert_status = 'perturbed';
 % assemble the matrix and the rhs
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
-[Au,qu,Tdiru]=assemble_system(npar,dat);
+[Au,qu,Tdiru,AN]=assemble_system(npar,dat);
 npar.pert_status = 'perturbed';
-[Ap,qp,Tdirp]=assemble_system(npar,dat);
+[Ap,qp,Tdirp,~]=assemble_system(npar,dat);
 % solve forward system
 Tu=Au\qu;
 Tp=Ap\qp;
@@ -31,7 +31,7 @@ Tp=Ap\qp;
 % assemble the matrix and the rhs
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
-[Aa,r,r_functional_u]=assemble_system(npar,dat);
+[Aa,r,r_functional_u,~]=assemble_system(npar,dat);
 % solve forward system
 phi=Aa\r;
 
@@ -42,25 +42,50 @@ J_for_pert   = Tp'*r   +dot(r_functional_u,Tdirp);
 
 % calculation of the QoI using definition and numerical quadrature
 npar.adjoint=false;
-J_num_for_unpert = qoi_num_eval(Tu,npar,dat);
-J_num_for_pert   = qoi_num_eval(Tp,npar,dat);
+[J_num_for_unpert,vol_integral_Tr] = qoi_num_eval(Tu,npar,dat,AN);
+% [J_num_for_pert,~]   = qoi_num_eval(Tp,npar,dat);
 npar.adjoint=true;
-J_num_adj_unpert = qoi_num_eval(phi,npar,dat);
+npar.use_matrix_terms=false;
+[J_num_adj_unpert,vol_integral_Phiq] = qoi_num_eval(phi,npar,dat,AN);
+J_num_adj_unpert = J_num_adj_unpert + (npar.porder==1)*dot(r_functional_u,Tdiru);
+npar.use_matrix_terms=true;
+[J_num_adj_unpert_AN,~] = qoi_num_eval(phi,npar,dat,AN);
+J_num_adj_unpert_AN = J_num_adj_unpert_AN + dot(r_functional_u,Tdiru);
+%
 dx=diff(npar.xf);
-JJJJUUUU = dot( (Tu(1:end-1)+Tu(2:end))/2 , dx )/sum(dx)
-% JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2 , dx )/sum(dx)
-% JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000
-% disp('phi''*qu');
-% phi'*qu
-disp('dot(r_functional_u,Tdiru)');
-dot(r_functional_u,Tdiru)
- 
+JJJJUUUU  = dot( (Tu(1:end-1)+Tu(2:end))/2   , dx )/sum(dx);
+JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000;
+
 fprintf('QoI unperturbed: \n----------------\n');
 fprintf('\t Forward: inner: %g\n',J_for_unpert);
+fprintf('\t%s\t %g \n','Tu''*r',Tu'*r);
+fprintf('\t%s %g \n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
 fprintf('\t Forward: num. : %g\n',J_num_for_unpert);
+fprintf('\t vol.int. Tr: %g\n',vol_integral_Tr);
+fprintf('\t Forward: Trapezoidal rule: %g\n',JJJJUUUU);
+
 fprintf('QoI unperturbed: \n----------------\n');
+extra_term = -dot(AN,phi)*dat.bc_for.rite.C;
 fprintf('\t Adjoint: inner: %g\n',J_adj_unpert);
-fprintf('\t Adjoint: num. : %g\n\n',J_num_adj_unpert);
+fprintf('\t%s\t %g \n','phi''*qu',phi'*qu);
+fprintf('\t%s %g \n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
+fprintf('\t Adjoint: num. : %g\n',J_num_adj_unpert);
+fprintf('\t Adjoint: num.AN: %g\n',J_num_adj_unpert_AN);
+fprintf('\t Adjoint: vol.int. Phiq: %g\n',vol_integral_Phiq);
+fprintf('\t Adjoint: vol.int.+Extra: %g\n',vol_integral_Phiq+extra_term+dot(r_functional_u,Tdiru));
+fprintf('\t Adjoint: Trapezoidal rule: %g\n',JJJJaUUUU);
+
+% plot solution
+figure(1)
+subplot(1,2,1)
+plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-');
+legend(['Tu';'Tp']);
+subplot(1,2,2)
+plot(npar.xf,phi,'r-');
+legend(['Adj']);
+
+error('qqq');
+
 fprintf('QoI perturbed: \n----------------\n');
 fprintf('\t Forward: inner: %g\n',J_for_pert);
 fprintf('\t Forward: num. : %g\n',J_num_for_pert);
@@ -95,7 +120,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs, out]=assemble_system(npar,dat)
+function [A,rhs, out, A_extremities_before_bc]=assemble_system(npar,dat)
 
 % assemble the matrix, the rhs, apply BC
 
@@ -206,6 +231,8 @@ switch bc.rite.type
         Dirichlet_val=[Dirichlet_val bc.rite.C];
         r_functional=[r_functional rhs(n)];
 end
+% save pieces of A
+A_extremities_before_bc=A(Dirichlet_nodes,:);
 % apply Dirichlet BC
 for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     id=Dirichlet_nodes(i);      % extract the dof of a constraint
@@ -227,7 +254,7 @@ return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function QoI = qoi_num_eval(fem_sol,npar,dat)
+function [QoI,volumetric_integral] = qoi_num_eval(fem_sol,npar,dat,AN)
 
 % calculation of the QoI using definition and numerical quadrature
 % dx=diff(npar.xf);
@@ -249,8 +276,9 @@ poly_max=2*porder;
 use_response_function = ~npar.adjoint;
 
 % switch between forward and adjoint calculations
-if use_response_function
+if use_response_function % when the forward solution is passed as argument
     src = dat.asrc;
+    % no need for anything else: we use only T and r to compute the QoI !!!
     %     bc  = dat.bc_adj;
     %     kond = dat.k;
 else
@@ -267,15 +295,15 @@ else
             end
             bc.left.C = bc.left.C + bc.left.dC;
             bc.rite.C = bc.rite.C + bc.rite.dC;
-        case 'delta_p'
-            for i=1:length(dat.k)
-                kond{i} = @(T) dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
-            end
-            src = dat.dfsrc;
-            bc.left.type =  0; % Neumann
-            bc.rite.type =  0;
-            bc.left.C =  0;
-            bc.rite.C =  0;
+            %         case 'delta_p'
+            %             for i=1:length(dat.k)
+            %                 kond{i} = @(T) dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
+            %             end
+            %             src = dat.dfsrc;
+            %             bc.left.type =  0; % Neumann
+            %             bc.rite.type =  0;
+            %             bc.left.C =  0;
+            %             bc.rite.C =  0;
     end
 end
 
@@ -301,54 +329,71 @@ for iel=1:npar.nel
     QoI = QoI + dot( wq.*fem_sol_qp ,q_or_r_qp)*Jac;
 end
 
+volumetric_integral=QoI; % we are done at this point if the forward solution was passed.
+
 % add missing part to QoI when evaluating it with the adjoint function
 % recall 0=neumann, 1=robin, 2=dirichlet
 % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if ~use_response_function
+    fprintf('Adding bc stuff to volumetric integral\n\t npar.adjoint=%g, QoI so far=%g\n',npar.adjoint,QoI);
     % store shapeset at element extremities
     [b,dbdx] = feshpln([-1 1],porder);
-    QoI
     switch npar.pert_status
         case 'unperturbed'
             switch bc.left.type
                 case 0 % Neumann
                     fem_sol_extremity = b(:,:) * fem_sol(gn(1,:));
+                    fprintf('Neumann left, bc value %g\n\tadd to phi.q: ',bc.left.C);
+                    fprintf('%g \n',bc.left.C*fem_sol_extremity(1));
                     QoI = QoI +bc.left.C*fem_sol_extremity(1);
                 case 1 % Robin
                     fem_sol_extremity = b(:,:) * fem_sol(gn(1,:));
+                    fprintf('Robin left, bc value %g\n\tadd to phi.q: ',bc.left.C);
+                    fprintf('%g \n',dat.hcv*bc.left.C*fem_sol_extremity(1));
                     QoI = QoI +dat.hcv*bc.left.C*fem_sol_extremity(1);
                 case 2 % Dirichlet
-                    iel=1;
-                    Jac = (npar.x(iel+1)-npar.x(iel))/2;
-                    dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
-                    bc.left.C
-                    my_zone=npar.iel2zon(iel);
-                    d=kond{my_zone}(npar.x(iel));
-                    disp('dir')
-                    d*bc.left.C*dfem_sol_extremity(1)
-%                     dfem_sol_extremity(1)
-                    QoI = QoI +d*bc.left.C*dfem_sol_extremity(1);
+                    if npar.use_matrix_terms
+                        QoI = QoI -dot(AN(1,:),fem_sol)*bc.left.C;
+                    else
+                        iel=1;
+                        Jac = (npar.x(iel+1)-npar.x(iel))/2;
+                        dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
+                        my_zone=npar.iel2zon(iel);
+                        d=kond{my_zone}(npar.x(iel));
+                        fprintf('dirichlet left, bc value %g\n\tadd to phi.q: ',bc.left.C)
+                        fprintf('%g \n',d*bc.left.C*dfem_sol_extremity(1))
+                        %                     dfem_sol_extremity(1)
+                        QoI = QoI +d*bc.left.C*dfem_sol_extremity(1);
+                    end
             end
             switch bc.rite.type
                 case 0 % Neumann
                     fem_sol_extremity = b(:,:) * fem_sol(gn(end,:));
+                    fprintf('Neumann right, bc value %g\n\tadd to phi.q: ',bc.rite.C);
+                    fprintf('%g \n',bc.rite.C*fem_sol_extremity(end));
                     QoI = QoI +bc.rite.C*fem_sol_extremity(end);
                 case 1 % Robin
                     fem_sol_extremity = b(:,:) * fem_sol(gn(end,:));
-                    disp('rob')
-                    dat.hcv*bc.rite.C*fem_sol_extremity(end)
+                    fprintf('Robin right, bc value %g\n\tadd to phi.q: ',bc.rite.C);
+                    fprintf('%g \n',dat.hcv*bc.rite.C*fem_sol_extremity(end));
                     QoI = QoI +dat.hcv*bc.rite.C*fem_sol_extremity(end);
                 case 2 % Dirichlet
-                    iel=npar.nel;
-                    Jac = (npar.x(iel+1)-npar.x(iel))/2;
-                    dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
-                    my_zone=npar.iel2zon(iel);
-                    d=kond{my_zone}(npar.x(iel+1));
-                    d*bc.rite.C*dfem_sol_extremity(end);
-                    QoI = QoI -d*bc.rite.C*dfem_sol_extremity(end);
+                    if npar.use_matrix_terms
+                        QoI = QoI -dot(AN(end,:),fem_sol)*bc.rite.C;
+                    else
+                        iel=npar.nel;
+                        Jac = (npar.x(iel+1)-npar.x(iel))/2;
+                        dfem_sol_extremity = dbdx(:,:) * fem_sol(gn(iel,:)) / Jac;
+                        my_zone=npar.iel2zon(iel);
+                        d=kond{my_zone}(npar.x(iel+1));
+                        fprintf('dirichlet right, bc value %g\n\tadd to phi.q: ',bc.rite.C);
+                        fprintf('%g \n',-d*bc.rite.C*dfem_sol_extremity(end));
+                        QoI = QoI -d*bc.rite.C*dfem_sol_extremity(end);
+                    end
             end
     end
 end
+
 return
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -428,7 +473,7 @@ end
 
 function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
-triga = true;
+triga = false;
 
 % dimensions
 if triga
@@ -472,14 +517,14 @@ for i=1:length(dat.k)
 end
 
 % forward bc
-bc.left.type=2; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=100; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.left.type=1; %0=neumann, 1=robin, 2=dirichlet
+bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 if triga
     bc.rite.type=2;
     bc.rite.C=15;
 else
     bc.rite.type=2;
-    bc.rite.C=110;
+    bc.rite.C=1000;
 end
 dat.bc_for=bc;
 % create perturbations

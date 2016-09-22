@@ -21,13 +21,14 @@ pert.bc_R = 1e-1 *0;
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 npar.do_analytical=false;
-[Tu,Au,qu,Tdiru]=solve_system(npar,dat);
+[Tu,Au,qu,Tdiru]=solve_system(npar,dat,1);
 
 % solve perturbed forward problem
 npar.adjoint=false;
 npar.pert_status = 'perturbed';
 [Tp,Ap,qp,Tdirp]=solve_system(npar,dat,Tu);
 %
+subplot(2,1,1);
 plot(npar.xf,Tu,npar.xf,Tp);
 
 % solve unperturbed adjoint problem
@@ -46,6 +47,10 @@ dot(r_functional_u,Tdiru)
 disp('dot(r_functional_p,Tdirp)');
 dot(r_functional_p,Tdirp)
 
+subplot(2,1,2);
+plot(npar.xf,phiu,npar.xf,phip);
+
+
 % QoI summary
 J_for_unpert = Tu'*ru   +dot(r_functional_u,Tdiru);
 J_for_pert   = Tp'*ru   +dot(r_functional_u,Tdiru);
@@ -53,6 +58,9 @@ J_adj_unpert = phiu'*qu  +dot(r_functional_u,Tdirp);
 fprintf('-------------QoI------------\n')
 fprintf('J forward unperturbed\t%14.8g \n',J_for_unpert);
 fprintf('J adjoint unperturbed\t%14.8g \n',J_adj_unpert);
+
+return
+
 % sensitivity
 dT = Tp-Tu;
 dq = qp-qu; % this is how the bc mods to the rhs get eliminated. need to check. especially for dirichlet !!!
@@ -122,7 +130,11 @@ end
 if nargin==2
     T=100*ones(npar.ndofs,1);
 else
-    T=T_init;
+    if length(T_init)==1
+        T=T_init*ones(npar.ndofs,1);
+    else
+        T=T_init;
+    end
 end
 
 % nonlinear solve
@@ -138,6 +150,11 @@ for iter=1:npar.max_nl_iter
     T_old=T;
     % solve linear system
     T=A\q;
+    % relax new solution value, w=1: pick 100% of the new solution
+    if npar.adjoint==false
+        w=0.2;
+        T=(1-w)*T_old+w*T;
+    end        
     % compute error
     err=norm(T_old-T);
     % check convergence
@@ -401,11 +418,12 @@ end
 function [dat,npar]=load_simulation_data(pert)
 
 % data 
-T_inf=300; h=16; L=0.5;
+T_inf=5; h=16; L=0.5;
 
 a=2150; b=200;c=1.05*0; d=1;
 
 cond = @(T) a./(d*T+b)+c;
+cond = @(T) T;
 
 dat.conductivity_constants.a=a;
 dat.conductivity_constants.b=b;
@@ -440,13 +458,13 @@ end
 dat.hcv = h; 
 dat.width = L; 
 % mesh resolution per region
-nel_zone = [ 10 ];
+nel_zone = [ 20 ];
 
 % forward bc
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
 bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 bc.rite.type=2;
-bc.rite.C=600;
+bc.rite.C=T_inf;
 dat.bc_for=bc; 
 % create perturbations
 dat.bc_for.left.dC = pert.bc_L*dat.bc_for.left.C;
@@ -511,7 +529,7 @@ for iel=1:npar.nel
     npar.xf(ibeg:iend)=linspace(npar.x(iel),npar.x(iel+1),npar.porder+1) ;
 end
 
-npar.max_nl_iter=30;
+npar.max_nl_iter=300;
 npar.nl_tol=1e-6;
 
 return

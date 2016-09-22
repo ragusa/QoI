@@ -1,75 +1,108 @@
 function hc_nonlinear_analytical
 clc; close all;
 
-% problem definition
-% -d/dx (T^k dT/dx) = q = -1/(k+1).d^2(T^(k+1))/dx^2
+% problem definition: k(T)=T^q
+% -d/dx (T^a dT/dx) = q = -1/(a+1).d^2(T^(a+1))/dx^2
 % dTdx|_0=0 T(L)=T_dir
-L=0.5; q=10000; T_dir=5; k=1;
+L=0.5; q=10000; T_dir=100; a=1;
 % region of interest
-% direc at 0
+% "whole domain" or "dirac at 0"
 % 
 do_plot = true;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward problem for unperturbed temperature
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% int_0^x (eq) = -1/(k+1).d(T^(k+1))/dx = qx
-% int_x^L (new.eq) => T^(k+1)(x) = T_dir^(k+1) + (k+1)/2.q.(L^2-x^2)
+% int_0^x (eq) = -1/(a+1).d(T^(a+1))/dx = q.x
+% int_x^L (new.eq) => T^(a+1)(x) = T_dir^(a+1) + (a+1)/2.q.(L^2-x^2)
 %
-kp1=k+1;
-fh_T = @(x) (T_dir^kp1 + kp1/2*q*(L^2-x.^2)).^(1/kp1);
-fh_dTdx = @(x) (-q*x)./(fh_T(x).^k);
+ap1=a+1;
+fh_T = @(x) (T_dir^ap1 + ap1/2*q*(L^2-x.^2)).^(1/ap1);
+fh_dTdx = @(x) (-q*x)./(fh_T(x).^a);
 % plot temperature
+xx=linspace(0,L,10000);
 if do_plot
-    x=linspace(0,L,1000);
-    figure(1); subplot(1,2,1); plot(x,fh_T(x)); axis tight; title('Temperature');
+    figure(1); subplot(1,2,1); plot(xx,fh_T(xx)); axis tight; title('Temperature');
 end
 % compute functional using forward solution
-response = 'averaged';
+response = 'dirac';
 switch response
     case 'dirac'
+        % response = dirac at x=0
         J_for = fh_T(0);
     case 'integrated'
+        % response = 1 for all x
         J_for = integral(fh_T,0,L);
     case 'averaged'
+        % response = 1/L for all x
         J_for = integral(fh_T,0,L)/L;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve adjoint problem
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% -d/dx (T^k dphi/dx) = dirac(x) = 0
-% phi(L)=phi_dir=0, 
-% for dirac at 0 response : source condition at x=0: -2T^k(0) dphidx|_0 = 1
-% T^k.dphidx = C = -1/2
-% phi(L) - phi(x) = (-1/2) int_x^L 1/T^k(y) dy = -phi(x)
+% bc : phi(L)=phi_dir=0, 
 %
-% for integrated temp as response: dphidx|_0=0
+% if response = constant, it is easy to see that: 
+% phi(x) is proportional to (T(x)-T_dir). phi(x)=C.(T(x)-T_dir)
+%  -d/dx (T^a dphi/dx) = r = q.r/r 
+% <==> -q/r d/dx (T^a dphi/dx) = q 
+% <==> -C.q/r d/dx (T^a dT/dx) = q 
+% <==> -C.q/r/(a+1) d^2[T^(a+1)]/dx^2 = q 
+% => C = r/q
+%
+% if response = dirac @ 0 :
+% -d/dx (T^k dphi/dx) = dirac(x) = 0
+% source condition at x=0: -2T^k(0) dphidx|_0 = 1
+% integrate(eq) from x to L: (rhs=0 in that range)
+% ==> T^k.dphidx = C. Apply source condition. C = -1/2
+% so dphi/dx=-1/2/T^a(x)
+% integrate between x and L:
+% phi(L) - phi(x) = (-1/2) int_x^L 1/T^a(y) dy = -phi(x)
 %
 switch response
     case 'dirac'
-        for i=1:length(x)
-           phi(i) = integral(@(x) 1./(fh_T(x).^k), x(i),L)/2;
+        for i=1:length(xx)
+            phi(i) = integral(@(x) 1./(fh_T(x).^a), xx(i),L)/2;
         end
     case {'integrated','averaged'}
-        for i=1:length(x)
-           phi(i) = integral(@(x) x./(fh_T(x).^k), x(i),L);
+        if strcmpi(response,'integrated')
+            rr=1;
+        else
+            rr=1/L;
         end
+        fh_phi = @(x) rr/q*(fh_T(x)-T_dir);
+        phi = fh_phi(xx);
 end
 % plot adjoint
 if do_plot
-    subplot(1,2,2); plot(x,phi); axis tight; title('Adjoint');
+    subplot(1,2,2); plot(xx,phi); axis tight; title('Adjoint');
 end
 % compute functional using adjoint
-int_phi = dot( (phi(1:end-1)+phi(2:end))/2 , diff(x) ); 
-J_adj_vol = q * int_phi;
+% first, the volumetric part:
+J_adj_vol = q*dot( (phi(1:end-1)+phi(2:end))/2 , diff(xx) ); 
+fprintf('QoI: Adjoint\n  volumetric term: %g\n',J_adj_vol);
+if strcmpi(response,'integrated') || strcmpi(response,'averaged')
+    J_adj_vol = q*integral(fh_phi,0,L);
+    fprintf('QoI: Adjoint\n  volumetric term (exact): %g\n',J_adj_vol);
+end
+% now, the bc parts:
 switch response
     case 'dirac'
-       J_adj_dir = (T_dir-fh_T(0))/2;
-    case 'integrated'
-       J_adj_dir = T_dir*L;
-    case 'averaged'
+        % it is easier to think of this one as integral from -L to +L
+        % (1) kdT/dx.phi:  phi(+/-L)=0, so nothing
+        % (2) -kdphi/dx.T: kdphi/dx=-1/2 everythwere
+        % because of the dirac, the vol+bc contributions calculated as 
+        % integral from -L to +L are the QoI, not twice the QoI
        J_adj_dir = T_dir;
+       J_adj_vol = 2*J_adj_vol;
+    case {'integrated','averaged'}
+        % we need to add 
+        % (1) kdT/dx.phi. dTdx=0 at x=0+, and phi(L)=0, so nothing
+        % (2) -kdphi/dx.T.
+        % only term left is: -kdphi/dx.T at x=L, so T_dir^(a+1)*dphi/dx
+        % but dphidx = C dT/dx = r/q (-qL T^(-a))
+       J_adj_dir = L*rr*T_dir;
 end
 J_adj = J_adj_vol + J_adj_dir;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,7 +112,7 @@ fprintf('Unperturbed QoI values: \nForward %g\nAdjoint %g\n',J_for,J_adj);
 fprintf('Splitting the adjoint values:\n\tvolume  \t%g\n\tDirichlet bc\t%g\n',...
     J_adj_vol,J_adj_dir);
 
-warning('What is below is a copy-paste formt he linear analytical solution');
+disp('What is below is a copy-paste form the linear analytical solution');
 warning('Amend first if you want to use');
 return
 
@@ -87,19 +120,16 @@ return
 % create perturbation 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % save values
-fh_T0 = fh_T; fh_dT0dx = fh_dTdx; J_for0 = J_for;
+fh_T0 = fh_T; fh_dT0dx = fh_dTdx; phi0=phi; J_for0 = J_for;
 % save unperturbed parameters
-k0=k; q0=q; h0=h; T_dir0=T_dir; T_inf0=T_inf;
+a0=a; q0=q; T_dir0=T_dir;
 % perturbed values
 pert = 1e-1;
 q     = q0     * (1 + pert*1); 
-k     = k0     * (1 + pert*1);
-h     = h0     * (1 + pert*1);
+a     = a0     * (1 + pert*1);
 T_dir = T_dir0 * (1 + pert*1);
-T_inf = T_inf0 * (1 + pert*1);
 %
-q1 = q-q0; h1 = h-h0; k1 = k-k0;
-T_dir1=T_dir-T_dir0; T_inf1=T_inf-T_inf0;
+a1 = a-a0; q1 = q-q0; T_dir1=T_dir-T_dir0; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward problem for perturbed temperature

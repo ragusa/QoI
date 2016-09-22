@@ -1,0 +1,434 @@
+\documentclass[11pt]{article}
+% PACKAGES
+\usepackage{graphicx}
+\usepackage{tabls}
+\usepackage{afterpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsbsy}
+\usepackage{epsfig}
+%\usepackage{cites}
+\usepackage{epsf}
+\usepackage{float} 
+\usepackage{color} 
+
+\usepackage{array}
+\usepackage[section]{placeins} % force � mettre l'image o� on veut
+\usepackage{lscape} %utilisation du mode paysage
+\usepackage{xspace}
+
+%\usepackage[pdftex,bookmarks=true]{hyperref}
+%\usepackage{hyperref}
+\usepackage{url}
+\usepackage{verbatim}
+%\usepackage[all]{hypcap}
+
+\usepackage[labelsep=quad]{caption} % needed by the breakalgo environment
+
+\usepackage{ifthen}
+\usepackage{subfig}
+
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{listings}
+%\usepackage[noprefix]{nomencl}  % for nomenclature
+
+%-----------------------------------------------------------
+% NEW  DEFINITIONS
+% margin par
+\newcommand{\mt}[1]{\marginpar{ {\footnotesize #1} }}
+% vector shortcuts
+\newcommand{\vo}{\vec{\Omega}}
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\vnk}{\vec{\mathbf{n}}}
+
+% More Quick Commands
+% 
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+
+\renewcommand{\div}{\vec{\nabla}\! \cdot \!}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\oa}[1]{\fn{\frac{1}{3}\hat{\Omega}\!\cdot\!\overrightarrow{A_{#1}}}}
+
+% common reference commands
+\newcommand{\eqt}[1]{Eq.~(\ref{#1})}                     % equation
+\newcommand{\fig}[1]{Fig.~\ref{#1}}                      % figure
+\newcommand{\tbl}[1]{Table~\ref{#1}}                     % table
+
+%
+% Equation beginnings and endings
+%
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\beas}{\begin{eqnarray*}}
+\newcommand{\eeas}{\end{eqnarray*}}
+\newcommand{\bdm}{\begin{displaymath}}
+\newcommand{\edm}{\end{displaymath}}
+%
+\newcommand{\vj}{\vec{J}}
+\newcommand{\sa}[1]{\sigma_{a #1}}
+\newcommand{\vl}{\vec{\lambda}}
+\newcommand{\vdj}{\delta \vec{J}}
+\newcommand{\dphi}{\delta \Phi}
+\newcommand{\lmax}{\ensuremath{L_{\textit{max}}}\xspace}
+\newcommand{\pmax}{\ensuremath{p_{\textit{max}}}\xspace}
+\newcommand{\sddx}{\frac{d}{dx}}
+\newcommand{\sddt}{\frac{d}{dt}}
+\newcommand{\der}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\vF}{\vec{F}}
+
+\renewcommand{\O}{\mathcal{O}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\us}{{u^\ast}}
+
+\newcommand{\ti}{ {t^{\text{init}}} }
+\newcommand{\te}{ {t^{\text{end }}} }
+
+\newcommand{\tcr}[1]{\textcolor{red}{#1}}
+
+%-----------------------------------------------------------
+\addtolength{\hoffset}{-2.0cm}
+\addtolength{\textwidth}{4cm}
+\addtolength{\textheight}{4.0cm}
+\addtolength{\voffset}{-1.8cm}
+\addtolength{\headsep}{-0.3cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.8ex plus 0.5ex minus 0.2ex}
+
+\linespread{1.1}
+%-----------------------------------------------------------
+\begin{document}
+%-----------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+{\huge Ians Notes}\\
+{\Large Ian Halvic, Jean C. Ragusa, TAMU}\\
+{\Large \textcolor{red}{No distribution please}}\\
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A nonlinear example: nonlinear heat conduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{QoI: quantity of interest FROM RAGUSA}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Consider the following \tcr{nonlinear} heat conduction problem ($A(\tcr{T})T=q$)
+\be
+\label{eq:ex_heat_conduction}
+-\frac{d}{dx}k\tcr{(T)}\frac{dT}{dx}=q \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc}
+\be
+T(a) = T_{\text{dir}} 
+\ee
+\be
+-k(T) \left.\frac{dT}{dx}\right|_b = h(T(b)-T_{\infty})
+\ee
+\end{subequations}
+
+Our QoI is a functional of the solution
+\be
+\label{eq:ex_heat_conduction_qoi}
+J = \int_a^b r(x) T(x) dx
+\ee
+where $r(x)$ is the response function.
+
+Consider the following adjoint problem ($A^\star(\tcr{T})T=r$)
+\be
+\label{eq:ex_heat_conduction_adjoint}
+-\frac{d}{dx}k(T)\frac{d\phi}{dx}=r \qquad x\in [a,b]
+\ee
+with boundary conditions
+\begin{subequations}
+\label{eq:ex_heat_conduction_bc_adjoint}
+\be
+\phi(a) = \phi_{\text{dir}} = 0 
+\ee
+\be
+-k(T) \left.\frac{d\phi}{dx}\right|_b = h(\phi(b)-\phi_{\infty}) = h\phi(b)
+\ee
+\end{subequations}
+where we have chosen $\phi_{\text{dir}} = 0$ and $\phi_{\infty}=0$ for reasons that were explained previously. Do note that the adjoint problem is now \tcr{linear} but requires that the forward solution $T$ be known.
+
+The rest of the derivation for the QoI, $J$, is identical to the one for the linear heat conduction problem. We do not reproduce here and just give the final result
+\be
+\boxed{
+J := \int_a^b rT dx = \int_a^b q \phi dx + h T_{\infty} \phi(b) + \left.k\frac{d\phi}{dx}\right|_a T_{\text{dir}}
+}
+\ee
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sensitivity for a nonlinear problem FROM RAGUSA}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Now things get really interesting. Notably the adjoint problem will be different than the previous ones seen so far.
+
+Let us consider the unperturbed and perturbed forward problems ($p$ denotes a parameter):
+\[
+-\frac{d}{dx}k(T,p)\frac{dT}{dx} = q \qquad \text{with bc: } \left.\frac{dT}{dx}\right|_0=0 \ \text{  and } -k(T,p)\left.\frac{dT}{dx}\right|_L=h(T(L)-T_\infty)
+\]
+and
+\[
+-\frac{d}{dx}\left[\left(k(T,p)+\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p\right) \frac{d(T+\delta T)}{dx}\right] = q+\delta q \]
+where we have used a first-order expansion for the perturbations in conductivity
+\[
+k(T+\delta T, p+\delta p) \simeq k(T,p)+\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p
+\]
+The perturbed boundary conditions are as follows: 
+\[
+ \left.\frac{d(T+\delta T)}{dx}\right|_0=0 \ \text{ and } -k(T+\delta T, p+\delta p)\left.\frac{d(T+\delta T)}{dx}\right|_L=(h+\delta h)(T(L)+\delta T(L)-T_\infty-\delta T_\infty)
+\]
+
+/We would like to subtract these two equations to obtain an equation for $\delta T$. However, in order to include the boundary conditions, we multiply both unperturbed and perturbed forward equations by $\phi$ and integrate by parts. This yields, for both equations,
+\begin{equation}
+\int q\phi = \int k(T,p)\frac{dT}{dx}\frac{d\phi}{dx} - \left.k(T,p)\frac{dT}{dx}\phi\right|_0^L  
+= \int k(T,p)\frac{dT}{dx}\frac{d\phi}{dx} +h(T(L)-T_\infty) \phi(L) 
+\end{equation}
+and
+\begin{equation}
+\int (q+\delta q)\phi = \int k(T+\delta T,p+\delta p)\frac{d(T+\delta T)}{dx}\frac{d\phi}{dx} +(h+\delta h)(T(L)+\delta T(L)-T_\infty-\delta T_\infty) \phi(L) 
+\end{equation}
+
+Subtract the above two equations (now, we will obtain the weak form of the equation for $\delta T$ and the appropriate bc will naturally be evaluated in that process). We only keep first-order terms in the unknowns.
+\begin{multline}
+\int \delta q\phi = \int \left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p\right) \frac{dT}{dx}\frac{d\phi}{dx} + \int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} \\
++h(\delta T(L)-\delta T_\infty)  \phi(L)
++\delta h(T(L)-T_\infty)  \phi(L)
+\end{multline}
+
+Let us place everything that does not depend on $\delta T$ on the LHS:
+\begin{multline}
+\label{eq:sensitivity_nonlinear_hc_1}
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\delta h(T(L)-T_\infty)  \phi(L)
+\\=
+\int \left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{dT}{dx}\frac{d\phi}{dx} 
++ \int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} 
++h(\delta T(L)-\delta T_\infty)  \phi(L)
+\end{multline}
+
+Remember that we seek 
+\[
+\delta J = \langle \delta T, r \rangle = \langle \delta T, A^\star \phi \rangle 
+\]
+hence we need to remove all differential operators for $\delta T$ in \eqt{eq:sensitivity_nonlinear_hc_1}. Thus, we need to integrate by parts the second integral in the RHS of \eqt{eq:sensitivity_nonlinear_hc_1}:
+\[
+\int k(T,p)\frac{d\delta T}{dx}\frac{d\phi}{dx} 
+=
+-\int \frac{d}{dx}k(T,p)\frac{d\phi}{dx} \delta T + \left.k(T,p)\frac{d\phi}{dx}\delta T\right|_0^L
+\]
+
+This tells us two things
+\begin{enumerate}
+\item the boundary conditions for $\phi$ should be
+\[
+\left.k(T,p)\frac{d\phi}{dx}\right|_L = -h\phi(L) \quad \text{and} \quad \left.\frac{d\phi}{dx}\right|_0 = 0
+\]
+\item The adjoint operator is (recall, the response function $r$ is the adjoint source)
+\[
+r=A^\star(\tcr{T}) \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
+\]
+$A^\star(\tcr{T})$ is linear in $\phi$ and depends on the unperturbed solution $T$.
+\end{enumerate}
+
+Now, \eqt{eq:sensitivity_nonlinear_hc_1} becomes
+\begin{multline}
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\delta h(T(L)-T_\infty)  \phi(L)
+\\=
+\underbrace{
+\int \left(
+- \frac{d}{dx}k(T,p)\frac{d\phi}{dx} 
++ \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} 
+\right) 
+\delta T 
+}
+_{=\langle r,\delta T \rangle = \delta J}
+%-h\phi(L)\delta T(L)
+%+h(\delta T(L)-\delta T_\infty)  \phi(L)
+-h\delta T_\infty \phi(L)
+\end{multline}
+
+Finally, we have
+\be
+\boxed{
+\delta J = 
+\int \delta q\phi 
+-\int \left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{dT}{dx}\frac{d\phi}{dx} 
+-\left(\delta h(T(L)-T_\infty)  - h\delta T_\infty \right)\phi(L)
+}
+\ee
+where $\phi$ is the adjoint solution of the following problem:
+\[
+A^\star(T) \phi  = -\frac{d}{dx}k(T,p)\frac{d\phi}{dx} + \left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{dT}{dx}\frac{d\phi}{dx} = r
+\]
+with boundary conditions:
+\[
+-\left.k(T,p)\frac{d\phi}{dx}\right|_L = h\phi(L) \quad \text{and} \quad \left.\frac{d\phi}{dx}\right|_0 = 0
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Nonlinear operator notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+As with the liner case Define forward, keeping in mind $A=A(T)$
+\[
+AT=q
+\]
+define adjoint
+\[
+A^* \phi =r
+\]
+We have the functional
+\[
+J=\langle T,r \rangle = \langle T, A^\star \phi \rangle = \langle (A^*)^t T,\phi \rangle
+\]
+We introduce our linear perturbation to the system, however, since the operator $A$ has a dependence on $T$, the perturbation to $A$ is nonlinear
+\begin{equation}
+(A+\der{A}{p} \delta p + \der{A}{T} \delta T)(T + \delta T)=(q+\delta q)
+\end{equation}
+Compute inner products
+\begin{equation}
+\langle \phi, q + \delta q \rangle = \langle \phi, (A+\der{A}{p} \delta p + \der{A}{T} \delta T)(T + \delta T) \rangle = \langle \phi , AT \rangle + \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle + O(\delta^2) 
+\end{equation}
+Use the forward problem definition $AT=q$ to reduce to 
+\begin{equation}
+\langle \phi, \delta q \rangle = \langle \phi , A \delta  T \rangle + \langle \phi , \der{A}{p} \delta p T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle + O(\delta^2) 
+\end{equation}
+
+Drop second order terms and group all terms with a factor of $\delta T$
+\[
+\langle \phi , A \delta  T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle = \langle \phi, \delta q \rangle- \langle \phi , \der{A}{p} \delta p T \rangle 
+\]
+Moving the lhs operator to act on $\phi$ instead of $\delta T$
+\[
+\langle \Big(A+\der{A}{T} T \Big)^T \phi ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+The lhs operator on $\phi$ becomes our adjoint operator $A^\star$
+\[
+\langle A^\star \phi ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+This is just our response function however 
+\[
+\langle r ,  \delta T \rangle  = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+the response acting on $\delta T$ yields $\delta J$, so we arrive at our desired point
+\[
+\delta J = \langle \phi, \Big( \delta q - \der{A}{p} \delta p T \Big) \rangle.
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{General Case without BC}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\[
+-\frac{d}{dx}k(T,p)\frac{dT}{dx} = q 
+\]
+\[
+-\frac{d}{dx}k(T+\delta T,p+\delta p)\frac{d(T+\delta T)}{dx} = q +\delta q 
+\]
+To the first order this is
+\[
+-\frac{d}{dx}\left[\left(k(T,p)+\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T+\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p\right) \frac{d(T+\delta T)}{dx}\right] = q+\delta q \] 
+from the operator notation 
+\[
+\langle \phi , A \delta  T \rangle + \langle \phi, \der{A}{T} \delta T T \rangle = \langle \phi, \delta q \rangle- \langle \phi , \der{A}{p} \delta p T \rangle 
+\]
+or subtracting perturbed and unperturbed and dropping higher order terms.
+\[
+-\frac{d}{dx}\left( k(T,p) \frac{d(\delta T)}{dx} \right)
+-\frac{d}{dx}\left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx}\right)
+-\frac{d}{dx}\left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \right)
+= \delta q \] 
+Now inner product with $\phi$
+\[
+-\int \frac{d}{dx}\left( k(T,p) \frac{d(\delta T)}{dx} \right)\phi
+-\int \frac{d}{dx}\left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx}\right)\phi
+-\int \frac{d}{dx}\left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \right)\phi
+= \int \delta q \phi
+\] 
+Collect all $\delta T$ terms
+\[
+-\int \frac{d}{dx}\left( k(T,p) \frac{d(\delta T)}{dx} \right)\phi
+-\int \frac{d}{dx}\left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx}\right)\phi
+= \int \delta q \phi 
++\int \frac{d}{dx}\left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \right)\phi
+\] 
+Go crazy with integration by parts, generating 3 boundary terms
+\[
+\int \left( k(T,p) \frac{d(\delta T)}{dx} \right)\frac{d \phi}{dx}
++\int \left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx}\right)\frac{d \phi}{dx} 
+- \left. \left( k(T,p) \frac{d(\delta T)}{dx} \phi \right) \right|_0^L 
+- \left. \left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx} \phi \right ) \right|_0^L
+\]
+\[
+= \int \delta q \phi 
+-\int \left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \right)\frac{d \phi}{dx}
++ \left. \left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \phi \right) \right|_0^L
+\] 
+There is still one term on the lhs that has an operator acting on $\delta T$ so we need to deal with that. lets focus in
+\[
+\int \left( k(T,p) \frac{d(\delta T)}{dx} \right)\frac{d \phi}{dx}
+\] 
+Product rule
+\[
+\int \left( \frac{d}{dx} (k(t,p) \delta T)- \frac{d k(T,p)}{dx}\delta T \right)\frac{d \phi}{dx}
+\]
+and int by parts the remaining term.
+\[
+\int \left( k(t,p) \delta T\right)\frac{d^2 \phi}{dx^2}
+- \int \left( \frac{d k(T,p)}{dx}\delta T \right)\frac{d \phi}{dx}
++ \left.\left( k(t,p) \delta T \frac{d \phi}{dx}  \right) \right|_0^L
+\]
+So now we get the full expression with a bunch of boundary terms moved to the RHS 
+\[
+\int \left( k(t,p) \frac{d^2 \phi}{dx^2} \right) \delta T 
+- \int \left( \frac{d k(T,p)}{dx} \frac{d \phi}{dx} \right)\delta T 
++\int \left(\left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{d(T)}{dx} \frac{d \phi}{dx} \right)\delta T
+\]
+\[
+= \int \delta q \phi 
+-\int \left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \right)\frac{d \phi}{dx}
+\]
+\[
++ \left. \left(\left.\frac{\partial k}{\partial p}\right|_{T,p}\delta p \frac{d(T)}{dx} \phi \right) \right|_0^L
++ \left. \left( k(T,p) \frac{d(\delta T)}{dx} \phi \right) \right|_0^L 
++ \left. \left(\left.\frac{\partial k}{\partial T}\right|_{T,p}\delta T \frac{d(T)}{dx} \phi \right ) \right|_0^L
+- \left.\left( k(t,p) \delta T \frac{d \phi}{dx}  \right) \right|_0^L
+\] 
+So the $A^\star$ operator is
+\[
+A^\star = \left( k(t,p) \frac{d^2}{dx^2} \right) 
+- \left( \frac{d k(T,p)}{dx} \frac{d}{dx} \right) 
++ \left(\left.\frac{\partial k}{\partial T}\right|_{T,p} \frac{d(T)}{dx} \frac{d}{dx} \right)
+\]
+
+\end{document}

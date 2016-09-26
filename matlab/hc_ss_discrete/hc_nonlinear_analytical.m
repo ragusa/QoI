@@ -4,7 +4,7 @@ clc; close all;
 % problem definition: k(T)=T^q
 % -d/dx (T^a dT/dx) = q = -1/(a+1).d^2(T^(a+1))/dx^2
 % dTdx|_0=0 T(L)=T_dir
-L=0.5; q=10000; T_dir=100; a=1;
+L=0.5; q=10000; T_dir=40; a=1;
 % region of interest
 % "whole domain" or "dirac at 0"
 % 
@@ -26,7 +26,7 @@ if do_plot
     plot(xx,fh_T(xx)); axis tight; title('Temperature');
 end
 % compute functional using forward solution
-response = 'dirac';
+response = 'averaged';
 switch response
     case 'dirac'
         % response = dirac at x=0
@@ -128,12 +128,12 @@ fh_T0 = fh_T; fh_dT0dx = fh_dTdx; phi0=phi; J_for0 = J_for;
 a0=a; q0=q; T_dir0=T_dir;
 % perturbed values
 pert = 1e-1;
-q     = q0     * (1 + pert*1); 
+q     = q0     * (1 + pert*0); 
 a     = a0     * (1 + pert*0);
-T_dir = T_dir0 * (1 + pert*0);
+T_dir = T_dir0 * (1 + pert*1);
 %
 a1 = a-a0; q1 = q-q0; T_dir1=T_dir-T_dir0; 
-
+ap1=a+1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward problem for perturbed temperature
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,7 +144,7 @@ if do_plot
     figure(1); subplot(1,2,1); plot(xx,fh_T(xx),'r-'); legend(['TempU';'TempP']);
 end
 % compute functional using forward solution
-response = 'dirac';
+response = 'averaged';
 switch response
     case 'dirac'
         % response = dirac at x=0

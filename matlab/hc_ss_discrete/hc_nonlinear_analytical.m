@@ -4,7 +4,7 @@ clc; close all;
 % problem definition: k(T)=T^q
 % -d/dx (T^a dT/dx) = q = -1/(a+1).d^2(T^(a+1))/dx^2
 % dTdx|_0=0 T(L)=T_dir
-L=0.5; q=10000; T_dir=100; a=1;
+L=0.5; q=10000; T_dir=0; a=1;
 % region of interest
 % "whole domain" or "dirac at 0"
 % 
@@ -26,7 +26,7 @@ if do_plot
     plot(xx,fh_T(xx)); axis tight; title('Temperature');
 end
 % compute functional using forward solution
-response = 'dirac';
+response = 'averaged';
 switch response
     case 'dirac'
         % response = dirac at x=0

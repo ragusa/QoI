@@ -9,24 +9,26 @@ function hc_ss_x_CG_nonlinear
 clc; close all;
 
 % load the data and numerical parameters
-pert.a    = 1e-1 *0.;
-pert.b    = 1e-1 *1;
+pert.a    = 1e-1 *1;
+pert.b    = 1e-1 *0;
 pert.c    = 0;
 pert.q    = 1e-1 *0;
 pert.bc_L = 1e-1 *0;
 pert.bc_R = 1e-1 *0;
 [dat,npar] = load_simulation_data(pert);
+% Define how we determine K(t) perturbed
+npar.exactK=true;
 
 % solve unperturbed forward problem
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 npar.do_analytical=false;
-[Tu,Au,qu,Tdiru]=solve_system(npar,dat,1);
+[Tu,Au,qu,Tdiru,diru_rhs]=solve_system(npar,dat,1);
 
 % solve perturbed forward problem
 npar.adjoint=false;
 npar.pert_status = 'perturbed';
-[Tp,Ap,qp,Tdirp]=solve_system(npar,dat,Tu);
+[Tp,Ap,qp,Tdirp,dirp_rhs]=solve_system(npar,dat,Tu);
 %
 subplot(2,1,1);
 plot(npar.xf,Tu,npar.xf,Tp);
@@ -34,12 +36,12 @@ plot(npar.xf,Tu,npar.xf,Tp);
 % solve unperturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'unperturbed';
-[phiu,Aau,ru,r_functional_p]=solve_system(npar,dat,Tu,Tu);
+[phiu,Aau,ru,r_functional_u]=solve_system(npar,dat,Tu,Tu);
 
 % solve perturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'perturbed';
-[phip,Aap,rp,r_functional_u]=solve_system(npar,dat,Tu,Tu);
+[phip,Aap,rp,r_functional_p]=solve_system(npar,dat,Tu,Tu);
 
 disp('dot(r_functional_u,Tdiru)');
 dot(r_functional_u,Tdiru)
@@ -52,19 +54,22 @@ plot(npar.xf,phiu,npar.xf,phip);
 
 
 % QoI summary
-J_for_unpert = Tu'*ru   +dot(r_functional_u,Tdiru);
-J_for_pert   = Tp'*ru   +dot(r_functional_u,Tdiru);
-J_adj_unpert = phiu'*qu  +dot(r_functional_u,Tdirp);
+J_for_unpert = Tu'*ru    +dot(r_functional_u,Tdiru);
+J_for_pert   = Tp'*ru    +dot(r_functional_p,Tdirp);
+J_adj_unpert = phiu'*qu  +dot(r_functional_u,Tdiru);
+Tu'*ru
+dot(r_functional_u,Tdiru)
 fprintf('-------------QoI------------\n')
 fprintf('J forward unperturbed\t%14.8g \n',J_for_unpert);
 fprintf('J adjoint unperturbed\t%14.8g \n',J_adj_unpert);
 
-return
+%return
 
 % sensitivity
 dT = Tp-Tu;
-dq = qp-qu; % this is how the bc mods to the rhs get eliminated. need to check. especially for dirichlet !!!
-dA = Ap-Au; %caveat: application of bc disappear when doing this !!!!
+dq = (qp+dirp_rhs)-(qu+diru_rhs); % this is how the bc mods to the rhs get eliminated. need to check. especially for dirichlet !!!
+%dq = qp_wo_bc-qu_wo_bc;
+%dA = Ap-Au; %caveat: application of bc disappear when doing this !!!!
 dJ_for = dT'*ru       +dot(r_functional_u,Tdirp-Tdiru);
 fprintf('J forward perturbed \t%14.8g \n',J_for_pert);
 %fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
@@ -73,7 +78,11 @@ fprintf('J forward perturbed \t%14.8g \n',J_for_pert);
 npar.adjoint=false; 
 npar.pert_status = 'delta_p';
 [dAdp,~]=assemble_system(npar,dat,Tu);
-dJ_adj = phiu'*(dq - dAdp*Tu)        +dot(r_functional_p,Tdirp-Tdiru);
+dJ_adj = phip'*(dq - dAdp*Tu)     +dot(r_functional_p,Tdirp-Tdiru);
+%dJ_adj = phip'*((qp-qu) - dAdp*Tu)     +dot(r_functional_u,Tdirp-Tdiru);
+fprintf('------dJ For Debugging------\n')
+fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert),dJ_for);
+fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
 fprintf('------Sensitivity a------\n')
 fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.a,dJ_for/pert.a);
 fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.a);
@@ -95,7 +104,15 @@ fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_R);
 % dJ_adj = phiu'*(dq - dAdp*Tu);
 % fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
 
+plot(dq)
+max(abs(dq))
+phip'*dq
+max(abs(qp-qu))
+phip'*(qp-qu)
 phip'*dAdp*Tu
+dot(r_functional_p,Tdirp-Tdiru)
+Tdirp-Tdiru
+r_functional_p
 
 
 
@@ -110,17 +127,18 @@ legend('phiu','phip');
 
 %disp(dAdp)
 
-disp(r_functional_u)
+%disp(r_functional_u)
 
-disp(Tdirp)
+%disp(dTdxValues)
 
-disp(Tdiru)
+%disp(Tdiru)
+%disp(Tp)
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [T,A,q,out]=solve_system(npar,dat,T_init,T_for)
+function [T,A,q,out,dir_rhs]=solve_system(npar,dat,T_init,T_for)
 
 %check
 if nargin==4 && npar.adjoint==false
@@ -145,7 +163,7 @@ for iter=1:npar.max_nl_iter
     else
         T_for_assembly=T;
     end
-    [A,q,out]=assemble_system(npar,dat,T_for_assembly);
+    [A,q,out,dir_rhs]=assemble_system(npar,dat,T_for_assembly);
     % save old values
     T_old=T;
     % solve linear system
@@ -192,10 +210,9 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs,out]=assemble_system(npar,dat,T)
+function [A,rhs,out,dir_rhs]=assemble_system(npar,dat,T)
 
 % assemble the matrix, the rhs, apply BC
-
 % shortcuts
 porder= npar.porder;
 gn    = npar.gn;
@@ -207,6 +224,7 @@ n=nel*porder+1;
 % allocate memory
 A=spalloc(n,n,nnz);
 rhs=zeros(n,1);
+dir_rhs=zeros(n,1);
 
 % compute local matrices
 % load Gauss Legendre quadrature (GLQ is exact on polynomials of degree up to 2n-1,
@@ -231,6 +249,12 @@ if npar.adjoint
     src = dat.asrc;
     bc  = dat.bc_adj;
     kond = dat.k;
+    if npar.exactK
+        switch npar.pert_status
+            case 'perturbed'
+                kond=dat.kExact;
+        end
+    end
 else
     bc  = dat.bc_for;
     % what kind of material properties to use
@@ -240,7 +264,11 @@ else
             src = dat.fsrc;
         case 'perturbed'
             for i=1:length(dat.k)
-                kond{i} = @(T) dat.k{i}(T)    + dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
+                if npar.exactK
+                    kond{i} = @(T) dat.kExact{i}(T);
+                else
+                    kond{i} = @(T) dat.k{i}(T)    + dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
+                end
                 src{i}  = @(x) dat.fsrc{i}(x) + dat.dfsrc{i}(x);
             end
             bc.left.C = bc.left.C + bc.left.dC;
@@ -277,16 +305,22 @@ for iel=1:npar.nel
     % compute local matrices + load vector
     for i=1:porder+1
         for j=1:porder+1
-            k(i,j) = dot(d.*wq.*dbdx(:,i) , dbdx(:,j)) /Jac;
+            switch npar.pert_status
+                case 'delta_p'
+                k(i,j) = dot(d.*wq.*dbdx(:,i) , dbdx(:,j)) /Jac;
+                case {'unperturbed','perturbed'}
+                k(i,j) = dot(d.*wq.*dbdx(:,i) , dbdx(:,j)) /Jac;
+            end
         end
         f(i) = dot(q.*wq, b(:,i));
     end
     if npar.adjoint && strcmp(npar.pert_status,'perturbed')
-        dTdx = dbdx(:,:) * T(gn(iel,:));
+        dTdx = dbdx(:,:) * T(gn(iel,:)); % figure this term out
         dkdT=dat.dkdT{my_zone}(T_qp);
         for i=1:porder+1
             for j=1:porder+1
-                k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac;
+                %k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac;
+                %dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac
             end
         end
     end
@@ -294,6 +328,8 @@ for iel=1:npar.nel
     A(gn(iel,:),gn(iel,:)) = A(gn(iel,:),gn(iel,:)) + k;
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + f*Jac;
 end
+
+q_wo_bc=rhs;
 
 % apply natural BC
 Dirichlet_nodes=[];
@@ -325,6 +361,8 @@ end
 for i=1:length(Dirichlet_nodes);% loop on the number of constraints
     id=Dirichlet_nodes(i);      % extract the dof of a constraint
     bcval=Dirichlet_val(i);
+    dir_rhs=dir_rhs+bcval*A(:,id);
+    dir_rhs(id)=-bcval+rhs(id);
     rhs=rhs-bcval*A(:,id);  % modify the rhs using constrained value
     A(id,:)=0; % set all the id-th row to zero
     A(:,id)=0; % set all the id-th column to zero (symmetrize A)
@@ -418,12 +456,14 @@ end
 function [dat,npar]=load_simulation_data(pert)
 
 % data 
-T_inf=5; h=16; L=0.5;
+T_inf=0; h=16; L=0.5;
 
 a=2150; b=200;c=1.05*0; d=1;
+a=1;
 
 cond = @(T) a./(d*T+b)+c;
-cond = @(T) T;
+cond = @(T) T.^a;
+condExact = @(T) T.^((1+pert.a)*a); 
 
 dat.conductivity_constants.a=a;
 dat.conductivity_constants.b=b;
@@ -436,6 +476,7 @@ res_funct = @(x) 1/L*(1+0*x);
 
 % load the data structure with info pertaining to the physical problem
 dat.k{1}=cond; % W/m-K
+dat.kExact{1}=condExact;
 % forward calculation source
 dat.fsrc{1}=sq; 
 % adjoint calculation source
@@ -446,32 +487,39 @@ dat.asrc{1}=res_funct;
 % dk/da = 1/(b+T);
 % dk/db = -a/(b+T)^2;
 % dk/dc = 1;
+%THESE NEED TO BE CHANGED FOR OTHER K(T)
 for i=1:length(dat.k)
-    dat.dka{i}   = @(T) 1./(d*T+b)*pert.a*a;
-    dat.dkb{i}   = @(T) -a./((d*T+b).^2)*pert.b*b;
-    dat.dkc{i}   = @(T) pert.c*c*(1+0*T);
-    dat.dkdT{i}  = @(T) -a./((d*T+b).^2)*d;
-    dat.dfsrc{i} = @(x) pert.q*dat.fsrc{i}(x);
+    %dat.dka{i}   = @(T) 1./(d*T+b)*pert.a*a;
+    %dat.dkb{i}   = @(T) -a./((d*T+b).^2)*pert.b*b;
+    %dat.dkc{i}   = @(T) pert.c*c*(1+0*T);
+    %dat.dkdT{i}  = @(T) -a./((d*T+b).^2)*d;
+    dat.dfsrc{i} = @(x) q*pert.q*(1+0*x);
+    %values for analytical compare
+    dat.dka{i}   = @(T) log(T).*(T.^a)*pert.a*a;
+    dat.dkb{i}   = @(T) 0*T;
+    dat.dkc{i}   = @(T) 0*T;
+    dat.dkdT{i}   = @(T) a*T.^(a-1);
 end
 
 % dimensions
 dat.hcv = h; 
 dat.width = L; 
 % mesh resolution per region
-nel_zone = [ 20 ];
+nel_zone = [ 100 ];
 
-% forward bc
+% bc types
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
-bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
 bc.rite.type=2;
-bc.rite.C=T_inf;
+% forward bc values
+bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
+bc.rite.C=40;
 dat.bc_for=bc; 
 % create perturbations
 dat.bc_for.left.dC = pert.bc_L*dat.bc_for.left.C;
 dat.bc_for.rite.dC = pert.bc_R*dat.bc_for.rite.C;
-% adjoint bc
+% adjoint bc values
 bc.left.C=0;
-bc.rite.C=2;
+bc.rite.C=0;
 dat.bc_adj=bc;
 clear bc;
 

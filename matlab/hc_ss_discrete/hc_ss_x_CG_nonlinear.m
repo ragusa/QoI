@@ -299,6 +299,9 @@ for iel=1:npar.nel
     % evaluate external source at qp
     q=src{my_zone}(x);
     % evaluate previous temperature at qp
+    % T(gn(iel,:)) = a vector of FEM coef. of length p+1
+    % b: array of basis function values. size nq times (p+1)
+    % so T_qp = vector of length nq
     T_qp = b(:,:) * T(gn(iel,:));
     % evaluate
     d=kond{my_zone}(T_qp);
@@ -319,7 +322,7 @@ for iel=1:npar.nel
         dkdT=dat.dkdT{my_zone}(T_qp);
         for i=1:porder+1
             for j=1:porder+1
-                %k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac;
+                k(i,j) = k(i,j) + dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac;
                 %dot(dkdT.*dTdx.*wq.*b(:,i) , dbdx(:,j))/Jac
             end
         end

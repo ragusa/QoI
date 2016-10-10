@@ -442,4 +442,84 @@ Now, if our $T$ and $\delta T$ were given Dirichlet BC, then $\left. \delta T \r
 
 Should both adjoints have the same BC?
 
+\subsection{Time Dependent linear}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Time dependent linear heat equation
+\[
+\der{T}{t}-\frac{\partial}{\partial x} k \der{T}{x} = q
+\]
+QoI is given by
+\[
+J=\int_{t1}^{t2}  \int_a^b  r(x,t) T(x,t)
+\].
+Consider the adjoint equation
+\[
+-\der{\phi}{t}-\frac{\partial}{\partial x} k \der{\phi}{x} = r
+\]
+Multiply forward by $\phi$ and adjoint by $T$, integrate over time/space, and subtract the two
+\[
+\int_{t1}^{t2}  \int_a^b \left( \der{T}{t}-\frac{\partial}{\partial x} k \der{T}{x} \right) \phi
+- \int_{t1}^{t2}  \int_a^b \left( -\der{\phi}{t}-\frac{\partial}{\partial x} k \der{\phi}{x} \right) T
+= \int_{t1}^{t2}  \int_a^b \left(q \phi - rT \right)
+\]
+\[
+\int_{t1}^{t2}  \int_a^b \left( \der{T}{t}-\frac{\partial}{\partial x} k \der{T}{x} \right) \phi
+- \int_{t1}^{t2}  \int_a^b \left( -\der{\phi}{t}-\frac{\partial}{\partial x} k \der{\phi}{x} \right) T
+= \int_{t1}^{t2}  \int_a^b \left(q \phi \right) -J
+\]
+First integral term on LHS
+\begin{align*}
+\int_{t1}^{t2}  \int_a^b \left( \der{T}{t} \phi \right)
+&= \int_{t1}^{t2}  \int_a^b \left( \der{T}{t} \phi \right)  \\
+\end{align*}
+
+Second integral term on LHS
+\begin{align*}
+\int_{t1}^{t2}  \int_a^b \left(-\frac{\partial}{\partial x} k \der{T}{x} \phi \right)
+&=  \int_{t1}^{t2}  \int_a^b \left( k \der{T}{x} \der{\phi}{x} \right) - \int_{t1}^{t2} \left( \left. k \der{T}{x} \phi \right|_a^b \right)
+\end{align*}
+
+Third integral term on LHS
+\begin{align*}
+\int_{t1}^{t2}  \int_a^b \left( - \der{\phi}{t} T \right)
+&= \int_{t1}^{t2}  \int_a^b \left( \der{T}{t} \phi \right) - \int_a^b  \left((T  \phi) \Big|_{t1}^{t2} \right)  \\
+\end{align*}
+
+And the fourth integral term on LHS
+\begin{align*}
+\int_{t1}^{t2}  \int_a^b \left(-\frac{\partial}{\partial x} k \der{\phi}{x} T \right)
+&=  \int_{t1}^{t2}  \int_a^b \left( k \der{T}{x} \der{\phi}{x} \right) + \int_{t1}^{t2} \left( \left. k \der{\phi}{x} T \right|_a^b \right)
+\end{align*}
+
+Putting it all together 
+\[
+- \int_{t1}^{t2} \left( \left. k \der{T}{x} \phi \right|_a^b \right) +\int_a^b  \left((T  \phi) \Big|_{t1}^{t2} \right) - \int_{t1}^{t2} \left( \left. k \der{\phi}{x} T \right|_a^b \right) = \int_{t1}^{t2}  \int_a^b \left(q \phi \right) -J
+\]
+
+Solve for J
+\[
+J= \int_{t1}^{t2}  \int_a^b \left(q \phi \right) + \int_{t1}^{t2} \left( \left. \left[ k \der{T}{x} \phi + k \der{\phi}{x} T \right] \right|_a^b \right) - \int_a^b  \left((T  \phi) \Big|_{t1}^{t2} \right)
+\]
+
+\subsection{Time Dependent Nonlinear operator notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Look at the addition of a time dependence in the nonlinear case, keeping in mind $A=A(T)$
+\[
+\der{T}{t}=-AT+q
+\]
+Use a backward Euler method, where we have the initial temperature $T_1$.
+\[
+\left. \der{T}{t} \right|_{n+1} =-A_{n+1} T_{n+1}+q_{n+1}
+\]
+\[
+\frac{T_{n+1}-T_n}{\Delta t} =-A_{n+1} T_{n+1}+q_{n+1}
+\]
+\[
+T_{n+1} + \Delta t A_{n+1} T_{n+1}= T_n+\Delta t q_{n+1}
+\]
+\[
+(I + \Delta t A_{n+1}) T_{n+1}= T_n+\Delta t q_{n+1}
+\]
+
+
 \end{document}

@@ -9,7 +9,7 @@ function hc_ss_x_CG_nonlinear
 clc; close all;
 
 % load the data and numerical parameters
-pert.a    = 1e-1 *1;
+pert.a    = 1e-1 *0.1;
 pert.b    = 1e-1 *0;
 pert.c    = 0;
 pert.q    = 1e-1 *0;
@@ -17,7 +17,7 @@ pert.bc_L = 1e-1 *0;
 pert.bc_R = 1e-1 *0;
 [dat,npar] = load_simulation_data(pert);
 % Define how we determine K(t) perturbed
-npar.exactK=true;
+npar.exactK=false;
 
 % solve unperturbed forward problem
 npar.adjoint=false;
@@ -25,115 +25,130 @@ npar.pert_status = 'unperturbed';
 npar.do_analytical=false;
 [Tu,Au,qu,Tdiru,diru_rhs]=solve_system(npar,dat,1);
 
-% solve perturbed forward problem
-npar.adjoint=false;
-npar.pert_status = 'perturbed';
-[Tp,Ap,qp,Tdirp,dirp_rhs]=solve_system(npar,dat,Tu);
-%
-subplot(2,1,1);
-plot(npar.xf,Tu,npar.xf,Tp);
-
 % solve unperturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'unperturbed';
 [phiu,Aau,ru,r_functional_u]=solve_system(npar,dat,Tu,Tu);
+
+% calculation of the QoI using inner products
+J_for_unpert = Tu'*ru   + dot(r_functional_u,Tdiru);
+J_adj_unpert = phiu'*qu + dot(r_functional_u,Tdiru);
+
+%%%%%%%%%%%% perturbations
+
+% solve perturbed forward problem
+npar.adjoint=false;
+npar.pert_status = 'perturbed';
+[Tp,Ap,qp,Tdirp,dirp_rhs]=solve_system(npar,dat,Tu);
 
 % solve perturbed adjoint problem
 npar.adjoint=true; 
 npar.pert_status = 'perturbed';
 [phip,Aap,rp,r_functional_p]=solve_system(npar,dat,Tu,Tu);
 
-disp('dot(r_functional_u,Tdiru)');
-dot(r_functional_u,Tdiru)
+% perturbed QoI computed suing forward solution
+J_for_pert = Tp'*rp  + dot(r_functional_p,Tdirp);
+J_adj_pert = phip'*qp + dot(r_functional_p,Tdirp);
 
-disp('dot(r_functional_p,Tdirp)');
-dot(r_functional_p,Tdirp)
+%%%%%%%%%%%% Output
 
-subplot(2,1,2);
-plot(npar.xf,phiu,npar.xf,phip);
+fprintf('\n\n');
+fprintf('QoI unperturbed: Forward \n------------------------\n');
+fprintf('\tinner: %g\n',J_for_unpert);
+fprintf('\t%s\t %g \n','Tu''*r',Tu'*ru);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
 
+fprintf('QoI unperturbed: Adjoint \n-----------------------\n');
+fprintf('\tinner: %g\n',J_adj_unpert);
+fprintf('\t%s\t %g \n','phi''*qu',phiu'*qu);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
 
-% QoI summary
-J_for_unpert = Tu'*ru    +dot(r_functional_u,Tdiru);
-J_for_pert   = Tp'*ru    +dot(r_functional_p,Tdirp);
-J_adj_unpert = phiu'*qu  +dot(r_functional_u,Tdiru);
-Tu'*ru
-dot(r_functional_u,Tdiru)
-fprintf('-------------QoI------------\n')
-fprintf('J forward unperturbed\t%14.8g \n',J_for_unpert);
-fprintf('J adjoint unperturbed\t%14.8g \n',J_adj_unpert);
+% plot solution
+figure(1);
+subplot(1,2,1); hold all; plot(npar.xf,Tu,'.-'); legend('Tu');
+subplot(1,2,2); hold all; plot(npar.xf,phiu,'.-');legend('Phiu');
 
-%return
+fprintf('QoI perturbed: Forward \n----------------------\n');
+fprintf('\tinner: %g\n',J_for_pert);
+fprintf('\t%s\t %g \n','Tp''*r',Tp'*rp);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdirp)',dot(r_functional_u,Tdirp));
 
-% sensitivity
+fprintf('QoI perturbed: Adjoint \n-----------------------\n');
+fprintf('\tinner: %g\n',J_adj_pert);
+fprintf('\t%s\t %g \n','phi''*qu',phip'*qp);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdiru)',dot(r_functional_p,Tdirp));
+
+% plot solution
+figure(1);
+subplot(1,2,1); hold all; plot(npar.xf,Tp,'+-'); legend('Tu','Tp');
+subplot(1,2,2); hold all; plot(npar.xf,phip,'+-');legend('Phiu','Phip');
+
+%%%%%%%%%%%% Sensitivity
+
+% dJ forward
 dT = Tp-Tu;
 dq = (qp+dirp_rhs)-(qu+diru_rhs); % this is how the bc mods to the rhs get eliminated. need to check. especially for dirichlet !!!
-%dq = qp_wo_bc-qu_wo_bc;
 %dA = Ap-Au; %caveat: application of bc disappear when doing this !!!!
 dJ_for = dT'*ru       +dot(r_functional_u,Tdirp-Tdiru);
-fprintf('J forward perturbed \t%14.8g \n',J_for_pert);
-%fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
-%fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
+
+% dJ adjoint
 % assembly system to compute sitffness matrix with conductivity=dkdp
 npar.adjoint=false; 
 npar.pert_status = 'delta_p';
 [dAdp,~]=assemble_system(npar,dat,Tu);
 dJ_adj = phip'*(dq - dAdp*Tu)     +dot(r_functional_p,Tdirp-Tdiru);
-%dJ_adj = phip'*((qp-qu) - dAdp*Tu)     +dot(r_functional_u,Tdirp-Tdiru);
-fprintf('------dJ For Debugging------\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert),dJ_for);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
-fprintf('------Sensitivity a------\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.a,dJ_for/pert.a);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.a);
-fprintf('------Sensitivity b------\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.b);
-fprintf('------Sensitivity c------\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.c,dJ_for/pert.c);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.c);
-fprintf('------Sensitivity q------\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.q,dJ_for/pert.q);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.q);
-fprintf('-----Sensitivity bcL-----\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_L,dJ_for/pert.bc_L);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_L);
-fprintf('-----Sensitivity bcR-----\n')
-fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
-fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_R);
-% dJ_adj = phiu'*(dq - dAdp*Tu);
-% fprintf('dJ adjoint \t%14.8g \n',dJ_adj);
 
-plot(dq)
-max(abs(dq))
-phip'*dq
-max(abs(qp-qu))
-phip'*(qp-qu)
-phip'*dAdp*Tu
-dot(r_functional_p,Tdirp-Tdiru)
-Tdirp-Tdiru
-r_functional_p
+fprintf('\n');
+fprintf('SENSITIVITY: Forward\n----------------\n');
+fprintf('\tForward: inner: %g\n',dJ_for);
+fprintf('\tdT*ru: %g\n',dT'*ru);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdirp-Tdiru)',dot(r_functional_u,Tdirp-Tdiru));
 
+fprintf('SENSITIVITY: Adjoint\n----------------\n');
+fprintf('\tForward: inner: %g\n',dJ_adj);
+fprintf('\tphip*dq: %g\n',phip'*dq);
+fprintf('\tphip*-dAdp*Tu: %g\n',phip'* -dAdp*Tu);
+fprintf('\t%s %g \n\n','dot(r_functional_u,Tdirp-Tdiru)',dot(r_functional_u,Tdirp-Tdiru));
 
+if pert.a~=0
+    fprintf('------Sensitivity a------\n')
+    fprintf('pert.a \t%14.8g \n',pert.a);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.a,dJ_for/pert.a);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.a);
+end
+if pert.b~=0
+    fprintf('------Sensitivity b------\n')
+    fprintf('pert.b \t%14.8g \n',pert.b);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.b,dJ_for/pert.b);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.b);
+end
+if pert.c~=0
+    fprintf('------Sensitivity c------\n')
+    fprintf('pert.c \t%14.8g \n',pert.c);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.c,dJ_for/pert.c);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.c);
+end
+if pert.q~=0
+    fprintf('------Sensitivity q------\n')
+    fprintf('pert.q \t%14.8g \n',pert.q);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.q,dJ_for/pert.q);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.q);
+end
+if pert.bc_L~=0
+    fprintf('-----Sensitivity bcL-----\n')
+    fprintf('pert.bc_L \t%14.8g \n',pert.bc_L);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_L,dJ_for/pert.bc_L);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_L);
+end
+if pert.bc_R~=0
+    fprintf('-----Sensitivity bcR-----\n')
+    fprintf('pert.bc_R \t%14.8g \n',pert.bc_R);
+    fprintf('dJ forward \t%14.8g \t%14.8g\n',(J_for_pert-J_for_unpert)/pert.bc_R,dJ_for/pert.bc_R);
+    fprintf('dJ adjoint \t%14.8g \n',dJ_adj/pert.bc_R);
+end
 
-% plot solution
-figure(3)
-subplot(1,2,1);
-plot(npar.xf,Tu,'.-',npar.xf,Tp,'+-')
-legend('Tu','Tp');
-subplot(1,2,2);
-plot(npar.xf,phiu,'.-',npar.xf,phip,'+-')
-legend('phiu','phip');
-
-%disp(dAdp)
-
-%disp(r_functional_u)
-
-%disp(dTdxValues)
-
-%disp(Tdiru)
-%disp(Tp)
 return
+
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,7 +191,7 @@ for iter=1:npar.max_nl_iter
     % compute error
     err=norm(T_old-T);
     % check convergence
-    fprintf('Picard=%g, error=%d\n',iter,err);
+    fprintf('Picard=%g, error=%d \n',iter,err);
     if err<npar.nl_tol
         fprintf('Converged\n\n');
         break; % done
@@ -459,7 +474,7 @@ end
 function [dat,npar]=load_simulation_data(pert)
 
 % data 
-T_inf=0; h=16; L=0.5;
+T_inf=300; h=16; L=0.5;
 
 a=2150; b=200;c=1.05*0; d=1;
 a=1;
@@ -512,10 +527,10 @@ nel_zone = [ 100 ];
 
 % bc types
 bc.left.type=0; %0=neumann, 1=robin, 2=dirichlet
-bc.rite.type=2;
+bc.rite.type=1;
 % forward bc values
 bc.left.C=0; % (that data is C in: kdu/dn=C // u+k/hcv*du/dn =C // u=C)
-bc.rite.C=40;
+bc.rite.C=T_inf;
 dat.bc_for=bc; 
 % create perturbations
 dat.bc_for.left.dC = pert.bc_L*dat.bc_for.left.C;

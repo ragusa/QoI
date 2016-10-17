@@ -10,14 +10,13 @@ clc; close all;
 
 % load the data and numerical parameters
 pert.a    = 1e-1 *0.1;
-pert.b    = 1e-1 *0;
+pert.b    = 1e-1 *0.0;
 pert.c    = 0;
-pert.q    = 1e-1 *0;
-pert.bc_L = 1e-1 *0;
-pert.bc_R = 1e-1 *0;
+pert.q    = 1e-1 *0.0;
+pert.bc_L = 1e-1 *0.0;
+pert.bc_R = 1e-1 *0.0;
 [dat,npar] = load_simulation_data(pert);
-% Define how we determine K(t) perturbed
-npar.exactK=false;
+
 
 % solve unperturbed forward problem
 npar.adjoint=false;
@@ -73,15 +72,15 @@ fprintf('\tinner: %g\n',J_for_pert);
 fprintf('\t%s\t %g \n','Tp''*r',Tp'*rp);
 fprintf('\t%s %g \n\n','dot(r_functional_u,Tdirp)',dot(r_functional_u,Tdirp));
 
-fprintf('QoI perturbed: Adjoint \n-----------------------\n');
+fprintf('Adjoint Inner: NOT QOI \n-----------------------\n');
 fprintf('\tinner: %g\n',J_adj_pert);
 fprintf('\t%s\t %g \n','phi''*qu',phip'*qp);
 fprintf('\t%s %g \n\n','dot(r_functional_u,Tdiru)',dot(r_functional_p,Tdirp));
 
 % plot solution
 figure(1);
-subplot(1,2,1); hold all; plot(npar.xf,Tp,'+-'); legend('Tu','Tp');
-subplot(1,2,2); hold all; plot(npar.xf,phip,'+-');legend('Phiu','Phip');
+subplot(1,2,1); hold all; plot(npar.xf,Tp,'.-'); legend('Tu','Tp');
+subplot(1,2,2); hold all; plot(npar.xf,phip,'.-');legend('Phiu','Phip');
 
 %%%%%%%%%%%% Sensitivity
 
@@ -264,12 +263,6 @@ if npar.adjoint
     src = dat.asrc;
     bc  = dat.bc_adj;
     kond = dat.k;
-    if npar.exactK
-        switch npar.pert_status
-            case 'perturbed'
-                kond=dat.kExact;
-        end
-    end
 else
     bc  = dat.bc_for;
     % what kind of material properties to use
@@ -279,11 +272,7 @@ else
             src = dat.fsrc;
         case 'perturbed'
             for i=1:length(dat.k)
-                if npar.exactK
-                    kond{i} = @(T) dat.kExact{i}(T);
-                else
-                    kond{i} = @(T) dat.k{i}(T)    + dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
-                end
+                kond{i} = @(T) dat.k{i}(T)    + dat.dka{i}(T)+ dat.dkb{i}(T)+ dat.dkc{i}(T);
                 src{i}  = @(x) dat.fsrc{i}(x) + dat.dfsrc{i}(x);
             end
             bc.left.C = bc.left.C + bc.left.dC;
@@ -473,19 +462,25 @@ end
 
 function [dat,npar]=load_simulation_data(pert)
 
+%Switch to change k(T) to common testing values
+%0=>Default thing, 1=>Value for analytic comparison 
+condSwitch = 0 
+
 % data 
 T_inf=300; h=16; L=0.5;
 
-a=2150; b=200;c=1.05*0; d=1;
-a=1;
-
-cond = @(T) a./(d*T+b)+c;
-cond = @(T) T.^a;
-condExact = @(T) T.^((1+pert.a)*a); 
+if condSwitch==0
+    a=2150; b=200;c=1.05*0; d=1;
+    cond = @(T) a./(d*T+b)+c;
+end
+if condSwitch==1
+    a=1; b=0; c=0; d=0;
+    cond = @(T) T.^a;
+end
 
 dat.conductivity_constants.a=a;
 dat.conductivity_constants.b=b;
-% dat.conductivity_constants.c=c;
+dat.conductivity_constants.c=c;
 
 q=10000;  sq = @(x) q*(1+0*x);
 dat.src_strength=q;
@@ -494,7 +489,6 @@ res_funct = @(x) 1/L*(1+0*x);
 
 % load the data structure with info pertaining to the physical problem
 dat.k{1}=cond; % W/m-K
-dat.kExact{1}=condExact;
 % forward calculation source
 dat.fsrc{1}=sq; 
 % adjoint calculation source
@@ -505,18 +499,20 @@ dat.asrc{1}=res_funct;
 % dk/da = 1/(b+T);
 % dk/db = -a/(b+T)^2;
 % dk/dc = 1;
-%THESE NEED TO BE CHANGED FOR OTHER K(T)
 for i=1:length(dat.k)
-    %dat.dka{i}   = @(T) 1./(d*T+b)*pert.a*a;
-    %dat.dkb{i}   = @(T) -a./((d*T+b).^2)*pert.b*b;
-    %dat.dkc{i}   = @(T) pert.c*c*(1+0*T);
-    %dat.dkdT{i}  = @(T) -a./((d*T+b).^2)*d;
+    if condSwitch==0
+        dat.dka{i}   = @(T) 1./(d*T+b)*pert.a*a;
+        dat.dkb{i}   = @(T) -a./((d*T+b).^2)*pert.b*b;
+        dat.dkc{i}   = @(T) pert.c*c*(1+0*T);
+        dat.dkdT{i}  = @(T) -a./((d*T+b).^2)*d;
+    end
+    if condSwitch==1
+        dat.dka{i}   = @(T) log(T).*(T.^a)*pert.a*a;
+        dat.dkb{i}   = @(T) 0*T;
+        dat.dkc{i}   = @(T) 0*T;
+        dat.dkdT{i}   = @(T) a*(T.^(a-1));
+    end
     dat.dfsrc{i} = @(x) q*pert.q*(1+0*x);
-    %values for analytical compare
-    dat.dka{i}   = @(T) log(T).*(T.^a)*pert.a*a;
-    dat.dkb{i}   = @(T) 0*T;
-    dat.dkc{i}   = @(T) 0*T;
-    dat.dkdT{i}   = @(T) a*T.^(a-1);
 end
 
 % dimensions

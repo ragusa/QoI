@@ -103,7 +103,7 @@ fprintf('\tForward: Trapezoidal rule: %g\n',JJJJPPPP);
 
 % plot solution
 figure (1)
-subplot(1,2,1); plot(npar.xf,Tp,'+-'); legend(['Tu';'Tp'],'Location','Best');
+subplot(1,2,1); plot(npar.xf,Tp,'.-'); legend(['Tu';'Tp'],'Location','Best');
 
 
 dT = Tp-Tu;

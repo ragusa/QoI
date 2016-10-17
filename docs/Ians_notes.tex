@@ -511,15 +511,18 @@ Use a backward Euler method, where we have the initial temperature $T_1$.
 \[
 \left. \der{T}{t} \right|_{n+1} =-A_{n+1} T_{n+1}+q_{n+1}
 \]
+Approximate time derivative
 \[
 \frac{T_{n+1}-T_n}{\Delta t} =-A_{n+1} T_{n+1}+q_{n+1}
 \]
+Rearrange to solve for $T_{n+1}$ in terms of $T_n$
 \[
 T_{n+1} + \Delta t A_{n+1} T_{n+1}= T_n+\Delta t q_{n+1}
 \]
+Group $T_{n+1}$ operating terms
 \[
 (I + \Delta t A_{n+1}) T_{n+1}= T_n+\Delta t q_{n+1}
 \]
-
+Sow we just have a new operator $B=I + \Delta t A_{n+1}$
 
 \end{document}

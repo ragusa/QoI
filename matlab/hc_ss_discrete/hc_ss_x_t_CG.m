@@ -20,14 +20,16 @@ pert_bc_R = 1e-1 *0;
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 [Tu]=solve_time_system(npar,dat);
-return
-[Au,qu,Tdiru,AN]=assemble_system(npar,dat);
+%return
+%[Au,qu,Tdiru,AN]=assemble_system(npar,dat);
 % solve forward system
-Tu=Au\qu;
+%Tu=Au\qu;
 
 % assemble the matrix and the rhs
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
+[Phiu]=solve_time_system(npar,dat);
+return
 [Aa,r,r_functional_u,~]=assemble_system(npar,dat);
 % solve forward system
 phi=Aa\r;
@@ -142,27 +144,45 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [Tfinal]=solve_time_system(npar,dat)
-tfinal=5;
-dt=0.1;
-max_steps=tfinal/dt;
-%Tprev=dat.T_initial;
-for ii=1:max_steps
-    t=ii*dt;
-    [A,q,Tdir,AN]=assemble_system(npar,dat,t,1);
-    T=A\q;
-    pause(.1)
-    figure(2)
-    plot(npar.xf,T,'.-'); legend('T');
-    Tprev=T;
+function [final]=solve_time_system(npar,dat)
+tfinal=dat.finalTime;
+dt=dat.dt;
+max_steps=dat.timeSteps;
+if npar.adjoint==false
+    Tprev=ones(npar.nel*npar.porder+1,1);
+    for ii=1:max_steps
+        t=ii*dt;
+        [A,q,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
+        T=A\q;
+        pause(.001)
+        figure(2)
+        thing=strcat('T(x,',num2str(t),')');
+        plot(npar.xf,T,'.-'); legend(thing);
+        Tprev=T;
+    end
+    final=T;
 end
-Tfinal=T;
+if npar.adjoint==true
+    Phiprev=zeros(npar.nel*npar.porder+1,1);
+    for ii=1:max_steps
+        t=tfinal-ii*dt;
+        [A,r,Tdir,AN]=assemble_system(npar,dat,t,Phiprev);
+        Phi=A\r;
+        pause(.05)
+        figure(3)
+        thing=strcat('Phi(x,',num2str(t),')');
+        plot(npar.xf,Phi,'.-'); legend(thing);
+        Phiprev=Phi;
+    end
+    final=Phi;
+end
 return
 end
 
 function [A,rhs, out, A_extremities_before_bc]=assemble_system(npar,dat,t,Tprev)
 
 % assemble the matrix, the rhs, apply BC
+dt=dat.dt;
 
 % shortcuts
 porder= npar.porder;
@@ -174,6 +194,7 @@ nnz=(porder+3)*nel; %this is an upperbound, not exact
 n=nel*porder+1;
 % allocate memory
 A=spalloc(n,n,nnz);
+B=spalloc(n,n,nnz);
 rhs=zeros(n,1);
 
 % compute local matrices
@@ -208,8 +229,8 @@ else
             src = dat.fsrc;
         case 'perturbed'
             for i=1:length(dat.k)
-                kond{i} = @(x) dat.k{i}(x)    + dat.dk{i}(x);
-                src{i}  = @(x) dat.fsrc{i}(x) + dat.dfsrc{i}(x);
+                kond{i} = @(x,t) dat.k{i}(x,t)    + dat.dk{i}(x,t);
+                src{i}  = @(x,t) dat.fsrc{i}(x,t) + dat.dfsrc{i}(x,t);
             end
             bc.left.C = bc.left.C + bc.left.dC;
             bc.rite.C = bc.rite.C + bc.rite.dC;
@@ -231,19 +252,27 @@ for iel=1:npar.nel
     % get x values in the interval
     x=(x1+x0)/2+xq*(x1-x0)/2;
     my_zone=npar.iel2zon(iel);
-    d=kond{my_zone}(x);
-    q=src{my_zone}(x);
+    d=kond{my_zone}(x,t);
+    q=src{my_zone}(x,t);
     % compute local matrices + load vector
     for i=1:porder+1
         for j=1:porder+1
             k(i,j)= dot(d.*wq.*dbdx(:,i) , dbdx(:,j));
+            m(i,j)=dot(wq.*b(:,i),b(:,j));
         end
         f(i)= dot(q.*wq, b(:,i));
     end
     % assemble
     A(gn(iel,:),gn(iel,:)) = A(gn(iel,:),gn(iel,:)) + k/Jac;
+    B(gn(iel,:),gn(iel,:)) = B(gn(iel,:),gn(iel,:)) + m;
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + f*Jac;
 end
+if npar.adjoint 
+    A=A+(B/dt);
+else 
+    A=A+(B/dt);
+end
+rhs=rhs+(Tprev/dt);
 
 % apply natural BC
 Dirichlet_nodes=[];
@@ -274,7 +303,7 @@ end
 % save pieces of A
 A_extremities_before_bc=A(Dirichlet_nodes,:);
 % apply Dirichlet BC
-for i=1:length(Dirichlet_nodes);% loop on the number of constraints
+for i=1:length(Dirichlet_nodes) % loop on the number of constraints
     id=Dirichlet_nodes(i);      % extract the dof of a constraint
     bcval=Dirichlet_val(i);
     rhs=rhs-bcval*A(:,id);  % modify the rhs using constrained value
@@ -289,6 +318,7 @@ if npar.adjoint
 else
     out=Dirichlet_val;
 end
+
 
 return
 end
@@ -515,7 +545,7 @@ function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
 triga = false;
 
-dat.finalTime=10;
+dat.finalTime=100;
 dat.timeSteps=100;
 dat.dt=dat.finalTime/dat.timeSteps;
 
@@ -523,14 +553,14 @@ dat.dt=dat.finalTime/dat.timeSteps;
 if triga
     % dat.hcv = 1612.414; % W/m^2-C
     dat.hcv = 100; % W/m^2-C
-    % dat.width = [0.003175 0.01 0.0174115 0.0179195]; % m
+    % dat.width = [0.003175 0.01 0.017415 0.0179195]; % m
     dat.width = [1 3 4 7]; % m
     % mesh resolution per region
     nel_zone = [ 5 5 5 2];
 else
     dat.hcv = 100;
     dat.width = 0.5*5;
-    nel_zone = [ 10 ];
+    nel_zone = [ 100 ];
 end
 
 % load the data structure with info pertaining to the physical problem
@@ -550,17 +580,18 @@ if triga
     dat.asrc{3}=@zero_function;
     dat.asrc{4}=@zero_function; % W/m3
 else
-    dat.k{1}=@(x) 2150/200*(1+0*x);
-    dat.fsrc{1}=@(x) 10000*(1+0*x);
-    dat.asrc{1}=@(x) (1+0*x)/dat.width(end);
+    dat.k{1}=@(x,t) 2150/200*(1+0*x+0*t/100);
+    dat.fsrc{1}=@(x,t) (t<=40)*(10000*(1+0*x+0*t))+(t>40)*(t<=60)*(10000*(1+(t-40)/20))+(t>60)*(10000*(2));
+    %dat.fsrc{1}=@(x,t) (10000*(1+0*x+0*t)); %For debuging
+    dat.asrc{1}=@(x,t) (1+0*x+0*t)/dat.width(end);
 end
 % create perturbations
 for i=1:length(dat.k)
-    dat.dk{i}    = @(x) pert_k*dat.k{i}(x);
+    dat.dk{i}    = @(x,t) pert_k*dat.k{i}(x)*(1+0*t);
     if isequal(dat.fsrc{i},@zero_function)
         dat.dfsrc{i} = @zero_function;
     else
-        dat.dfsrc{i} = @(x) pert_s*(1+0*x);
+        dat.dfsrc{i} = @(x,t) pert_s*(1+0*x)*(1+0*t);
     end
 end
 
@@ -572,7 +603,7 @@ if triga
     bc.rite.C=15;
 else
     bc.rite.type=2;
-    bc.rite.C=1000;
+    bc.rite.C=100;
 end
 dat.bc_for=bc;
 % create perturbations

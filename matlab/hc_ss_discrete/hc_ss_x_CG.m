@@ -548,7 +548,7 @@ if triga
     bc.rite.C=15;
 else
     bc.rite.type=2;
-    bc.rite.C=1000;
+    bc.rite.C=100;
 end
 dat.bc_for=bc;
 % create perturbations

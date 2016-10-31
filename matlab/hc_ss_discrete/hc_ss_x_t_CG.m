@@ -17,23 +17,27 @@ pert_bc_R = 1e-1 *0;
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 [Tu]=solve_time_system(npar,dat);
-
+% 
 % assemble the matrix and the rhs
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
 [Phiu]=solve_time_system(npar,dat);
-
-npar.adjoint=false;
-npar.pert_status = 'perturbed';
-[Tp]=solve_time_system(npar,dat);
+% 
+% npar.adjoint=false;
+% npar.pert_status = 'perturbed';
+% [Tp]=solve_time_system(npar,dat);
 
 figure(1) 
 surf(Tu)
-figure(2) 
-surf(Phiu)
-figure(3) 
-surf(Tp)
+% figure(2) 
+% surf(Phiu)
+% figure(3) 
+% surf(Tp)
 
+figure(99);hold all;
+for k=1:length(Phiu(1,:))
+    plot(Phiu(:,k));
+end
 return
 end
 
@@ -41,29 +45,34 @@ end
 
 function [final]=solve_time_system(npar,dat)
 %Store time data in dat
-dat.finalTime=10;
-dat.timeSteps=100;
+dat.finalTime=1;
+dat.timeSteps=20;
 dat.dt=dat.finalTime/dat.timeSteps;
 %Set 
 max_steps=dat.timeSteps;
 dt=dat.dt;
 tfinal=dat.finalTime;
 if npar.adjoint==false
-    Tprev=ones(npar.nel*npar.porder+1,1);
+    Tprev=ones(npar.ndofs,1);
+    solutionForward = zeros(npar.ndofs,dat.timeSteps+1);
+    solutionForward(:,1) = Tprev;
     for ii=1:max_steps
         t=ii*dt;
         [T,q]=solveOneStep(npar,dat,t,Tprev);
-        solutionForward(ii,:,:)=T;
+        solutionForward(:,ii+1)=T;
         Tprev=T;
     end
     final=solutionForward;
 end
 if npar.adjoint==true
-    Phiprev=zeros(npar.nel*npar.porder+1,1);
+    Phiprev=zeros(npar.ndofs,1);
+    solutionAdjoint = zeros(npar.ndofs,dat.timeSteps+1);
+    solutionAdjoint(:,end) = Phiprev;
+    t = tfinal;
     for ii=1:max_steps
-        t=tfinal-ii*dt;
+        t = t -dt;
         [Phi,r]=solveOneStep(npar,dat,t,Phiprev);
-        solutionAdjoint(ii,:,:)=Phi;
+        solutionAdjoint(:,end-ii)=Phi;
         Phiprev=Phi;
     end
     final=solutionAdjoint;
@@ -71,35 +80,47 @@ end
 return
 end
 
-function [returnValue,source]=solveOneStep(npar,dat,t,Tprev)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [returnValue,source]=solveOneStep(npar,dat,t_end,Tprev)
 % systemSelector is used to determine which system is to be solved:
 % 1 => Transient heat equation
 % 2 => du/dt = t
-systemSelector=2;
 dt=dat.dt;
-if systemSelector==1
-   [A,source,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
-   T=A\source;
-   returnValue=T;
-end
-if systemSelector==2
-    [u,source]=test_system(npar,dat,t,Tprev);
-    returnValue=u;
+switch dat.systemSelector
+    case {1}
+        [A,source,Tdir,AN]=assemble_system(npar,dat,t_end,Tprev);
+        T=A\source;
+        returnValue=T;
+    case {2}
+        [u,source]=test_system(npar,dat,t_end,Tprev);
+        returnValue=u;
+    otherwise 
+        error('wong test selector in %s',mfilename);
 end
 
 return
 end
 
-function [u,source]=test_system(npar,dat,t,uprev)
-%Simple test case of solving du/dt = a*t
-dt=dat.dt;
-a=1;
-u=dt*a*t+uprev;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [u,source]=test_system(npar,dat,t_end,uprev)
+%Simple test case of solving du/dt = f(t)
+
+% define the rhs f function
+a = 1;
+my_f = @(t) a*t;
+
+% solve for new u:
+u = dat.dt*my_f(t_end) + uprev;
+
 source=ones(npar.nel*npar.porder+1,1); %Just a dummy for now
 return
 end
 
-function [A,rhs, out, A_extremities_before_bc]=assemble_system(npar,dat,t,Tprev)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [A,rhs, out, A_extremities_before_bc]=assemble_system(npar,dat,t_end,Tprev)
 
 % assemble the matrix, the rhs, apply BC
 dt=dat.dt;
@@ -114,7 +135,7 @@ nnz=(porder+3)*nel; %this is an upperbound, not exact
 n=nel*porder+1;
 % allocate memory
 A=spalloc(n,n,nnz);
-B=spalloc(n,n,nnz);
+M=spalloc(n,n,nnz);
 rhs=zeros(n,1);
 
 % compute local matrices
@@ -172,27 +193,28 @@ for iel=1:npar.nel
     % get x values in the interval
     x=(x1+x0)/2+xq*(x1-x0)/2;
     my_zone=npar.iel2zon(iel);
-    d=kond{my_zone}(x,t);
-    q=src{my_zone}(x,t);
+    d=kond{my_zone}(x,t_end);
+    q=src{my_zone}(x,t_end);
     % compute local matrices + load vector
     for i=1:porder+1
         for j=1:porder+1
             k(i,j)= dot(d.*wq.*dbdx(:,i) , dbdx(:,j));
-            m(i,j)=dot(wq.*b(:,i),b(:,j));
+            m(i,j)= dot(wq.*b(:,i),b(:,j));
         end
         f(i)= dot(q.*wq, b(:,i));
     end
     % assemble
     A(gn(iel,:),gn(iel,:)) = A(gn(iel,:),gn(iel,:)) + k/Jac;
-    B(gn(iel,:),gn(iel,:)) = B(gn(iel,:),gn(iel,:)) + m;
+    M(gn(iel,:),gn(iel,:)) = M(gn(iel,:),gn(iel,:)) + m*Jac;
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + f*Jac;
 end
 if npar.adjoint 
-    A=A+(B/dt);
+    A = M/dt +A;
+    rhs = rhs + M*Tprev/dt;
 else 
-    A=A+(B/dt);
+    A = M/dt +A;
+    rhs = rhs + M*Tprev/dt;
 end
-rhs=rhs+(Tprev/dt);
 
 % apply natural BC
 Dirichlet_nodes=[];
@@ -464,6 +486,7 @@ end
 function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
 triga = false;
+dat.systemSelector=1;
 
 
 % dimensions

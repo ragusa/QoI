@@ -20,10 +20,7 @@ pert_bc_R = 1e-1 *0;
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 [Tu]=solve_time_system(npar,dat);
-%return
-%[Au,qu,Tdiru,AN]=assemble_system(npar,dat);
-% solve forward system
-%Tu=Au\qu;
+
 
 % assemble the matrix and the rhs
 npar.adjoint=true;
@@ -33,115 +30,6 @@ npar.pert_status = 'unperturbed';
 npar.adjoint=false;
 npar.pert_status = 'perturbed';
 [Tp]=solve_time_system(npar,dat);
-return
-%[Aa,r,r_functional_u,~]=assemble_system(npar,dat);
-% solve forward system
-phi=Aa\r;
-
-% calculation of the QoI using inner products
-J_for_unpert = Tu'*r   + dot(r_functional_u,Tdiru);
-J_adj_unpert = phi'*qu + dot(r_functional_u,Tdiru);
-
-% calculation of the QoI using definition and numerical quadrature
-npar.adjoint=false;
-[J_num_for_unpert,vol_integral_Tr] = qoi_num_eval(Tu,npar,dat,AN);
-% [J_num_for_pert,~]   = qoi_num_eval(Tp,npar,dat);
-npar.adjoint=true;
-npar.use_matrix_terms=false;
-[J_num_adj_unpert,vol_integral_Phiq] = qoi_num_eval(phi,npar,dat,AN);
-J_num_adj_unpert = J_num_adj_unpert + (npar.porder==1)*dot(r_functional_u,Tdiru);
-npar.use_matrix_terms=true;
-[J_num_adj_unpert_AN,~] = qoi_num_eval(phi,npar,dat,AN);
-J_num_adj_unpert_AN = J_num_adj_unpert_AN + dot(r_functional_u,Tdiru);
-% trapezoidal rule
-dx=diff(npar.xf);
-JJJJUUUU  = dot( (Tu(1:end-1)+Tu(2:end))/2   , dx )/sum(dx);
-JJJJaUUUU = dot( (phi(1:end-1)+phi(2:end))/2 , dx )*10000;
-
-fprintf('QoI unperturbed: Forward \n------------------------\n');
-fprintf('\tinner: %g\n',J_for_unpert);
-fprintf('\t%s\t %g \n','Tu''*r',Tu'*r);
-fprintf('\t%s %g \n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
-fprintf('\tForward: num. : %g\n',J_num_for_unpert);
-fprintf('\tvol.int. Tr: %g\n',vol_integral_Tr);
-fprintf('\tForward: Trapezoidal rule: %g\n',JJJJUUUU);
-
-fprintf('QoI unperturbed: Adjoint \n-----------------------\n');
-extra_term = -dot(AN,phi)*dat.bc_for.rite.C;
-fprintf('\tinner: %g\n',J_adj_unpert);
-fprintf('\t%s\t %g \n','phi''*qu',phi'*qu);
-fprintf('\t%s %g \n','dot(r_functional_u,Tdiru)',dot(r_functional_u,Tdiru));
-fprintf('\tAdjoint: num. : %g\n',J_num_adj_unpert);
-fprintf('\tAdjoint: num.AN: %g\n',J_num_adj_unpert_AN);
-fprintf('\tAdjoint: vol.int. Phiq: %g\n',vol_integral_Phiq);
-fprintf('\tAdjoint: Trapezoidal vol.int.: %g\n',JJJJaUUUU);
-fprintf('\tAdjoint: vol.int.+Extra: %g\n',vol_integral_Phiq+extra_term+dot(r_functional_u,Tdiru));
-
-% plot solution
-figure(1);
-subplot(1,2,1); hold all; plot(npar.xf,Tu,'.-'); legend('Tu');
-subplot(1,2,2); hold all; plot(npar.xf,phi,'.-');legend('Adj');
-
-%%%%%%%%%%%% perturbations
-
-% assemble the matrix and the rhs
-npar.adjoint=false;
-npar.pert_status = 'perturbed';
-[Ap,qp,Tdirp,AN]=assemble_system(npar,dat);
-% solve forward system
-Tp=Ap\qp;
-
-
-% perturbed QoI computed suing forward solution
-J_for_pert   = Tp'*r  + dot(r_functional_u,Tdirp);
-JJJJPPPP = dot( (Tp(1:end-1)+Tp(2:end))/2   , dx )/sum(dx);
-
-% calculation of the QoI using definition and numerical quadrature
-npar.adjoint=false;
-[J_num_for_pert,vol_integral_Tr] = qoi_num_eval(Tp,npar,dat,AN);
-
-
-fprintf('QoI perturbed: Forward \n----------------------\n');
-fprintf('\tinner: %g\n',J_for_pert);
-fprintf('\t%s\t %g \n','Tp''*r',Tp'*r);
-fprintf('\t%s %g \n','dot(r_functional_u,Tdirp)',dot(r_functional_u,Tdirp));
-fprintf('\tForward: num. : %g\n',J_num_for_pert);
-fprintf('\tvol.int. Tr: %g\n',vol_integral_Tr);
-fprintf('\tForward: Trapezoidal rule: %g\n',JJJJPPPP);
-
-% plot solution
-figure (1)
-subplot(1,2,1); plot(npar.xf,Tp,'.-'); legend(['Tu';'Tp'],'Location','Best');
-
-
-dT = Tp-Tu;
-dq = qp-qu;
-dA = Ap-Au;
-
-dJ_for = dT'*r        +dot(r_functional_u,Tdirp-Tdiru);
-
-dJ_adj       = phi'*(dq - dA*Tu)        +dot(r_functional_u,Tdirp-Tdiru);
-dJ_adj_exact = phi'*(dq  -dA*Tu -dA*dT) +dot(r_functional_u,Tdirp-Tdiru);
-
-fprintf('SENSITIVITY: \n----------------\n');
-fprintf('\tForward: inner: %g\n',dJ_for);
-fprintf('\t%s %g \n','dot(r_functional_u,Tdirp-Tdiru)',dot(r_functional_u,Tdirp-Tdiru));
-fprintf('\tAdjoint: inner: %g\n',dJ_adj);
-fprintf('\tAdjoint: phi*dq: %g\n',phi'*dq);
-fprintf('\tAdjoint: phi*dA*Tu: %g\n',phi'*dA*Tu);
-fprintf('\tAdjoint: inner exact: %g\n',dJ_adj_exact);
-
-npar.adjoint=true;
-npar.use_matrix_terms=false;
-[J_num_adj_pert,vol_integral_Phiq] = qoi_num_eval(phi,npar,dat,AN);
-J_num_adj_pert = J_num_adj_pert + (npar.porder==1)*dot(r_functional_u,Tdirp);
-npar.use_matrix_terms=true;
-[J_num_adj_pert_AN,~] = qoi_num_eval(phi,npar,dat,AN);
-J_num_adj_pert_AN = J_num_adj_pert_AN + dot(r_functional_u,Tdirp);
-fprintf('\tAdjoint: num. : %g\n',J_num_adj_pert-J_num_adj_unpert*0);
-fprintf('\tAdjoint: num.AN: %g\n',J_num_adj_pert_AN-J_num_adj_unpert_AN*0);
-
-% (Tp,Aa.phi) = (Tp,r) = (Ap^{-1}qp,r) = (qp,Ap^{-T}r)
 
 return
 end
@@ -156,8 +44,7 @@ if npar.adjoint==false
     Tprev=ones(npar.nel*npar.porder+1,1);
     for ii=1:max_steps
         t=ii*dt;
-        [A,q,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
-        T=A\q;
+        [T]=solveOneStep(npar,dat,t,Tprev);
         pause(.001)
         figure(2)
         thing=strcat('T(x,',num2str(t),')');
@@ -180,6 +67,25 @@ if npar.adjoint==true
     end
     final=Phi;
 end
+return
+end
+
+function [returnValue]=solveOneStep(npar,dat,t,Tprev)
+% systemSelector is used to determine which system is to be solved:
+% 1 => Transient heat equation
+% 2 => du/dt = t
+systemSelector=1;
+dt=dat.dt;
+if systemSelector==1
+   [A,q,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
+   T=A\q;
+   returnValue=T;
+end
+if systemSelector==2
+    T=dt*a*t+Tprev;
+    returnValue=T;
+end
+
 return
 end
 

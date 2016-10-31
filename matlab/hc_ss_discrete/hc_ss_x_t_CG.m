@@ -1,9 +1,6 @@
 function hc_ss_x_t_CG
-% Solves the heat conduction equation in 1-D x-geometry using CFEM
-% without T gap.
-% An arbitrary number of material zones can be used but the analytical
-% solution assumes 3 zones are used. The conductivities and the volumetric
-% sources can be spatially dependent.
+%solver for time dependent PDE using backwards Euler. Includes a
+%time-dependent heat equation and a simple du/dt=t case for testing.
 
 % clear the console screen
 clc; close all;
@@ -21,7 +18,6 @@ npar.adjoint=false;
 npar.pert_status = 'unperturbed';
 [Tu]=solve_time_system(npar,dat);
 
-
 % assemble the matrix and the rhs
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
@@ -31,61 +27,75 @@ npar.adjoint=false;
 npar.pert_status = 'perturbed';
 [Tp]=solve_time_system(npar,dat);
 
+figure(1) 
+surf(Tu)
+figure(2) 
+surf(Phiu)
+figure(3) 
+surf(Tp)
+
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [final]=solve_time_system(npar,dat)
-tfinal=dat.finalTime;
-dt=dat.dt;
+%Store time data in dat
+dat.finalTime=10;
+dat.timeSteps=100;
+dat.dt=dat.finalTime/dat.timeSteps;
+%Set 
 max_steps=dat.timeSteps;
+dt=dat.dt;
+tfinal=dat.finalTime;
 if npar.adjoint==false
     Tprev=ones(npar.nel*npar.porder+1,1);
     for ii=1:max_steps
         t=ii*dt;
-        [T]=solveOneStep(npar,dat,t,Tprev);
-        pause(.001)
-        figure(2)
-        thing=strcat('T(x,',num2str(t),')');
-        plot(npar.xf,T,'.-'); legend(thing);
+        [T,q]=solveOneStep(npar,dat,t,Tprev);
+        solutionForward(ii,:,:)=T;
         Tprev=T;
     end
-    final=T;
+    final=solutionForward;
 end
 if npar.adjoint==true
     Phiprev=zeros(npar.nel*npar.porder+1,1);
     for ii=1:max_steps
         t=tfinal-ii*dt;
-        [A,r,Tdir,AN]=assemble_system(npar,dat,t,Phiprev);
-        Phi=A\r;
-        pause(.05)
-        figure(3)
-        thing=strcat('Phi(x,',num2str(t),')');
-        plot(npar.xf,Phi,'.-'); legend(thing);
+        [Phi,r]=solveOneStep(npar,dat,t,Phiprev);
+        solutionAdjoint(ii,:,:)=Phi;
         Phiprev=Phi;
     end
-    final=Phi;
+    final=solutionAdjoint;
 end
 return
 end
 
-function [returnValue]=solveOneStep(npar,dat,t,Tprev)
+function [returnValue,source]=solveOneStep(npar,dat,t,Tprev)
 % systemSelector is used to determine which system is to be solved:
 % 1 => Transient heat equation
 % 2 => du/dt = t
-systemSelector=1;
+systemSelector=2;
 dt=dat.dt;
 if systemSelector==1
-   [A,q,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
-   T=A\q;
+   [A,source,Tdir,AN]=assemble_system(npar,dat,t,Tprev);
+   T=A\source;
    returnValue=T;
 end
 if systemSelector==2
-    T=dt*a*t+Tprev;
-    returnValue=T;
+    [u,source]=test_system(npar,dat,t,Tprev);
+    returnValue=u;
 end
 
+return
+end
+
+function [u,source]=test_system(npar,dat,t,uprev)
+%Simple test case of solving du/dt = a*t
+dt=dat.dt;
+a=1;
+u=dt*a*t+uprev;
+source=ones(npar.nel*npar.porder+1,1); %Just a dummy for now
 return
 end
 
@@ -455,9 +465,6 @@ function [dat,npar]=load_simulation_data(pert_k,pert_s,pert_bc_L,pert_bc_R)
 
 triga = false;
 
-dat.finalTime=100;
-dat.timeSteps=100;
-dat.dt=dat.finalTime/dat.timeSteps;
 
 % dimensions
 if triga

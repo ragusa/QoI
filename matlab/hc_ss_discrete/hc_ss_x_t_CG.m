@@ -29,8 +29,12 @@ npar.pert_status = 'unperturbed';
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
 [Phiu]=solve_time_system(npar,dat);
+
+npar.adjoint=false;
+npar.pert_status = 'perturbed';
+[Tp]=solve_time_system(npar,dat);
 return
-[Aa,r,r_functional_u,~]=assemble_system(npar,dat);
+%[Aa,r,r_functional_u,~]=assemble_system(npar,dat);
 % solve forward system
 phi=Aa\r;
 
@@ -587,7 +591,7 @@ else
 end
 % create perturbations
 for i=1:length(dat.k)
-    dat.dk{i}    = @(x,t) pert_k*dat.k{i}(x)*(1+0*t);
+    dat.dk{i}    = @(x,t) pert_k*dat.k{i}(x,t)*(1+0*t);
     if isequal(dat.fsrc{i},@zero_function)
         dat.dfsrc{i} = @zero_function;
     else

@@ -16,84 +16,146 @@ pert_bc_R = 1e-1 *0;
 % assemble the matrix and the rhs
 npar.adjoint=false;
 npar.pert_status = 'unperturbed';
-[Tu]=solve_time_system(npar,dat);
+[Tu,qu]=solve_time_system(npar,dat);
 % 
 % assemble the matrix and the rhs
 npar.adjoint=true;
 npar.pert_status = 'unperturbed';
-[Phiu]=solve_time_system(npar,dat);
+[Phiu,ru]=solve_time_system(npar,dat);
 % 
-% npar.adjoint=false;
-% npar.pert_status = 'perturbed';
-% [Tp]=solve_time_system(npar,dat);
+npar.adjoint=false;
+npar.pert_status = 'perturbed';
+[Tp,qp]=solve_time_system(npar,dat);
 
-figure(1) 
-surf(Tu)
-% figure(2) 
-% surf(Phiu)
-% figure(3) 
-% surf(Tp)
+QoIArray=[];
+for ii=1:length(Tu(1,:))
+    QoIArray=[QoIArray dot(Tu(:,ii ), ru(:,ii))];
+end
+%QoIArray
+TuQoI=sum(QoIArray)
+QoIArray=[];
+for ii=1:length(Tp(1,:))
+    QoIArray=[QoIArray dot(Tp(:,ii ), ru(:,ii))];
+end
+TpQoI=sum(QoIArray)
 
-figure(99);hold all;
-for k=1:length(Phiu(1,:))
-    plot(Phiu(:,k));
+switch dat.systemSelector
+    case {1} %Heat Equation
+        figure(1) 
+        surf(Tu)
+        figure(2) 
+        surf(Phiu)
+        figure(3) 
+        surf(Tp)
+        figure(4)
+        surf(ru)
+
+        figure(97);hold all;
+        for k=1:length(Tu(1,:))
+            plot(Tu(:,k));
+        end
+        figure(98);hold all;
+        for k=1:length(Phiu(1,:))
+            plot(Phiu(:,k));
+        end
+        figure(99);hold all;
+        for k=1:length(Tp(1,:))
+            plot(Tp(:,k));
+        end
+    case {2} 
+        figure(1);
+        plot(Tu);
 end
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [final]=solve_time_system(npar,dat)
+function [final,finalSource]=solve_time_system(npar,dat)
 %Store time data in dat
-dat.finalTime=1;
-dat.timeSteps=20;
+dat.finalTime=100;
+dat.timeSteps=10;
 dat.dt=dat.finalTime/dat.timeSteps;
 %Set 
 max_steps=dat.timeSteps;
 dt=dat.dt;
 tfinal=dat.finalTime;
 if npar.adjoint==false
-    Tprev=ones(npar.ndofs,1);
-    solutionForward = zeros(npar.ndofs,dat.timeSteps+1);
-    solutionForward(:,1) = Tprev;
+    [Tprev,solutionForward,qArray]=getInitial(dat,npar);
     for ii=1:max_steps
         t=ii*dt;
         [T,q]=solveOneStep(npar,dat,t,Tprev);
-        solutionForward(:,ii+1)=T;
+        solutionForward=[solutionForward T];
+        qArray=[qArray q];
         Tprev=T;
     end
     final=solutionForward;
+    finalSource=qArray;
 end
 if npar.adjoint==true
-    Phiprev=zeros(npar.ndofs,1);
-    solutionAdjoint = zeros(npar.ndofs,dat.timeSteps+1);
-    solutionAdjoint(:,end) = Phiprev;
+    [Phiprev,solutionAdjoint,rArray]=getInitial(dat,npar);
     t = tfinal;
     for ii=1:max_steps
         t = t -dt;
         [Phi,r]=solveOneStep(npar,dat,t,Phiprev);
-        solutionAdjoint(:,end-ii)=Phi;
+        solutionAdjoint=[Phi solutionAdjoint];
+        rArray=[r rArray];
         Phiprev=Phi;
     end
     final=solutionAdjoint;
+    finalSource=rArray;
 end
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [initialGuess,solutionArray,sourceArray]=getInitial(dat,npar)
+max_steps=dat.timeSteps;
+dt=dat.dt;
+tfinal=dat.finalTime;
+switch dat.systemSelector
+    case {1} %Heat Equation
+        if npar.adjoint==false
+            initialGuess=ones(npar.ndofs,1);
+            [~,initialSource]=solveOneStep(npar,dat,0,initialGuess);
+        end
+        if npar.adjoint==true
+            initialGuess=zeros(npar.ndofs,1);
+            [~,initialSource]=solveOneStep(npar,dat,tfinal,initialGuess);
+        end
+    solutionArray = zeros(npar.ndofs,1);
+    sourceArray = zeros(npar.ndofs,1);
+    solutionArray(:,1) = initialGuess;
+    sourceArray(:,1)=initialSource;
+    case {2} %Test system du/dt=a*t
+        if npar.adjoint==false
+            initialGuess=0;
+            initialSource=0;
+        end
+        if npar.adjoint==true
+            initialGuess=0;
+            initialSource=0;
+        end
+    solutionArray =[initialGuess];
+    sourceArray=[initialSource];
+    otherwise 
+        error('wong test selector in %s',mfilename);
+end
 
-function [returnValue,source]=solveOneStep(npar,dat,t_end,Tprev)
+end
+
+function [returnValue,realSource]=solveOneStep(npar,dat,t_end,Tprev)
 % systemSelector is used to determine which system is to be solved:
 % 1 => Transient heat equation
 % 2 => du/dt = t
 dt=dat.dt;
 switch dat.systemSelector
     case {1}
-        [A,source,Tdir,AN]=assemble_system(npar,dat,t_end,Tprev);
-        T=A\source;
+        [A,sourceTerm,Tdir,AN,realSource]=assemble_system(npar,dat,t_end,Tprev);
+        T=A\sourceTerm;
         returnValue=T;
     case {2}
-        [u,source]=test_system(npar,dat,t_end,Tprev);
+        [u,realSource]=test_system(npar,dat,t_end,Tprev);
         returnValue=u;
     otherwise 
         error('wong test selector in %s',mfilename);
@@ -114,13 +176,13 @@ my_f = @(t) a*t;
 % solve for new u:
 u = dat.dt*my_f(t_end) + uprev;
 
-source=ones(npar.nel*npar.porder+1,1); %Just a dummy for now
+source=[dat.dt]; %Just a dummy for now
 return
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [A,rhs, out, A_extremities_before_bc]=assemble_system(npar,dat,t_end,Tprev)
+function [A,rhs, out, A_extremities_before_bc,realSource]=assemble_system(npar,dat,t_end,Tprev)
 
 % assemble the matrix, the rhs, apply BC
 dt=dat.dt;
@@ -208,6 +270,7 @@ for iel=1:npar.nel
     M(gn(iel,:),gn(iel,:)) = M(gn(iel,:),gn(iel,:)) + m*Jac;
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + f*Jac;
 end
+realSource=rhs;
 if npar.adjoint 
     A = M/dt +A;
     rhs = rhs + M*Tprev/dt;

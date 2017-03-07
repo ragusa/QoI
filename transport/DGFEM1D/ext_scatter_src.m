@@ -1,14 +1,29 @@
-function [q]=ext_scatter_src(q, phi, ncells, pb);
+function [q]=ext_scatter_src(phi,forward)
 % compute the total source (ext+scattering) 
-q(:,:)=0;
-% loop over each spatial cell
-for i=1:ncells,
-    imed = pb.ID.mat(i); % retrieve material ID
-    xs   = pb.XS.sca(imed); % retrieve scattering XS value
-    isrc = pb.ID.src(i);    % retrieve ext src ID
-    sext=0;
-    if(isrc>0), sext = pb.src(isrc); end
-    q(i,:) = (sext + xs * phi(i,:) )/ 2;
+
+global dat npar
+
+% source data (volumetric) 
+if forward
+    qv  = dat.qv_forward;
+else
+    qv  = dat.qv_adjoint;
 end
-return
+
+% initialize
+q = zeros(npar.porder+1,npar.nel);
+
+% loop over each spatial cell
+for iel=1:npar.nel
+
+    my_zone=npar.iel2zon(iel);
+    sigs = dat.sigs(my_zone);
+    qext = qv(my_zone);
+
+    q(:,iel) = qext + sigs * phi(:,iel);
+end
+
+% isotropic source and scattering
+q = q/2; 
+
 end

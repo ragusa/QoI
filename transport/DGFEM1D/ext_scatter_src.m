@@ -1,7 +1,7 @@
 function [q]=ext_scatter_src(phi,forward)
 % compute the total source (ext+scattering) 
 
-global dat npar
+global dat npar snq
 
 % source data (volumetric) 
 if forward
@@ -24,6 +24,6 @@ for iel=1:npar.nel
 end
 
 % isotropic source and scattering
-q = q/2; 
+q = q/snq.sw; 
 
 end

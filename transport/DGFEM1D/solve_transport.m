@@ -22,7 +22,7 @@ if do_dsa
 end
 
 % iteration parameters
-npar.max_SI_iter  = 500;
+npar.max_SI_iter  = 5000;
 npar.SI_tolerance = 1e-8;
 keep_angular_flux = false;
 
@@ -41,16 +41,22 @@ for iter=1:npar.max_SI_iter,
     % perform transport sweep
     phi_new = sweep1D_LD(q, forward, keep_angular_flux);
     % compute error norm
-    err = norm(phi_new-phi_old,inf);
-    fprintf('SI iteration %4i, error %7e \n',iter,err);
+    new_norm = norm(phi_new-phi_old,2);
     % check for convergence, otherwise prepare next SI
-    if err<npar.SI_tolerance
+    if new_norm<npar.SI_tolerance
         break
     else
         % update RHS term
         q = ext_scatter_src(phi_new,forward); 
         if(iter==npar.max_SI_iter), warning('about to exit w/o convergence'); end
     end
+    % console printouts
+    fprintf('SI iteration %4i, error %7e',iter,new_norm);
+    if iter>1
+        fprintf(', NSR %7e',new_norm/old_norm);
+    end
+    old_norm = new_norm;
+    fprintf('\n');
 end
 
 

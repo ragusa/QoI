@@ -9,7 +9,7 @@ xlabel('x'); ylabel('scalar flux');
 % filename=sprintf('scal_%s_sn%i.png',tit,sn);
 % print('-dpng',filename);
 
-if length(varargin)==2
+if length(varargin)>=1
     
     figure(2)
     E = varargin{1};
@@ -17,12 +17,14 @@ if length(varargin)==2
     title(sprintf('Eddington tensor, problem %d',dat.pb_ID));
     xlabel('x'); ylabel('E');
     
-    psi = varargin{2};
-    for idir=1:snq.n_dir
-        figure(10+idir)
-        plot(npar.xf,reshape(psi(:,:,idir),npar.ndofs,1),'-','LineWidth',1);
-        title(sprintf('angular flux %d, problem %d',idir,dat.pb_ID));
-        xlabel('x'); ylabel('angular flux');
+    if length(varargin)==2
+        psi = varargin{2};
+        for idir=1:snq.n_dir
+            figure(10+idir)
+            plot(npar.xf,reshape(psi(:,:,idir),npar.ndofs,1),'-','LineWidth',1);
+            title(sprintf('angular flux %d, problem %d',idir,dat.pb_ID));
+            xlabel('x'); ylabel('angular flux');
+        end
     end
 end
 

@@ -21,7 +21,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=7;
+pb_ID=1;
 load_input(pb_ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -34,7 +34,8 @@ do_dsa = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % pretty plots
-do_plot(phi,E,psi)
+% do_plot(phi,E,psi)
+do_plot(phi,E)
 
 return
 end

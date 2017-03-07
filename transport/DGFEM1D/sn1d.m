@@ -29,12 +29,12 @@ load_input(pb_ID);
 % solve forward transport problem using sweeps
 forward = true;
 do_dsa = false;
-[phi,E]=solve_transport(forward,do_dsa);
+[phi,E,psi]=solve_transport(forward,do_dsa);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % pretty plots
-do_plot(phi)
+do_plot(phi,E,psi)
 
 return
 end

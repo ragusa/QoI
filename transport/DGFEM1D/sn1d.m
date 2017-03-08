@@ -21,7 +21,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=1;
+pb_ID=12;
 load_input(pb_ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -30,12 +30,18 @@ load_input(pb_ID);
 forward = true;
 do_dsa = true;
 [phi,E,psi]=solve_transport(forward,do_dsa);
-
+% pretty plots
+do_plot(phi,0,E)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward transport problem using sweeps
+forward = false;
+do_dsa = true;
+[phia,Ea,psia]=solve_transport(forward,do_dsa);
 % pretty plots
-% do_plot(phi,E,psi)
-do_plot(phi,E)
+do_plot(phia,100,Ea)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 return
 end

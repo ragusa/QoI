@@ -211,8 +211,13 @@ dat.sigt = sigt;
 dat.sigs = sigs;
 dat.qv_forward =qvf;
 dat.inc_forward = incf;
-dat.qv_adjoint =qva;
-dat.inc_adjoint = inca;
+if pb_ID==12
+    dat.qv_adjoint =qva;
+    dat.inc_adjoint = inca;
+else
+    dat.qv_adjoint =qvf;
+    dat.inc_adjoint = incf;
+end    
 
 %%%%%%%%%%%%%%%%%%%%%%%%% prepare data for computation
 

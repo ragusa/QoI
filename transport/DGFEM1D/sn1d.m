@@ -35,6 +35,14 @@ do_plot(phi,0,E)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward VEF problem using IP
+forward = true;
+[phiVEF]=solve_VEF(forward,E);
+% pretty plots
+do_plot(phiVEF,50)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 forward = false;
 do_dsa = true;
@@ -42,6 +50,15 @@ do_dsa = true;
 % pretty plots
 do_plot(phia,100,Ea)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward VEF problem using IP
+forward = false;
+[phiVEFa]=solve_VEF(forward,E);
+% pretty plots
+do_plot(phiVEFa,150)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 return
 end

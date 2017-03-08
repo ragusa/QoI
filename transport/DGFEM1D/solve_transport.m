@@ -9,7 +9,7 @@ if do_dsa
     % build DSA matrix
     switch dsa_bc_type
         case 'Neumann'
-            error('Neumann bc non accepted for DSA study')
+            error('Neumann bc not accepted for DSA study')
         case 'Robin'
             dat.bc.left.type = 1; % 1=Robin
             dat.bc.rite.type = 1; % 1=Robin
@@ -26,7 +26,7 @@ if do_dsa
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     npar.lump = false;
-    npar.Ckappa = 2;
+    npar.Ckappa = 10;
     npar.Ckappa_bd=2*npar.Ckappa;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     

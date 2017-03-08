@@ -20,7 +20,7 @@ if length(varargin)>=1
     if length(varargin)==2
         psi = varargin{2};
         for idir=1:snq.n_dir
-            figure(figID+10+idir)
+            figure(figID+2+idir)
             plot(npar.xf,reshape(psi(:,:,idir),npar.ndofs,1),'-','LineWidth',1);
             title(sprintf('angular flux %d, problem %d',idir,dat.pb_ID));
             xlabel('x'); ylabel('angular flux');

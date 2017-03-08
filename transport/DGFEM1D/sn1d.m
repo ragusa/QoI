@@ -28,7 +28,7 @@ load_input(pb_ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 forward = true;
-do_dsa = false;
+do_dsa = true;
 [phi,E,psi]=solve_transport(forward,do_dsa);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

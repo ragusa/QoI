@@ -78,12 +78,13 @@ end
 
 % output arguments
 varargout{1} = phi_new;
-if nargout==3
+if nargout==4
     keep_angular_flux=true;
     [phi_new,psi] = sweep1D_LD(q, forward, keep_angular_flux);
-    varargout{3} = psi;
-    E = compute_Eddington_tensor(phi_new,psi);
+    varargout{4} = psi;
+    [E,Ebd] = compute_Eddington_tensor(phi_new,psi);
     varargout{2} = E;
+    varargout{3} = Ebd;
 end
 
 

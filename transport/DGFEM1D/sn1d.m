@@ -29,7 +29,8 @@ load_input(pb_ID);
 % solve forward transport problem using sweeps
 forward = true;
 do_dsa = true;
-[phi,E,psi]=solve_transport(forward,do_dsa);
+[phi,E,Ebd,psi]=solve_transport(forward,do_dsa);
+Ebd
 % pretty plots
 do_plot(phi,0,E)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,16 +38,18 @@ do_plot(phi,0,E)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 forward = true;
-[phiVEF]=solve_VEF(forward,E);
+[phiVEF]=solve_VEF(forward,E,Ebd);
 % pretty plots
-do_plot(phiVEF,50)
+do_plot(phiVEF,0)
+do_plot((phiVEF./reshape(phi,npar.ndofs,1)-1),22)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 forward = false;
 do_dsa = true;
-[phia,Ea,psia]=solve_transport(forward,do_dsa);
+[phia,Ea,Ebda,psia]=solve_transport(forward,do_dsa);
+Ebda
 % pretty plots
 do_plot(phia,100,Ea)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,10 +57,25 @@ do_plot(phia,100,Ea)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 forward = false;
-[phiVEFa]=solve_VEF(forward,E);
+[phiVEFa]=solve_VEF(forward,Ea,Ebda);
 % pretty plots
-do_plot(phiVEFa,150)
+do_plot(phiVEFa,100)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+forward = true;
+qoi_sn_f = compute_qoi(~forward,phi);
+fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
+qoi_vef_f = compute_qoi(~forward,phiVEF);
+fprintf('qoi using VEFforward: \t %g \n',qoi_vef_f);
+forward=false;
+qoi_sn_a = compute_qoi(~forward,phia);
+fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
+qoi_vef_a = compute_qoi(~forward,phiVEFa);
+fprintf('qoi using VEFadjoint: \t %g \n',qoi_vef_a);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 return

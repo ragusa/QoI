@@ -76,6 +76,16 @@ qoi_vef_a = compute_qoi(~forward,phiVEFa);
 fprintf('qoi using VEFadjoint: \t %g \n',qoi_vef_a);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward VEF problem using IP
+forward = false;
+[phiVEFmath]=solve_VEF_math_adjoint(forward,E,Ebd);
+% pretty plots
+do_plot(phiVEFmath,300)
+qoi_vef_math_adj = compute_qoi(~forward,phiVEFmath);
+fprintf('qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 return

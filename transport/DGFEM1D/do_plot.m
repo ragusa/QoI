@@ -2,12 +2,13 @@ function do_plot(phi,figID,varargin)
 
 global npar dat snq
 
-figure(1+figID)
+figure(1+figID); hold all;
 plot(npar.xf,reshape(phi,npar.ndofs,1),'-','LineWidth',1);
 title(sprintf('scalar flux, problem %d',dat.pb_ID));
 xlabel('x'); ylabel('scalar flux');
 % filename=sprintf('scal_%s_sn%i.png',tit,sn);
 % print('-dpng',filename);
+hold off;
 
 if length(varargin)>=1
     

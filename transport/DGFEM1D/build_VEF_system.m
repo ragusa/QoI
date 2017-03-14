@@ -1,4 +1,4 @@
-function [A,rhs] = build_VEF_system(forward,E)
+function [A,rhs] = build_VEF_system(forward,E,Ebd)
 
 global npar dat
 
@@ -10,6 +10,8 @@ else
 end
 
 dsa_method='SIP';
+npar.Ckappa = 3;
+npar.Ckappa_bd=2*npar.Ckappa;
 
 % Ckappa = 1;
 % Ckappa_bd = 1/400;
@@ -59,10 +61,16 @@ for iel=1:npar.nel
     isigtr = 3*dat.cdif(my_zone); % inverse of sigma_tr 
     siga = dat.siga(my_zone);
     qext = qv(my_zone);
+    % get E values in the interval
+    E0=E(1,iel);
+    E1=E(2,iel);
+    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
+    dEdx = (E1-E0)/2;
     % compute local matrices + load vector
     for i=1:porder+1
         for j=1:porder+1
-            k(i,j) = dot(wq.*dbdx(:,i) , dbdx(:,j));
+%            k(i,j) = dot(wq.*dbdx(:,i) ,dbdx(:,j));
+            k(i,j) = dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
             m(i,j) = dot(wq.*b(:,i)    , b(:,j));
         end
         f(i)= dot(qext.*wq, b(:,i));
@@ -73,8 +81,9 @@ for iel=1:npar.nel
     rhs(gn(iel,:)) = rhs(gn(iel,:)) + f*Jac;
 end
 % add VEF 
-Emat = sparse(diag(reshape(E,npar.ndofs,1)));
-A = A + K*Emat;
+% Emat = sparse(diag(reshape(E,npar.ndofs,1)));
+% A = A + K*Emat;
+A=A+K;
 
 % loop on interior edges
 for ie=1:(npar.nel-1)
@@ -103,11 +112,13 @@ for ie=1:(npar.nel-1)
     mii=0.5*(-cdif1/Jac1)*be(end,:)'   *dbedx(end,:);
     % penalty coefficent:
     % assemble
+    Ee=diag(E(:,ie+1));
+    Ei=diag(E(:,ie  ));
     [ kap, sg ] = penalty_coef( dsa_method,cdif1,cdif2,d1,d2,npar.alpha );
-    A(gn(ieli,:),gn(ieli,:)) = A(gn(ieli,:),gn(ieli,:)) + mii + sg*mii';
-    A(gn(ieli,:),gn(iele,:)) = A(gn(ieli,:),gn(iele,:)) + mie + sg*mei';
-    A(gn(iele,:),gn(ieli,:)) = A(gn(iele,:),gn(ieli,:)) + mei + sg*mie';
-    A(gn(iele,:),gn(iele,:)) = A(gn(iele,:),gn(iele,:)) + mee + sg*mee';
+    A(gn(ieli,:),gn(ieli,:)) = A(gn(ieli,:),gn(ieli,:)) + (mii + sg*mii');
+    A(gn(ieli,:),gn(iele,:)) = A(gn(ieli,:),gn(iele,:)) + (mie + sg*mei');
+    A(gn(iele,:),gn(ieli,:)) = A(gn(iele,:),gn(ieli,:)) + (mei + sg*mie');
+    A(gn(iele,:),gn(iele,:)) = A(gn(iele,:),gn(iele,:)) + (mee + sg*mee');
 %     % assemble
 %     A(gn(ieli,:),gn(ieli,:)) = A(gn(ieli,:),gn(ieli,:)) + mii' + mii;
 %     A(gn(ieli,:),gn(iele,:)) = A(gn(ieli,:),gn(iele,:)) + mie' + mei;
@@ -169,7 +180,7 @@ switch dat.bcVEF.left.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
         rhs(1)=rhs(1)+dat.bcVEF.left.C;
     case 1 % Robin
-        A(1,1)=A(1,1) + 1/2; %kap1; %1/2;
+        A(1,1)=A(1,1) + Ebd(1); % 1/2; %kap1; %1/2;
         rhs(1)=rhs(1) + 2*dat.bcVEF.left.C;
     case 2 % Dirichlet
         minus_one=1;
@@ -186,7 +197,7 @@ switch dat.bcVEF.rite.type
     case 0 % Neumann, int_bd_domain (b D grad u n) is on the RHS
         rhs(n)=rhs(n)+dat.bcVEF.rite.C;
     case 1 % Robin
-        A(n,n)=A(n,n) + 1/2; %kapn; %1/2;
+        A(n,n)=A(n,n) + Ebd(2); %+ 1/2; %kapn; %1/2;
         rhs(n)=rhs(n) + 2*dat.bcVEF.rite.C;
     case 2 % Dirichlet
         plus_one =2;

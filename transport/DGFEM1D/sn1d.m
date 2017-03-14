@@ -21,7 +21,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=12;
+pb_ID=7;
 load_input(pb_ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

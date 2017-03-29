@@ -67,12 +67,12 @@ for iter=1:npar.max_SI_iter,
         if(iter==npar.max_SI_iter), warning('about to exit w/o convergence'); end
     end
     % console printouts
-    fprintf('SI iteration %4i, error %7e',iter,new_norm);
-    if iter>1
-        fprintf(', NSR %7e',new_norm/old_norm);
-    end
+    %fprintf('SI iteration %4i, error %7e',iter,new_norm);
+    %if iter>1
+    %    fprintf(', NSR %7e',new_norm/old_norm);
+    %end
     old_norm = new_norm;
-    fprintf('\n');
+    %fprintf('\n');
 end
 
 

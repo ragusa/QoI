@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath, amsthm, amssymb, mhchem, booktabs, hyperref, graphicx, float, esint}
+\usepackage{amsmath, amsthm, amssymb, booktabs, hyperref, graphicx, float, esint, xcolor}
 \setlength{\abovedisplayskip}{0pt}
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
@@ -22,16 +22,28 @@
 Ian Halvic \\
 \end{center}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{1D-Sn Transport}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 Define our forward Sn transport equation
 \[
-\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + q
+\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + q \quad \vr \in V
 \]
-And the adjoint Sn transport equation
+with BC 
+\[
+\psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^-
+\]
+with $\partial V^{\mp}=\left\{ \partial V \text{ such that } \vr \cdot \vO \lessgtr 0 \right\}$.
+
+The adjoint Sn transport equation
 \[
 - \vO \cdot \vgrad \psi^\dag + \sigma_t \psi^\dag = \frac{\sigma_s}{4 \pi} \phi^\dag + q^\dag
 \]
 Where the adjoint source is our response $q^\dag = \frac{r}{4 \pi}$
+\textcolor{red}{always give bc as well}
 Multiply the forward by $\psi^\dag$ and integrate over space and angle
 \[
 \int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \vO \cdot \vgrad \psi + \sigma_t \psi  \right] = 
@@ -83,7 +95,7 @@ Define our forward Sn transport equation
 \[
 \vO \cdot \vgrad \left( \psi + \delta \psi \right) + \left( \sigma_t + \delta \sigma_t \right) \left( \psi + \delta \psi \right) = \frac{\left( \sigma_s + \delta \sigma_s \right)}{4 \pi} \left( \phi + \delta \phi \right) + \left( q + \delta q \right)
 \]
-Retain the adjont equation
+Retain the adjoint equation
 \[
 - \vO \cdot \vgrad \psi^\dag + \sigma_t \psi^\dag = \frac{\sigma_s}{4 \pi} \phi^\dag + q^\dag
 \]
@@ -118,13 +130,21 @@ And split the surface integral once again
 - \int d^2 r \, \int_{\vO \cdot \vec{n} <0} d  \Omega \, \psi^\dag \delta \psi ( \vO \cdot \vec{n} )
 \]
 So we should know $\delta \psi$ on the incoming for boundary conditions, and we can specify $\psi^\dag$ on the outgoing.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VEF Formulation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 The forward VEF formulation, representing using the operator A
 \[ -\vdiv \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right)
 + \sigma_r \phi
 = q
 \]
-The corresponding adjoint operator
+\textcolor{red}{always give bc as well}
+The corresponding adjoint operator \textcolor{red}{careful, at some point, you should describe (1) where the VEF comes from, (2) state that the adjoint VEF can be defined in 2 manners: the adjoint of the forward VEF, which we will call the math adjoint, and the VEF of the adjoint Sn transport}
+
 \[ E^T \cdot \left( - \vgrad \left( \frac{1}{\sigma_{tr}} \vgrad \phi^\dag \right) \right)
 + \sigma_r \phi^\dag
 = q^\dag

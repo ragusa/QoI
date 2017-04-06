@@ -1,4 +1,4 @@
-function [pqoi_sn_f,pqoi_vef_math_adj] = sn1d_iterator(sigsFactor,sigtFactor)
+function [pqoi_sn_f,pqoi_sn_a,pqoi_vef_math_adj] = sn1d_iterator(sigsFactor,sigtFactor)
 % Linear Discontinous FEM code for Sn transport in 1D
 % Jean Ragusa,
 close all; clc; % closes all plotting figures, clears console
@@ -96,11 +96,11 @@ dat.sigaPert = dat.sigtPert - dat.sigsPert;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute perturbed QoIs using adjoint method and unperturbed forward
 forward=false;
-pqoi_sn_a = compute_delta_source_qoi(~forward,phia,phi,E);
+pqoi_sn_a = compute_purturbed_qoi_Sn(~forward,phia,phi,E,psi,psia);
 %fprintf('perturbed qoi using sn adjoint: \t %g \n',pqoi_sn_a);
-pqoi_vef_a = compute_delta_source_qoi(~forward,phiVEFa,phiVEF,E);
+pqoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEF,E);
 %fprintf('perturbed qoi using VEFadjoint: \t %g \n',pqoi_vef_a);
-pqoi_vef_math_adj = compute_delta_source_qoi(~forward,phiVEFmath,phiVEF,E);
+pqoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEF,E);
 %fprintf('perturbed qoi using VEFmathadj: \t %g \n',pqoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

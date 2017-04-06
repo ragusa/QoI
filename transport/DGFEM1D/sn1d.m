@@ -19,6 +19,9 @@ snq.mu = omega; snq.w = weights;
 snq.sw = sum(snq.w);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+dat.bcincPert = 0.00;
+dat.bcLPert = 0.00;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
 pb_ID=12;
@@ -41,7 +44,7 @@ forward = true;
 [phiVEF]=solve_VEF(forward,E,Ebd);
 % pretty plots
 do_plot(phiVEF,0)
-do_plot((phiVEF./reshape(phi,npar.ndofs,1)-1),22)
+%do_plot((phiVEF./reshape(phi,npar.ndofs,1)-1),22)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,17 +93,18 @@ fprintf('qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Perturbations
 dat.sourcePert = 0.0;
-dat.sigsPert = 0.01*dat.sigs;
-dat.sigtPert = 0.00*dat.sigt;
+dat.sigsPert = 0.00*dat.sigs;
+dat.sigtPert = 0.05*dat.sigt;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
+dat.psiIncPert = 0.00*dat.inc_forward;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute perturbed QoIs using adjoint method and unperturbed forward
 forward=false;
-qoi_sn_a = compute_delta_source_qoi(~forward,phia,phi,E);
+qoi_sn_a = compute_purturbed_qoi_Sn(~forward,phia,phi,E,psi,psia);
 fprintf('perturbed qoi using sn adjoint: \t %g \n',qoi_sn_a);
-qoi_vef_a = compute_delta_source_qoi(~forward,phiVEFa,phiVEF,E);
+qoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEF,E);
 fprintf('perturbed qoi using VEFadjoint: \t %g \n',qoi_vef_a);
-qoi_vef_math_adj = compute_delta_source_qoi(~forward,phiVEFmath,phiVEF,E);
+qoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEF,E);
 fprintf('perturbed qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,6 +114,7 @@ dat.siga = dat.siga+dat.sigaPert;
 dat.sigt = dat.sigt+dat.sigtPert;
 dat.cdif = 1./(3*dat.sigt);
 dat.qv_forward=(1+dat.sourcePert)*dat.qv_forward;
+dat.inc_forward = dat.inc_forward + dat.psiIncPert ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %load_input(13);
 % solve forward transport problem using sweeps
@@ -118,15 +123,14 @@ do_dsa = true;
 [phip,Ep,Ebdp,psip]=solve_transport(forward,do_dsa);
 Ebdp;
 % pretty plots
-do_plot(phip,0,Ep)
+do_plot(phip,0)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 forward = true;
 [phiVEFp]=solve_VEF(forward,Ep,Ebdp);
 % pretty plots
-do_plot(phiVEFp,0)
-do_plot((phiVEFp./reshape(phip,npar.ndofs,1)-1),122)
+%do_plot(phiVEFp,0)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 forward = true;

@@ -176,10 +176,10 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 0 0];
         % incoming flux values
-        incf(1:sn) = 0;
+        incf(1:sn) = 0.1;
         % volumetric source value, per zone
         qva=[0 0 1];
-        % incoming flux values
+        % incoming adj flux values
         inca(1:sn) = 0;
         
        case 13 % 
@@ -234,7 +234,7 @@ dat.sigt = sigt;
 dat.sigs = sigs;
 dat.qv_forward =qvf;
 dat.inc_forward = incf;
-if pb_ID==12 || pb_ID==7
+if pb_ID==12 || pb_ID==7 
     dat.qv_adjoint =qva;
     dat.inc_adjoint = inca;
 else

@@ -189,7 +189,7 @@ switch pb_ID
         width_zone = [ 20 4 2 4 20 ];
         % sigt/sigs per zone
         sigt=[2 2 2 2 2];
-        sigs=[0 0 0 0 0];
+        sigs=[1 1 1 1 1];
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values

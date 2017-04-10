@@ -36,10 +36,7 @@ for iel=1:npar.nel
     qext = qv(my_zone)*(1+sourcePert);
     dx   = npar.dx(iel);
     % compute local matrices + load vector
-    for i=1:porder+1
-        f(i)= dot(qext.*wq, b(:,i));
-    end
-    
+    f= mass*(qext.*wq);
     % assemble
     qoi = qoi + dx*dot(f,phia(:,iel)) ;
     qoi = qoi + dx*delta_sigs/snq.sw*dot(mass*phi(:,iel),phia(:,iel));

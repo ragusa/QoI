@@ -91,7 +91,7 @@ fprintf('qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Perturbations
 dat.sourcePert = 0.0;
-dat.sigsPert = -[0.0 0.0 0.0 0.0 0.0].*dat.sigs;
+dat.sigsPert = +[0.1 0.1 0.1 0.1 0.1].*dat.sigs*0;
 dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1].*dat.sigt;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.psiIncPert = 0.0*dat.inc_forward;

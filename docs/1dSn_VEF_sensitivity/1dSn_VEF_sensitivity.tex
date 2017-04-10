@@ -30,7 +30,7 @@ Ian Halvic \\
 
 Define our forward Sn transport equation
 \[
-\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + q \quad \vr \in V
+\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2} \quad \vr \in V
 \]
 with BC 
 \[
@@ -47,19 +47,19 @@ Where the adjoint source is our response $q^\dag = \frac{r}{4 \pi}$
 Multiply the forward by $\psi^\dag$ and integrate over space and angle
 \[
 \int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \vO \cdot \vgrad \psi + \sigma_t \psi  \right] = 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + q \right]
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2}  \right]
 \]
 Take a look at the RHS first
 \begin{align*}
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + q \right]
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2}  \right]
 &= 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi + \int d^3 r \, \int d  \Omega \,  \psi^\dag q \\
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
 &= 
-\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi \int d  \Omega \,  \psi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag q \\
+\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi \int d  \Omega \,  \psi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
 &= 
-\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi  \phi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag q \\
+\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi  \phi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
 &= 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi^\dag + \int d^3 r \, \int d  \Omega \,  \psi q \\
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi^\dag + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
 \end{align*}
 On the LHS, take a look at the first integral
 \begin{align*}

@@ -176,7 +176,7 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 0 0];
         % incoming flux values
-        incf(1:sn) = 0.1;
+        incf(1:sn) = 0;
         % volumetric source value, per zone
         qva=[0 0 1];
         % incoming adj flux values
@@ -184,21 +184,19 @@ switch pb_ID
         
        case 13 % 
         % number of elements per zone
-        nel_zone = [ 10 10 10 ]*4;
+        nel_zone = [ 100  20 10 20 100 ]*4;
         % width of each zone
-        width_zone = [ 2 2 2 ];
+        width_zone = [ 20 4 2 4 20 ];
         % sigt/sigs per zone
-        sigt=[1 1e-8 1];
-        sigt=sigt*(1+dat.sigtPert);
-        sigs=[0.3 0 0.3];
-        sigs=sigs*(1+dat.sigsPert);
+        sigt=[2 2 2 2 2];
+        sigs=[0 0 0 0 0];
         % volumetric source value, per zone
-        qvf=[1 0 0];
+        qvf=[1 1 1 1 1];
         % incoming flux values
         incf(1:sn) = 0;
         % volumetric source value, per zone
-        qva=[0 0 1];
-        % incoming flux values
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
         inca(1:sn) = 0;
 
     otherwise
@@ -234,7 +232,7 @@ dat.sigt = sigt;
 dat.sigs = sigs;
 dat.qv_forward =qvf;
 dat.inc_forward = incf;
-if pb_ID==12 || pb_ID==7 
+if pb_ID==12 || pb_ID==7 || pb_ID==13
     dat.qv_adjoint =qva;
     dat.inc_adjoint = inca;
 else

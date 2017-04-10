@@ -24,7 +24,7 @@ dat.bcLPert = 0.00;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=12;
+pb_ID=13;
 load_input(pb_ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -93,8 +93,8 @@ fprintf('qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Perturbations
 dat.sourcePert = 0.0;
-dat.sigsPert = 0.00*dat.sigs;
-dat.sigtPert = 0.05*dat.sigt;
+dat.sigsPert = -[0.0 0.0 0.0 0.0 0.0].*dat.sigs;
+dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1].*dat.sigt;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.psiIncPert = 0.00*dat.inc_forward;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -102,9 +102,9 @@ dat.psiIncPert = 0.00*dat.inc_forward;
 forward=false;
 qoi_sn_a = compute_purturbed_qoi_Sn(~forward,phia,phi,E,psi,psia);
 fprintf('perturbed qoi using sn adjoint: \t %g \n',qoi_sn_a);
-qoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEF,E);
+qoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEF,E,Ebd);
 fprintf('perturbed qoi using VEFadjoint: \t %g \n',qoi_vef_a);
-qoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEF,E);
+qoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEF,E,Ebd);
 fprintf('perturbed qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,6 +138,16 @@ qoi_sn_f = compute_qoi(~forward,phip);
 fprintf('perturbed qoi using sn forward: \t %g \n',qoi_sn_f);
 qoi_vef_f = compute_qoi(~forward,phiVEFp);
 fprintf('perturbed qoi using VEFforward: \t %g \n',qoi_vef_f);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%Check 2nd order stuff
+load_input(pb_ID);
+forward=false;
+qoi_sn_a_second = compute_purturbed_qoi_Sn(~forward,phia,phip,Ep,psip,psia);
+fprintf('perturbed qoi using sn adjoint 2nd order: \t %g \n',qoi_sn_a_second);
+qoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEFp,Ep,Ebd);
+fprintf('perturbed qoi using VEFadjoint 2nd order: \t %g \n',qoi_vef_a);
+qoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEFp,Ep,Ebd);
+fprintf('perturbed qoi using VEFmathadj 2nd order: \t %g \n',qoi_vef_math_adj);
 return
 end

@@ -77,7 +77,7 @@ end
 
 
 % output arguments
-varargout{1} = phi_new;
+%varargout{1} = phi_new;
 if nargout==4
     keep_angular_flux=true;
     [phi_new,psi] = sweep1D_LD(q, forward, keep_angular_flux);
@@ -86,6 +86,7 @@ if nargout==4
     varargout{2} = E;
     varargout{3} = Ebd;
 end
+varargout{1} = phi_new;
 
 
 end

@@ -19,8 +19,6 @@ if n2==1
     phi=reshape(phi,npar.porder+1,npar.nel);
 end
 
-angleProduct=zeros(npar.porder+1,npar.nel);
-
 % shortcuts
 porder= npar.porder;
 % quadrature
@@ -29,7 +27,6 @@ porder= npar.porder;
 [b,dbdx] =feshpln(xq,porder);
 
 qoi=0;
-ProductSum=0;
 mass = [2 1;1 2]/6;
 %mass = [6 1;1 6]/30;
 %mass = [12 5;5 12]/60;
@@ -52,13 +49,12 @@ for iel=1:npar.nel
     for i=1:porder+1
         f(i)= dot(qext.*wq, b(:,i));
         g(i)= (1/(4*3.14159))*psigs*dot(phi(:,iel).*wq, b(:,i));
-        %Anglular integration of psi psia product
-        %m = psigt*Jac*b;
     end
     m = mass * dx * psigt;
     % assemble
     qoi = qoi + Jac*dot(f,phia(:,iel)) ;
     qoi = qoi + Jac*dot(g,phia(:,iel)) ;
+            %Anglular integration of psi psia product
     for idir=1:snq.n_dir
         qoi=qoi-(snq.w(idir)*((psia(:,iel,idir))'*m*psi(:,iel,idir)));
     end
@@ -70,12 +66,12 @@ for idir=(snq.n_dir/2)+1:snq.n_dir
         m = mass * dx;
         incident=dat.inc_forward+dat.psiIncPert;  %total perturbed incident
         adjointTerm = m*psia(:,1,idir);
-        qoi=qoi-(snq.w(idir)*incident(idir)*adjointTerm(1));
+        %qoi=qoi-(snq.w(idir)*incident(idir)*adjointTerm(1));
 end
 for idir=1:snq.n_dir/2
         dx   = npar.dx(npar.nel);
         m = mass * dx;
         incident=dat.inc_forward+dat.psiIncPert;  %total perturbed incident
         adjointTerm = m*psia(:,npar.nel,idir);
-        qoi=qoi-(snq.w(idir)*incident(idir)*adjointTerm(2));
+        %qoi=qoi-(snq.w(idir)*incident(idir)*adjointTerm(2));
 end

@@ -1,4 +1,4 @@
-function qoi = compute_purturbed_qoi_VEF(forward,phia,phi,E)
+function qoi = compute_purturbed_qoi_VEF(forward,phia,phi,E,Ebd)
 
 global npar dat
 
@@ -60,3 +60,26 @@ for iel=1:npar.nel
     qoi = qoi + Jac*dot(h,phia(:,iel));
 end
 
+
+%boundary terms
+%Left Boundary
+    Jac = npar.dx(1)/2;
+    E0=E(1,1);
+    E1=E(2,1);
+    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
+    dEdx = (E1-E0)/2;
+    %my_zone=npar.iel2zon(1)
+    isigtr = 3*dat.cdif(my_zone);
+    for i=1:porder+1
+        for j=1:porder+1
+            k(i,j) = dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
+        end
+    end
+    term1=isigtr*k/Jac;
+    term2=term1*phi(:,1);
+    testx=1;
+%Right Boundry
+    E0=E(1,end);
+    E1=E(2,end);
+    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
+    dEdx = (E1-E0)/2;

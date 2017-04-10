@@ -33,7 +33,6 @@ load_input(pb_ID);
 forward = true;
 do_dsa = true;
 [phi,E,Ebd,psi]=solve_transport(forward,do_dsa);
-Ebd
 % pretty plots
 do_plot(phi,0,E)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +51,6 @@ do_plot(phiVEF,0)
 forward = false;
 do_dsa = true;
 [phia,Ea,Ebda,psia]=solve_transport(forward,do_dsa);
-Ebda
 % pretty plots
 do_plot(phia,100,Ea)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,7 +94,7 @@ dat.sourcePert = 0.0;
 dat.sigsPert = -[0.0 0.0 0.0 0.0 0.0].*dat.sigs;
 dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1].*dat.sigt;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
-dat.psiIncPert = 0.00*dat.inc_forward;
+dat.psiIncPert = 0.0*dat.inc_forward;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Compute perturbed QoIs using adjoint method and unperturbed forward
 forward=false;

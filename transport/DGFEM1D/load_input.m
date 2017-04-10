@@ -193,7 +193,7 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = 0;
+        incf(1:sn) = 0;  %incf(1:sn/2)=1;
         % volumetric source value, per zone
         qva=[0 0 1 0 0];
         % incoming adj flux values

@@ -19,25 +19,21 @@ end
 ndir = snq.n_dir;
 ii = find (inc(1:ndir/2)>0);
 if isempty(ii) % vacuum
-    dat.bcVEF.left.type = 1; % Pick your choice: 1=Robin, 2=Dirichlet
-    dat.bcVEF.left.C = 0;
-else
-    dat.bcVEF.left.type = 1; % 1=Robin
-    xa=snq.w(1:ndir/2);
-    xb=snq.mu(1:ndir/2);
-    xc= inc(1:ndir/2);
-    xd=snq.w(1:ndir/2)'.*snq.mu(1:ndir/2);
-    Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
-    dat.bcVEF.left.C = 2*Jinc;
-end
-ii = find (inc(ndir/2+1:end)>0);
-if isempty(ii) % vacuum
     dat.bcVEF.rite.type = 1; % Pick your choice: 1=Robin, 2=Dirichlet
     dat.bcVEF.rite.C = 0;
 else
     dat.bcVEF.rite.type = 1; % 1=Robin
+    Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
+    dat.bcVEF.rite.C = -2*Jinc/2;
+end
+ii = find (inc(ndir/2+1:end)>0);
+if isempty(ii) % vacuum
+    dat.bcVEF.left.type = 1; % Pick your choice: 1=Robin, 2=Dirichlet
+    dat.bcVEF.left.C = 0;
+else
+    dat.bcVEF.left.type = 1; % 1=Robin
     Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
-    dat.bcVEF.rite.C = 2*Jinc;
+    dat.bcVEF.left.C = -2*Jinc/2;
 end
 
 % method = 'SIP';

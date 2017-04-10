@@ -28,35 +28,24 @@ porder= npar.porder;
 
 qoi=0;
 mass = [2 1;1 2]/6;
-%mass = [6 1;1 6]/30;
-%mass = [12 5;5 12]/60;
 % loop over elements
 for iel=1:npar.nel
-    % element extremities
-    % x0 = npar.x(iel);
-    % x1 = npar.x(iel+1);
-    % get x values in the interval
-    % x = (x1+x0)/2+xq*(x1-x0)/2;
-    % jacobian of the transformation to the ref. element
-    Jac = npar.dx(iel)/2;
     my_zone=npar.iel2zon(iel);
-    siga = dat.siga(my_zone);
-    psigs= dat.sigsPert(my_zone);
-    psigt= dat.sigtPert(my_zone);
+    delta_sigs= dat.sigsPert(my_zone);
+    delta_sigt= dat.sigtPert(my_zone);
     qext = qv(my_zone)*(1+sourcePert);
     dx   = npar.dx(iel);
     % compute local matrices + load vector
     for i=1:porder+1
         f(i)= dot(qext.*wq, b(:,i));
-        g(i)= (1/(4*3.14159))*psigs*dot(phi(:,iel).*wq, b(:,i));
     end
-    m = mass * dx * psigt;
+    
     % assemble
-    qoi = qoi + Jac*dot(f,phia(:,iel)) ;
-    qoi = qoi + Jac*dot(g,phia(:,iel)) ;
-            %Anglular integration of psi psia product
+    qoi = qoi + dx*dot(f,phia(:,iel)) ;
+    qoi = qoi + dx*delta_sigs/snq.sw*dot(mass*phi(:,iel),phia(:,iel));
+    % Anglular integration of psi psia product
     for idir=1:snq.n_dir
-        qoi=qoi-(snq.w(idir)*((psia(:,iel,idir))'*m*psi(:,iel,idir)));
+        qoi = qoi - delta_sigt*dx* snq.w(idir)* dot(mass*psi(:,iel,idir), psia(:,iel,idir));
     end
 end
 %Add boundary terms

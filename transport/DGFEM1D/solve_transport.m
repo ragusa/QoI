@@ -1,4 +1,4 @@
-function [varargout]=solve_transport(forward,do_dsa)
+function [varargout]=solve_transport(forward,do_dsa,console_io)
 
 global dat npar snq
 
@@ -67,17 +67,18 @@ for iter=1:npar.max_SI_iter,
         if(iter==npar.max_SI_iter), warning('about to exit w/o convergence'); end
     end
     % console printouts
-    %fprintf('SI iteration %4i, error %7e',iter,new_norm);
-    %if iter>1
-    %    fprintf(', NSR %7e',new_norm/old_norm);
-    %end
-    old_norm = new_norm;
-    %fprintf('\n');
+    if console_io
+        fprintf('SI iteration %4i, error %7e',iter,new_norm);
+        if iter>1
+            fprintf(', NSR %7e',new_norm/old_norm);
+        end
+        old_norm = new_norm;
+        fprintf('\n');
+    end
 end
 
 
 % output arguments
-%varargout{1} = phi_new;
 if nargout==4
     keep_angular_flux=true;
     [phi_new,psi] = sweep1D_LD(q, forward, keep_angular_flux);

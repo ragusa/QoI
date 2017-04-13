@@ -7,7 +7,8 @@ global dat npar snq
 if forward
     qv  = dat.qv_forward;
 else
-    qv  = dat.qv_adjoint;
+    % we multiply by sw because we want q^\dagger(x,mu) = function(x) given in load_input
+    qv  = dat.qv_adjoint*snq.sw; 
 end
 
 % initialize

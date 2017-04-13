@@ -66,33 +66,13 @@ for iel=1:npar.nel
     end
 end
 
-% % loop over elements
-% aux=zeros(9,1);
-% aa=0;
-% for iel=1:npar.nel
-%     my_zone=npar.iel2zon(iel);
-%     delta_sigs= dat.sigsPert(my_zone);
-%     delta_sigt= dat.sigtPert(my_zone);
-%     qext = qv(my_zone)*(1+sourcePert);
-%     Jac   = npar.dx(iel)/2;
-%     % assemble
-% %     qoi = qoi + Jac*dot(m*ones(2,1)*qext,phia(:,iel)) ;
-%     aux(9) = aux(9) + Jac*delta_sigs/snq.sw*dot(m*phi(:,iel),phia(:,iel));
-%     % Anglular integration of psi psia product
-%     for idir=1:snq.n_dir
-%         aux(idir) = aux(idir) - delta_sigt*Jac* snq.w(idir)* dot(m*psi(:,iel,idir), psia(:,iel,idir));
-%     end
-%     for idir=1:snq.n_dir
-%         aa = aa + Jac* snq.w(idir)* dot(m*ones(2,1), psia(:,iel,idir));
-%     end
-% end
 
 % Add boundary terms
+dir_index_rite = 1:snq.n_dir/2; % the first half of the directions are <0
+dir_index_left = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
 
 % Incident flux on right
 iel=npar.nel;
-dir_index_rite = 1:snq.n_dir/2; % the first half of the directions are <0
-dir_index_left = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
 incident_rite = dat.inc_forward(dir_index_rite) + dat.psiIncPert(dir_index_rite);
 adjoint_flx_rite = shiftdim(psia(1,iel,dir_index_left),1);
 % the reason for using the "other" direction for the adjoint flux is that

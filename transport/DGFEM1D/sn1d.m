@@ -19,15 +19,13 @@ snq.mu = omega; snq.w = weights;
 snq.sw = sum(snq.w);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dat.bcincPert = 0.00;
-dat.bcLPert = 0.00;
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=14;
+pb_ID=13;
 load_input(pb_ID);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 console_io = false;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 forward = true;
@@ -46,6 +44,7 @@ do_dsa = true;
 do_plot(phia,100,forward,Ea)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 forward = true; sn=true;
 qoi_sn_f = compute_qoi(~forward,phi,sn);
 fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
@@ -53,6 +52,7 @@ fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
 forward=false;
 qoi_sn_a = compute_qoi(~forward,phia,sn);
 fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % solve forward VEF problem using IP
@@ -92,16 +92,37 @@ fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Perturbations
-dat.sourcePert = 0.0;
+dat.sourcePert =[0 0 0 0 5];
 dat.sigsPert = +[0.1 0.1 0.1 0.1 0.1].*dat.sigs*0;
-dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1].*dat.sigt;
+dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1]*0.*dat.sigt;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.psiIncPert = 0.0*dat.inc_forward;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward transport problem using sweeps
+forward = true;
+do_dsa = true;
+dat_saved = dat;
+dat.qv_forward = dat.qv_forward + dat.sourcePert;
+dat.sigs = dat.sigs + dat.sigsPert;
+dat.sigt = dat.sigt + dat.sigtPert;
+dat.siga = dat.siga + dat.sigaPert;
+dat.inc_forward = dat.inc_forward + dat.psiIncPert;
+[phi_pert,E_pert,Ebd_pert,psi_pert]=solve_transport(forward,do_dsa,console_io);
+% pretty plots
+do_plot(phi_pert,10,forward,E_pert)
+% reset
+dat = dat_saved;
+qoi_sn_f_pert = compute_qoi(~forward,phi_pert,sn);
+fprintf('delta qoi using 2 sn forward runs: \t %g \n',qoi_sn_f_pert-qoi_sn_f);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %Compute perturbed QoIs using adjoint method and unperturbed forward
 forward=false;
-qoi_sn_a = compute_perturbed_qoi_Sn(~forward,phia,phi,E,psi,psia,sn);
-fprintf('perturbed qoi using sn adjoint: \t %g \n',qoi_sn_a);
+delta_qoi_sn_a = compute_perturbed_qoi_Sn(~forward,phia,phi,E,psi,psia,sn);
+fprintf('delta qoi using sn adjoint: \t\t %g \n',delta_qoi_sn_a);
 
 error('ddd');
 
@@ -119,7 +140,6 @@ dat.cdif = 1./(3*dat.sigt);
 dat.qv_forward=(1+dat.sourcePert)*dat.qv_forward;
 dat.inc_forward = dat.inc_forward + dat.psiIncPert ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%load_input(13);
 % solve forward transport problem using sweeps
 forward = true;
 do_dsa = true;

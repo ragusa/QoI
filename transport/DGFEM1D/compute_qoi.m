@@ -5,6 +5,18 @@ global npar dat snq
 % source data (volumetric) 
 if forward
     qv  = dat.qv_forward;
+    % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
+    % in the Sn equation, it is  made into an (isotropic) angular-dependent
+    % SRD [part/cm^3-s-unit_cosine] by dividing by the sum of the angular
+    % weights (2)
+    %
+    % when one applies the inner product, for Sn, it is the angle-dependent
+    % terms that are in the definition:
+    % QoI = \int dmu qv(mu) psi(mu) = \int dmu qv/2 psi(mu) = qv/2 phi
+    % (note there is everywhere an integral of space dx that I omitted for
+    % brevity. it plays no role in the demonstration
+    %
+    % hence below, we need to do the division by 2 (sw)
     if is_sn
         qv = qv / snq.sw;
     end

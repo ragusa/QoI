@@ -5,10 +5,13 @@ global dat npar snq
 
 % source data (volumetric) 
 if forward
-    qv  = dat.qv_forward;
+    % isotropic source. we need the angular dependent SRD in the forward
+    % problem
+    qv  = dat.qv_forward / snq.sw;
 else
-    % we multiply by sw because we want q^\dagger(x,mu) = function(x) given in load_input
-    qv  = dat.qv_adjoint*snq.sw; 
+    % we want q^\dagger(x,mu) = response function(x) given in load_input so
+    % no change here
+    qv  = dat.qv_adjoint; 
 end
 
 % initialize
@@ -18,13 +21,11 @@ q = zeros(npar.porder+1,npar.nel);
 for iel=1:npar.nel
 
     my_zone=npar.iel2zon(iel);
-    sigs = dat.sigs(my_zone);
+    % isotropic scattering
+    sigs = dat.sigs(my_zone)/snq.sw;
     qext = qv(my_zone);
 
     q(:,iel) = qext + sigs * phi(:,iel);
 end
-
-% isotropic source and scattering
-q = q/snq.sw; 
 
 end

@@ -27,6 +27,15 @@ console_io = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% No Perturbations
+dat.sourcePert = 0.0;
+dat.sigsPert = dat.sigs*0;
+dat.sigtPert = dat.sigt*0;
+dat.sigaPert = dat.sigtPert - dat.sigsPert;
+dat.psiIncPert = 0*dat.inc_forward;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 forward = true;
 do_dsa = true;
@@ -52,6 +61,15 @@ fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
 forward=false;
 qoi_sn_a = compute_qoi(~forward,phia,sn);
 fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
+
+
+
+
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,9 +112,13 @@ fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
 % Perturbations
 dat.sourcePert =[0 0 0 0 5];
 dat.sigsPert = +[0.1 0.1 0.1 0.1 0.1].*dat.sigs*0;
+
 dat.sigtPert = -[0.1 0.1 0.1 0.1 0.1]*0.*dat.sigt;
+
+
+
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
-dat.psiIncPert = 0.0*dat.inc_forward;
+dat.psiIncPert = 0.2*dat.inc_forward;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

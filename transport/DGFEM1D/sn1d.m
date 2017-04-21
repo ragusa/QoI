@@ -32,7 +32,7 @@ forward = true;
 do_dsa = true;
 [phi,E,Ebd,psi]=solve_transport(forward,do_dsa,console_io);
 % pretty plots
-do_plot(phi,0,forward,E)
+do_plot(phi,0,forward)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,19 +41,19 @@ forward = false;
 do_dsa = true;
 [phia,Ea,Ebda,psia]=solve_transport(forward,do_dsa,console_io);
 % pretty plots
-do_plot(phia,100,forward,Ea)
+do_plot(phia,100,forward)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 forward = true; sn=true;
-qoi_sn_f = compute_qoi(~forward,phi,sn);
+qoi_sn_f = compute_qoi(forward,phi,[],[],sn);
 fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
 %
 forward=false;
-qoi_sn_a = compute_qoi(~forward,phia,sn);
+qoi_sn_a = compute_qoi(forward,phia,psi,psia,sn);
 fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+error('qqqq');
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % solve forward VEF problem using IP
 % forward = true;

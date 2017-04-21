@@ -48,6 +48,7 @@ for idir=1:snq.n_dir;
     for i=ibeg:incr:iend
         my_zone=npar.iel2zon(i);
         sig = dat.sigt(my_zone);
+        
         dx   = npar.dx(i);
         % compute L/R psi for given cell i
         rhs = mass * dx * q(:,i);

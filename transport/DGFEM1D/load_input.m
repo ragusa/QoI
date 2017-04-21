@@ -179,8 +179,42 @@ switch pb_ID
         incf(1:sn) = 0;
         % volumetric source value, per zone
         qva=[0 0 1];
-        % incoming flux values
+        % incoming adj flux values
         inca(1:sn) = 0;
+        
+       case 13 % 
+        % number of elements per zone
+        nel_zone = [ 100  20 10 20 100 ]*1;
+        % width of each zone
+        width_zone = [ 20 4 2 4 20 ]/5;
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1];
+        sigs=[1 1 1 1 1]*0;
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = .1;  %incf(1:sn/2)=1;
+        % volumetric source value, per zone
+        qva=[1 1 1 1 1];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+
+       case 14 % flat solution !!!
+        % number of elements per zone
+        nel_zone = [ 100  20 10 20 100 ]*1;
+        % width of each zone
+        width_zone = [ 20 4 2 4 20 ]/5;
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1];
+        sigs=[1 1 1 1 1]*0;
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 1/2;  %incf(1:sn/2)=1;
+        % volumetric source value, per zone
+        qva=[1 1 1 1 1];
+        % incoming adj flux values
+        inca(1:sn) = 1;
 
     otherwise
         error('problem ID %g is unknown',pb_ID);
@@ -215,10 +249,11 @@ dat.sigt = sigt;
 dat.sigs = sigs;
 dat.qv_forward =qvf;
 dat.inc_forward = incf;
-if pb_ID==12 || pb_ID==7
+if pb_ID==12 || pb_ID==7 || pb_ID==13 || pb_ID==14
     dat.qv_adjoint =qva;
     dat.inc_adjoint = inca;
 else
+    error('fix load input');
     dat.qv_adjoint =qvf;
     dat.inc_adjoint = incf;
 end    

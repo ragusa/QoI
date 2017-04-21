@@ -98,30 +98,33 @@ if forward %need to check this because our definition of "forward" in this conte
 end
 
 
-% if ~forward
-%     % Add boundary terms if using the adjoitn to compute the QoI
-%     dir_index_rite = 1:snq.n_dir/2; % the first half of the directions are <0
-%     dir_index_left = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
-%     
-%     % Get angular flux on right
-%     psi_rite = shiftdim(psi(npar.porder+1,npar.nel,:),1);
-%     % overwrite with BC values
-%     psi_rite(index_rite) = dat.inc_forward(dir_index_rite);
-% 
-%     % Get angular flux on left
-%     psi_left = shiftdim(psi(1,1,:),1);
-%     % overwrite with BC values
-%     psi_left(dir_index_left) = dat.inc_forward(dir_indexdir_index_left_rite);
-% 
-%     % the reason for using the "other" direction for the adjoint flux is that
-%     % psia(mu) = psi(-mu), or equivalently psi(-mu)=psi(mu) and remember we
-%     % faked a "forward" solve for the adjoint
-%     
-%     % Incident flux on left
-%     iel=1;
-%     % total incident
-%     incident_left = dat.inc_forward(dir_index_left);
-% %     adjoint_flx_left = shiftdim(psia(1,iel,dir_index_rite),1);
-%     %
-%     % qoi = qoi - dot(snq.w.*[incident_left incident_rite]',[adjoint_flx_left adjoint_flx_rite]);
-% end
+if ~forward
+    % Add boundary terms if using the adjoint to compute the QoI
+    neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
+    pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
+    
+    % Get angular flux at right extremity
+    psi_rite = shiftdim(psi(npar.porder+1,npar.nel,:),1);
+    % overwrite with BC values
+    psi_rite(neg_dir) = dat.inc_forward(neg_dir);
+
+    % Get angular flux at left extremity
+    psi_left = shiftdim(psi(1,1,:),1);
+    % overwrite with BC values
+    psi_left(pos_dir) = dat.inc_forward(pos_dir);
+
+    % the reason for using the "other" direction for the adjoint flux is that
+    % psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
+    % faked a "forward" solve for the adjoint
+    reverse_dir = snq.n_dir:-1:1
+    psia_rite = shiftdim(psi(npar.porder+1,npar.nel,reverse_dir),1);
+    psia_left = shiftdim(psi(1,1,reverse_dir),1);
+    % overwrite with BC values
+    psia_bc = dat.inc_adjoint(reverse_dir);
+    psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
+    psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
+    % right extremity: vo.vn = vo.ex
+    qoi = qoi - dot(snq.w.*snq.mu.*psi_rite,psia_rite);
+    % left extremity: vo.vn = -vo.ex
+    qoi = qoi + dot(snq.w.*snq.mu.*psi_left,psia_left);
+end

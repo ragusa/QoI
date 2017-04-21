@@ -1,40 +1,12 @@
-function qoi = compute_qoi(forward,phi,is_sn,pert,psi,psia)
-% pert input: 
-% 0 -> No Perturbation, just QoI
-% 1 -> Perturbed QoI
-% 2 -> Just sensitivity
-% Need to add in input checks, should not be used if computing QoI from
-% forward
+function qoi = compute_qoi_forward(phi,is_sn)
+
 
 global npar dat snq
 
-if nargin < 5
-   psi = 0;
-   psia=0;
-end
-
 % source data (volumetric)
-if forward
-    qv  = dat.qv_forward;
-    % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
-    % in the Sn equation, it is  made into an (isotropic) angular-dependent
-    % SRD [part/cm^3-s-unit_cosine] by dividing by the sum of the angular
-    % weights (2)
-    %
-    % when one applies the inner product, for Sn, it is the angle-dependent
-    % terms that are in the definition:
-    % QoI = \int dmu qv(mu) psi(mu) = \int dmu qv/2 psi(mu) = qv/2 phi
-    % (note there is everywhere an integral of space dx that I omitted for
-    % brevity. it plays no role in the demonstration
-    %
-    % hence below, we need to do the division by 2 (sw)
-    if is_sn
-        qv = qv / snq.sw;
-    end
-else
-    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
-    qv  = dat.qv_adjoint;
-end
+% this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
+qv  = dat.qv_adjoint;
+
 
 
 % type of solution data passed in
@@ -70,31 +42,10 @@ for iel=1:npar.nel
     my_zone=npar.iel2zon(iel);
     qext = qv(my_zone);
     % compute local matrices + load vector
-    % assemble
-    if pert==0 || pert==1   
-        qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
-    end
-    if pert==1 || pert==2
-        if is_sn
-            q_pert=dat.sourcePert(my_zone);
-            q_pert = q_pert / snq.sw;
-            qoi = qoi + Jac*q_pert*dot(ones(porder+1,1),m*phi(:,iel));
-        else
-            q_pert=dat.sourcePert(my_zone);
-            qoi = qoi + Jac*q_pert*dot(ones(porder+1,1),m*phi(:,iel));
-        end
-    end
+    % assemble 
+    qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
 end
-%Boundary terms
-if forward %need to check this because our definition of "forward" in this context is confusing.
-    if is_sn
-        %Add boundary terms if using the adjoitn to compute the QoI
-        dir_index_rite = 1:snq.n_dir/2; % the first half of the directions are <0
-        dir_index_left = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
-        
-    else
-        x=1;
-    end
+
 end
 
 

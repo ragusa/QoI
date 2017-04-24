@@ -63,7 +63,6 @@ for iel=1:npar.nel
     qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
 end
 
-
 if ~use_forward_flux
     
     if is_sn

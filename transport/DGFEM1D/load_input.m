@@ -184,12 +184,12 @@ switch pb_ID
         
     case 13 %
         % number of elements per zone
-        nel_zone = [ 100  20 10 20 100 ]*1;
+        nel_zone = [ 100  20 10 20 100 ];
         % width of each zone
         width_zone = [ 20 4 2 4 20 ]/5;
         % sigt/sigs per zone
         sigt=[1 1 1 1 1];
-        sigs=[1 1 1 1 1]*0;
+        sigs=[0 0 0 0 0];
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
@@ -210,12 +210,11 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = 1/2;  %incf(1:sn/2)=1;
+        incf(1:sn) = 1/2;  %incf(1:sn/2)=0.6; incf(sn/2+1:sn)=0.4;
         % volumetric source value, per zone
         qva=[1 1 1 1 1];
         % incoming adj flux values
         inca(1:sn) = 1; inca(1:sn/2)=.1;
-        
     otherwise
         error('problem ID %g is unknown',pb_ID);
         

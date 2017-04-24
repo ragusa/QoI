@@ -1,9 +1,12 @@
-function qoi = compute_qoi(forward,phi,is_sn)
+function qoi = compute_qoi(use_forward_flux,phi,is_sn,psi,psia)
 
 global npar dat snq
 
 % source data (volumetric)
-if forward
+if use_forward_flux
+    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
+    qv  = dat.qv_adjoint;
+else
     qv  = dat.qv_forward;
     % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
     % in the Sn equation, it is  made into an (isotropic) angular-dependent
@@ -20,9 +23,6 @@ if forward
     if is_sn
         qv = qv / snq.sw;
     end
-else
-    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
-    qv  = dat.qv_adjoint;
 end
 
 
@@ -63,33 +63,50 @@ for iel=1:npar.nel
     qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
 end
 
-if ~forward
-    % Add boundary terms if using the adjoint to compute the QoI
-    neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
-    pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
+if ~use_forward_flux
     
-    % Get angular flux at right extremity
-    psi_rite = shiftdim(psi(npar.porder+1,npar.nel,:),1);
-    % overwrite with BC values
-    psi_rite(neg_dir) = dat.inc_forward(neg_dir);
-
-    % Get angular flux at left extremity
-    psi_left = shiftdim(psi(1,1,:),1);
-    % overwrite with BC values
-    psi_left(pos_dir) = dat.inc_forward(pos_dir);
-
-    % the reason for using the "other" direction for the adjoint flux is that
-    % psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
-    % faked a "forward" solve for the adjoint
-    reverse_dir = snq.n_dir:-1:1
-    psia_rite = shiftdim(psi(npar.porder+1,npar.nel,reverse_dir),1);
-    psia_left = shiftdim(psi(1,1,reverse_dir),1);
-    % overwrite with BC values
-    psia_bc = dat.inc_adjoint(reverse_dir);
-    psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
-    psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
-    % right extremity: vo.vn = vo.ex
-    qoi = qoi - dot(snq.w.*snq.mu.*psi_rite,psia_rite);
-    % left extremity: vo.vn = -vo.ex
-    qoi = qoi + dot(snq.w.*snq.mu.*psi_left,psia_left);
+    if is_sn
+        warning('here, we use both forward and adjoint angular fluxes for BC terms. If 0-adjoint BC are used, we should be able to get away with only pisa as a given');
+        fprintf('qoi before bc %g (forward=%g) \n',qoi,use_forward_flux);
+        
+        % Add boundary terms if using the adjoint to compute the QoI
+        neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
+        pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
+        
+        % Get angular flux at right extremity
+        psi_rite = shiftdim(psi(npar.porder+1,npar.nel,:),1);
+        % overwrite with BC values
+        psi_rite(neg_dir) = dat.inc_forward(neg_dir);
+        
+        % Get angular flux at left extremity
+        psi_left = shiftdim(psi(1,1,:),1);
+        % overwrite with BC values
+        psi_left(pos_dir) = dat.inc_forward(pos_dir);
+        
+        % the reason for using the "opposite" direction for the adjoint flux is that
+        % psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
+        % faked a "forward" solve for the adjoint
+        reverse_dir = snq.n_dir:-1:1;
+        psia_rite = shiftdim(psia(npar.porder+1,npar.nel,reverse_dir),1);
+        psia_left = shiftdim(psia(1,1,reverse_dir),1);
+        % overwrite with BC values
+        %%% psia_bc = dat.inc_adjoint(reverse_dir);
+        psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
+        psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
+        %     psia_left(pos_dir) = dat.inc_adjoint(pos_dir);
+        %     psia_rite(neg_dir) = dat.inc_adjoint(neg_dir);
+        % right extremity: vo.vn = vo.ex
+        qoi = qoi - dot(snq.w'.*snq.mu.*psi_rite,psia_rite);
+        [psi_rite ; psia_rite]';
+        % left extremity: vo.vn = -vo.ex
+        qoi = qoi + dot(snq.w'.*snq.mu.*psi_left,psia_left);
+        [psi_left;psia_left]';
+        %
+        fprintf('qoi adjoint bc left = %g \n',-dot(snq.w'.*snq.mu.*psi_rite,psia_rite));
+        fprintf('qoi adjoint bc rite = %g \n',dot(snq.w'.*snq.mu.*psi_left,psia_left));
+        
+    else % adjoint VEF
+        warning('not yet implemented BC in adjoint Qoi with VEF');
+    end
+    
 end

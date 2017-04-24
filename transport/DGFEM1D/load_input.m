@@ -23,7 +23,7 @@ switch pb_ID
         qvf=[0.01];
         % incoming flux values
         incf(1:sn)   = 0;
-
+        
     case 2 % problem B from paper
         % number of elements per zone
         nel_zone = [ 10 ];
@@ -38,7 +38,7 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         incf(sn/2+1:end) = 1;
-
+        
     case 3 % problem C from paper
         % number of elements per zone
         nel_zone = [ 50 ];
@@ -53,7 +53,7 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         incf(sn)=1/snq.w(sn);
-
+        
     case 4 % problem D from paper
         % number of elements per zone
         nel_zone = [ 10 ];
@@ -67,7 +67,7 @@ switch pb_ID
         qvf=[epsilon];
         % incoming flux values
         incf(1:sn)   = 0;
-
+        
     case 5 % 2-zone problem
         % number of elements per zone
         nel_zone = [ 50 50 ];
@@ -80,7 +80,7 @@ switch pb_ID
         qvf=[1e-2 1e-2];
         % incoming flux values
         incf(1:sn)   = 0;
-
+        
     case 6 % 3-zone problem
         % number of elements per zone
         nel_zone = [ 50 50 10]*3;
@@ -93,7 +93,7 @@ switch pb_ID
         qvf=[1 2 1];
         % incoming flux values
         incf(1:sn)   = 0;
-
+        
     case 7 % Reed (5-zone problem)
         % number of elements per zone
         nel_zone = [ 20 10 20 10 20]*4;
@@ -110,7 +110,7 @@ switch pb_ID
         qva=[ 0 0 0 1 0];
         % incoming flux values
         inca(1:sn)   = 0;
-
+        
     case 8 % Adams (PIM)
         % number of elements per zone
         nel_zone = [ 10 ];
@@ -124,7 +124,7 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         incf(sn/2+1)=1/snq.w(sn/2+1);
-
+        
     case 9 % Adams (PIM) ref
         % number of elements per zone
         nel_zone = [ 1000 1000];
@@ -138,8 +138,8 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         incf(sn/2+1)=1/snq.w(sn/2+1);
-
-    case 10 % Test thick diffusive limit 
+        
+    case 10 % Test thick diffusive limit
         % number of elements per zone
         nel_zone = [ 100 ];
         % width of each zone
@@ -151,7 +151,7 @@ switch pb_ID
         qvf=[0];
         % incoming flux values
         incf(1:sn)   = 0;
-
+        
     case 11 % problem A from paper - modified for IP-testing
         % number of elements per zone
         nel_zone = [ 10 10 10 ]*10;
@@ -165,7 +165,7 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         
-    case 12 % 
+    case 12 %
         % number of elements per zone
         nel_zone = [ 10 10 10 ]*4;
         % width of each zone
@@ -182,24 +182,24 @@ switch pb_ID
         % incoming adj flux values
         inca(1:sn) = 0;
         
-       case 13 % 
+    case 13 %
         % number of elements per zone
-        nel_zone = [ 100  20 10 20 100 ]*1;
+        nel_zone = [ 100  20 10 20 100 ];
         % width of each zone
         width_zone = [ 20 4 2 4 20 ]/5;
         % sigt/sigs per zone
         sigt=[1 1 1 1 1];
-        sigs=[1 1 1 1 1]*0;
+        sigs=[0 0 0 0 0];
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = .1;  %incf(1:sn/2)=1;
+        incf(1:sn) = 0;  incf(1:sn/2)=0;
         % volumetric source value, per zone
         qva=[1 1 1 1 1];
         % incoming adj flux values
         inca(1:sn) = 0;
-
-       case 14 % flat solution !!!
+        
+    case 14 % flat solution !!!
         % number of elements per zone
         nel_zone = [ 100  20 10 20 100 ]*1;
         % width of each zone
@@ -210,15 +210,14 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = 1/2;  %incf(1:sn/2)=1;
+        incf(1:sn) = 1/2;  %incf(1:sn/2)=0.6; incf(sn/2+1:sn)=0.4;
         % volumetric source value, per zone
         qva=[1 1 1 1 1];
         % incoming adj flux values
-        inca(1:sn) = 1;
-
+        inca(1:sn) = 1; inca(1:sn/2)=.1;
     otherwise
         error('problem ID %g is unknown',pb_ID);
-
+        
 end
 
 % sanity checks
@@ -256,7 +255,7 @@ else
     error('fix load input');
     dat.qv_adjoint =qvf;
     dat.inc_adjoint = incf;
-end    
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%% prepare data for computation
 

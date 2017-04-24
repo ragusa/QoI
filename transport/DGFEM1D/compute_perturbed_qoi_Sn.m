@@ -1,9 +1,12 @@
-function d_qoi = compute_perturbed_qoi_Sn(forward,phia,phi,E,psi,psia,is_sn)
+function d_qoi = compute_perturbed_qoi_Sn(use_forward_flux,phia,phi_unpert,psi_unpert,psia,is_sn)
 
 global npar dat snq
 
-% source data (volumetric) 
-if forward
+% source data (volumetric)
+if use_forward_flux
+    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
+    qv  = dat.qv_adjoint;
+else
     qv  = dat.qv_forward;
     % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
     % in the Sn equation, it is  made into an (isotropic) angular-dependent
@@ -20,9 +23,6 @@ if forward
     if is_sn
         qv = qv / snq.sw;
     end
-else
-    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
-    qv  = dat.qv_adjoint;
 end
 
 % type of solution data passed in
@@ -30,9 +30,9 @@ end
 if n2==1
     phia=reshape(phia,npar.porder+1,npar.nel);
 end
-[n1,n2]=size(phi);
+[n1,n2]=size(phi_unpert);
 if n2==1
-    phi=reshape(phi,npar.porder+1,npar.nel);
+    phi_unpert=reshape(phi_unpert,npar.porder+1,npar.nel);
 end
 
 % shortcuts
@@ -55,63 +55,50 @@ for iel=1:npar.nel
     my_zone=npar.iel2zon(iel);
     delta_sigs= dat.sigsPert(my_zone);
     delta_sigt= dat.sigtPert(my_zone);
-    qext = qv(my_zone)*dat.sourcePert(my_zone);
+    delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
-    d_qoi = d_qoi + Jac*dot(m*ones(2,1)*qext,phia(:,iel)) ;
-    d_qoi = d_qoi + Jac*delta_sigs/snq.sw*dot(m*phi(:,iel),phia(:,iel));
+    d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;
+    d_qoi = d_qoi + Jac*delta_sigs/snq.sw*dot(m*phi_unpert(:,iel),phia(:,iel));
     % Anglular integration of psi psia product
     for idir=1:snq.n_dir
-        d_qoi = d_qoi - delta_sigt*Jac* snq.w(idir)* dot(m*psi(:,iel,idir), psia(:,iel,idir));
+        d_qoi = d_qoi - delta_sigt*Jac* snq.w(idir)* dot(m*psi_unpert(:,iel,idir), psia(:,iel,idir));
     end
 end
 
+fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
 
-% Add boundary terms
-dir_index_rite = 1:snq.n_dir/2; % the first half of the directions are <0
-dir_index_left = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
-
-% Incident flux on right
-iel=npar.nel;
-incident_rite = dat.inc_forward(dir_index_rite) + dat.psiIncPert(dir_index_rite);
-adjoint_flx_rite = shiftdim(psia(1,iel,dir_index_left),1);
-% the reason for using the "other" direction for the adjoint flux is that
-% psia(mu) = psi(-mu), or equivalently psi(-mu)=psi(mu) and remember we
-% faked a "forward" solve for the adjoint
-
-% Incident flux on left
-iel=1;
-% total perturbed incident
-incident_left = dat.inc_forward(dir_index_left) + dat.psiIncPert(dir_index_left);  
-adjoint_flx_left = shiftdim(psia(1,iel,dir_index_rite),1);
-% 
 %%%% d_qoi=d_qoi - dot(snq.w.*[incident_left incident_rite]',[adjoint_flx_left adjoint_flx_rite]);
 
-    % Add boundary terms if using the adjoint to compute the QoI
-    neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
-    pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
-    
-    % Get angular flux at right extremity
-    psi_rite = shiftdim(psi(npar.porder+1,npar.nel,:),1);
-    % overwrite with BC values
-    psi_rite(neg_dir) =  dat.psiIncPert(neg_dir);
+% Add boundary terms if using the adjoint to compute the QoI
+neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
+pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
 
-    % Get angular flux at left extremity
-    psi_left = shiftdim(psi(1,1,:),1);
-    % overwrite with BC values
-    psi_left(pos_dir) =  dat.psiIncPert(pos_dir);
+% Set ang. flux at right extremity
+% in the dQoI, we do not want to have to know the perturbed outgoing
+% forward flux, so we need to ensure that the adjoitn boundary src is 0
+psi_rite = zeros(1,snq.n_dir); %%% shiftdim(psi(npar.porder+1,npar.nel,:),1);
+% overwrite with BC values
+psi_rite(neg_dir) =  dat.psiIncPert(neg_dir);
 
-    % the reason for using the "other" direction for the adjoint flux is that
-    % psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
-    % faked a "forward" solve for the adjoint
-    reverse_dir = snq.n_dir:-1:1
-    psia_rite = shiftdim(psi(npar.porder+1,npar.nel,reverse_dir),1);
-    psia_left = shiftdim(psi(1,1,reverse_dir),1);
-    % overwrite with BC values
-    psia_bc = dat.inc_adjoint(reverse_dir);
-    psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
-    psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
-    % right extremity: vo.vn = vo.ex
-    qoi = qoi - dot(snq.w.*snq.mu.*psi_rite,psia_rite);
-    % left extremity: vo.vn = -vo.ex
-    qoi = qoi + dot(snq.w.*snq.mu.*psi_left,psia_left);
+% Set angular flux at left extremity
+psi_left = zeros(1,snq.n_dir); %%% shiftdim(psi(1,1,:),1);
+% overwrite with BC values
+psi_left(pos_dir) =  dat.psiIncPert(pos_dir);
+
+% the reason for using the "opposite" direction for the adjoint flux is that
+% psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
+% faked a "forward" solve for the adjoint
+reverse_dir = snq.n_dir:-1:1;
+psia_rite = shiftdim(psia(npar.porder+1,npar.nel,reverse_dir),1);
+psia_left = shiftdim(psia(1,1,reverse_dir),1);
+% overwrite with BC values
+psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
+psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
+if sum(abs(psia_left(neg_dir)))>eps || sum(abs(psia_rite(pos_dir)))>0
+    error('in %s, angular adjoint boundary src must be zero',mfilename);
+end
+% right extremity: vo.vn = vo.ex
+d_qoi = d_qoi - dot(snq.w'.*snq.mu.*psi_rite,psia_rite);
+% left extremity: vo.vn = -vo.ex
+d_qoi = d_qoi + dot(snq.w'.*snq.mu.*psi_left,psia_left);

@@ -33,7 +33,7 @@ if isempty(ii) % vacuum
 else
     dat.bcVEF.left.type = 1; % 1=Robin
     Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
-    dat.bcVEF.left.C = -2*Jinc/2;
+    dat.bcVEF.left.C = 2*Jinc/2;
 end
 
 % method = 'SIP';

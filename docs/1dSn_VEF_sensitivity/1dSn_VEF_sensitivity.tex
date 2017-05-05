@@ -16,6 +16,8 @@
 \newcommand{\pdx}{\frac{\partial}{\partial x}}
 \newcommand{\pdy}{\frac{\partial}{\partial y}}
 \newcommand{\pdz}{\frac{\partial}{\partial z}}
+\newcommand{\intrrr}{\int d^3 r \,}
+\newcommand{\intrr}{\int d^2 r \,}
 
 \begin{document}
 \begin{center}
@@ -24,13 +26,13 @@ Ian Halvic \\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{1D-Sn Transport}
+\section{1D-Sn Transport (Clean up for 1/2 in source)}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Define our forward Sn transport equation
 \[
-\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2} \quad \vr \in V
+\vO \cdot \vgrad \psi + \sigma_t \psi = \frac{\sigma_s}{4 \pi} \phi + \frac{q}{4 \pi} \quad \vr \in V
 \]
 with BC 
 \[
@@ -47,19 +49,19 @@ Where the adjoint source is our response $q^\dag = \frac{r}{4 \pi}$
 Multiply the forward by $\psi^\dag$ and integrate over space and angle
 \[
 \int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \vO \cdot \vgrad \psi + \sigma_t \psi  \right] = 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2}  \right]
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{4 \pi}  \right]
 \]
 Take a look at the RHS first
 \begin{align*}
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{2}  \right]
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \left[ \frac{\sigma_s}{4 \pi} \phi + \frac{q}{4 \pi}  \right]
 &= 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{4 \pi}  \\
 &= 
-\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi \int d  \Omega \,  \psi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
+\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi \int d  \Omega \,  \psi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{4 \pi}  \\
 &= 
-\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi  \phi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
+\int d^3 r \, \frac{\sigma_s}{4 \pi} \phi  \phi^\dag  + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{4 \pi}  \\
 &= 
-\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi^\dag + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{2}  \\
+\int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{\sigma_s}{4 \pi} \phi^\dag + \int d^3 r \, \int d  \Omega \,  \psi^\dag \frac{q}{4 \pi}  \\
 \end{align*}
 On the LHS, take a look at the first integral
 \begin{align*}
@@ -233,11 +235,11 @@ Multiply the forward by the test function $\phi^\dag$ (which will become our adj
 - \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \cdot \vec{n} \right] \\
 =& \int d^3r \, \left[ \frac{1}{\sigma_{tr}} \vgrad \phi^\dag \right] \cdot \left[ \left(  \vdiv \left( E \phi \right) \right) \right] 
 - \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \cdot \vec{n} \right] \\
-=& \int d^3r \, \left[- \vgrad \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right] : \left[ E \phi \right]^T 
-+ \int d^2 r \, \left( E \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+=& \int d^3r \, \left[- \vgrad \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right] : \left[ E \phi \right]
++ \int d^2 r \, \left( E \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right) \right) \cdot \vec{n} \\
 &- \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \cdot \vec{n} \right]\\
 =& \int d^3r \, \left[- E^T \vgrad \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right] : \left[ \phi \right] 
-+ \int d^2 r \, \left( E \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
++ \int d^2 r \, \left( E \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right) \right) \cdot \vec{n} \\
 &- \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \cdot \vec{n} \right]
 \end{align*}
 
@@ -300,7 +302,7 @@ For notational compactness, let $c=\frac{1}{\sigma_{tr}}$ and $c + \delta c = \f
 \[ 
 -\vdiv \left( c \vdiv \left( E \phi_p \right) \right) 
 - \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) 
-- \vdiv \left( \delta c \vdiv \left( E \delta \phi_p \right) \right) 
+- \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right) 
 + \sigma_r \phi_p
 + \delta \sigma_r \phi
 + \delta \sigma_r \delta \phi
@@ -341,9 +343,79 @@ In terms of the change in QoI
 \delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
 &+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right]
 \end{align*}
+\subsection{Some thoughts on a second order boundary term}
+There is a potential for some second order boundary term resulting from the $- \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right)$ in the expanded perturbed equation. On the boundaries we know $\delta c$ and $\delta \phi$, so we could calculate.
+\begin{align*}
+\intrrr \phi^\dag \left[ - \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right) \right] 
+&= \intrrr \delta c  \vgrad \phi^\dag \left[  \left( \vdiv \left( E \delta \phi \right) \right) \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
+&= \intrrr E \vgrad (\delta c  \vgrad \phi^\dag) \left[ \delta \phi  \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
+&\hspace{5mm}+\intrr (\delta c  \vgrad \phi^\dag) \cdot (E \delta \phi \cdot \vec{n}) 
+\end{align*}
+\textcolor{red}{However, we would never expect to get the boundary terms because we would never apply integration by parts to this term. the $\delta c$ never shows up in the unperturbed operator, so we would never be applying integration by parts to move the operation from $\delta \phi$ to $\phi^\dag$.} In other words, looking at the "suggestive" form from above
+\[ 
+-\vdiv \left( c \vdiv \left( E \phi_p \right) \right) + \sigma_r \phi_p
+= q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) 
+\]
+the term would fit in on the right hand "source" side, and not the LHS (which represents the unperturbed operator).
 
+\subsection*{Alternate boundary condition for forward.}
+Consider the alternate boundary condition for the forward problem \cite{Wiesel}
+\[
+\vec{n} \cdot \vec{J} + J_{IN} = C (\phi - \phi_{IN})
+\]
+Expanding out all values
+
+\section*{DISCLAIMER}
+Below here are just sections where I am "thinking out loud". Some of it is just rambling that leads nowhere.
+
+\section{Some thoughts/questions on operators and adjoints}
+Ok, we have the forward VEF transport operator
+\[
+\mathbf{L}\phi =
+-\vdiv \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) + \sigma_r \phi = q
+\]
+We also have two adjoint formulations (using the detector response $r$ as the adjoint source). The first being a "transport informed" operator, constructed using an adjoint Eddington factor $E^\dag$
+\[
+\mathbf{K}^\dag\varphi^\dag = -\vdiv \left( \frac{1}{\sigma_{tr}} \vdiv \left( E^\dag \varphi^\dag \right) \right) + \sigma_r \varphi^\dag = r
+\]
+The other adjoint is the one gained by application of Green's identity to the forward (integration by parts in 1D), which relies on the forward Eddington.
+\[ 
+\mathbf{L}^\dag \phi^\dag = E : \left( - \vgrad \left( \frac{1}{\sigma_{tr}} \vgrad \phi^\dag \right) \right)
++ \sigma_r \phi^\dag
+= r
+\]
+\subsection*{Equivalence?}
+Both adjoints above are true for arbitrary $r$, so it seems to follow that
+\[
+\mathbf{L}^\dag \phi^\dag = \mathbf{K}^\dag\varphi^\dag 
+\]
+which in itself is not really remarkable. However, if we introduce our QoI definition.
+\[
+QoI=\bra \phi , r \ket = \bra \phi , \mathbf{L}^\dag \phi^\dag \ket = \bra \phi , \mathbf{K}^\dag\varphi^\dag \ket
+\]
+Lets take a second to look at that last one. We transpose the operator to the forward solution $\phi$.
+\[
+QoI = \bra \phi , \mathbf{K}^\dag\varphi^\dag \ket = \bra \mathbf{K} \phi , \varphi^\dag \ket
+\]
+Where it can be shown that the operator is
+\[
+\mathbf{K} \phi =  E^\dag : \left( - \vgrad \left( \frac{1}{\sigma_{tr}} \vgrad \phi \right) \right)
++ \sigma_r \phi
+\]
+Which is the form of our "math adjoint", but using the adjoint Eddington tensor. Since $\phi$ is known in this context, we get a source term $f$
+\[
+\mathbf{K} \phi =  E^\dag : \left( - \vgrad \left( \frac{1}{\sigma_{tr}} \vgrad \phi \right) \right)
++ \sigma_r \phi = f
+\]
+This means our QoI is also given by
+\[
+QoI = \bra \phi , \mathbf{K}^\dag\varphi^\dag \ket = \bra \mathbf{K} \phi , \varphi^\dag \ket = \bra f , \varphi^\dag \ket
+\]
+\subsubsection{Perturbations}
+So, they only thing really "linking" the forward problem to our "transport adjoint" is that they are both transport informed, which really translates to linked by material properties. SO lets mess around with perturbations for a second.
+TO BE CONTINUED, I DONT THINK THIS LINE OF THOUGHT IS GOING ANYWHERE. NOTE TO SELF: Try $q + \delta q = f$
 \newpage
-\section{SOME SCRATH WORK ON Operator notation NEEDS REDONE}
+\section{SOME SCRATCH WORK ON Operator notation NEEDS REDONE}
 The forward VEF formulation, representing using the operator A
 \[
 A \phi = -\vdiv \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right)
@@ -420,5 +492,20 @@ So
 \[
 J_p = \bra q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right), \phi^\dag \ket - \left. \left( E \phi_p   \left( \frac{1}{\sigma_{tr}} \pdx \phi^\dag \right) \right)  \right|_a^b + \left. \left( \frac{1}{\sigma_{tr}} \pdx \left( E \phi_p \right) \right) (\phi^\dag) \right|_a^b
 \]
+
+\newpage
+
+\begin{thebibliography}{9}
+
+
+\bibitem{Wiesel}
+  William A. Wieselquest, \emph{The Quasidiffusion Method for Transport Problems on Unstructured Meshes}, North Carolina State University, 2009.
+
+
+
+
+\end{thebibliography}
+
+\textbf{This document was created using \LaTeX}
 
 \end{document}

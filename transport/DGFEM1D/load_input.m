@@ -210,11 +210,11 @@ switch pb_ID
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = 1/2;  %incf(1:sn/2)=0.6; incf(sn/2+1:sn)=0.4;
+        incf(1:sn) = 1/2;  incf(1:sn/2)=0.5; incf(sn/2+1:sn)=0;
         % volumetric source value, per zone
         qva=[1 1 1 1 1];
         % incoming adj flux values
-        inca(1:sn) = 1; inca(1:sn/2)=.1;
+        inca(1:sn) = 0;
     otherwise
         error('problem ID %g is unknown',pb_ID);
         

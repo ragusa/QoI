@@ -1,22 +1,24 @@
-function qoi = compute_purturbed_qoi_VEF(forward,phia,phi,E,Ebd)
+function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E)
 
-global npar dat
+global npar dat snq
 
-sourcePert=dat.sourcePert;
-sigaPert=dat.sigaPert;
-
-% source data (volumetric) 
-if forward
-    qv  = dat.qv_forward;
-else
+% source data (volumetric)
+if use_forward_flux
+    % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
     qv  = dat.qv_adjoint;
+else
+    qv  = dat.qv_forward;
+    % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
 end
 
 % type of solution data passed in
 [n1,n2]=size(phia);
 if n2==1
     phia=reshape(phia,npar.porder+1,npar.nel);
-    phi=reshape(phi,npar.porder+1,npar.nel);
+end
+[n1,n2]=size(phi_unpert);
+if n2==1
+    phi_unpert=reshape(phi_unpert,npar.porder+1,npar.nel);
 end
 
 % shortcuts
@@ -25,61 +27,56 @@ porder= npar.porder;
 [xq,wq] = GLNodeWt(porder+1);
 % store shapeset
 [b,dbdx] =feshpln(xq,porder);
+% compute elementary mass matrix
+m=zeros(porder+1,porder+1);
+for i=1:porder+1
+    for j=1:porder+1
+        m(i,j)= dot(wq.*b(:,i), b(:,j));
+    end
+end
+d_qoi=0;
 
-qoi=0;
 % loop over elements
 for iel=1:npar.nel
-    % element extremities
-    % x0 = npar.x(iel);
-    % x1 = npar.x(iel+1);
-    % get x values in the interval
-    % x = (x1+x0)/2+xq*(x1-x0)/2;
-    % jacobian of the transformation to the ref. element
-    Jac = npar.dx(iel)/2;
     my_zone=npar.iel2zon(iel);
-    siga = dat.siga(my_zone);
-    psiga= dat.sigaPert(my_zone);
-    qext = qv(my_zone)*(1+sourcePert);
-    %get some data for sigt pert
+    delta_siga= dat.sigaPert(my_zone);
     isigtr = 3*dat.cdif(my_zone); % inverse of sigma_tr 
     isigtrp= 3*1./(3*(dat.sigt(my_zone)+dat.sigtPert(my_zone)));
-    deltaisigtr=isigtrp-isigtr;
+    delta_isigtr=isigtrp-isigtr;
     E0=E(1,iel);
     E1=E(2,iel);
     Eloc = (E1+E0)/2+xq*(E1-E0)/2;
     dEdx = (E1-E0)/2;
-    % compute local matrices + load vector
-    for i=1:porder+1
-        f(i)= dot(qext.*wq, b(:,i));
-        g(i)= psiga*dot(phi(:,iel).*wq, b(:,i));
-        h(i)= deltaisigtr*dot(phi(:,iel).*wq, Eloc.*dbdx(:,i)+dEdx*b(:,i));
-    end
+    delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
+    Jac   = npar.dx(iel)/2;
     % assemble
-    qoi = qoi + Jac*dot(f,phia(:,iel)) ;
-    qoi = qoi - Jac*dot(g,phia(:,iel)) ;
-    qoi = qoi + Jac*dot(h,phia(:,iel));
+    d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;
+    d_qoi = d_qoi - Jac*delta_siga*dot(phi_unpert(:,iel), m*phia(:,iel));
+    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel).*wq, (Eloc.*dbdx+dEdx.*b)*phia(:,iel));
 end
 
+fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
 
-%boundary terms
-%Left Boundary
-    Jac = npar.dx(1)/2;
-    E0=E(1,1);
-    E1=E(2,1);
-    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
-    dEdx = (E1-E0)/2;
-    %my_zone=npar.iel2zon(1)
-    isigtr = 3*dat.cdif(my_zone);
-    for i=1:porder+1
-        for j=1:porder+1
-            k(i,j) = dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
-        end
-    end
-    term1=isigtr*k/Jac;
-    term2=term1*phi(:,1);
-    testx=1;
-%Right Boundry
-    E0=E(1,end);
-    E1=E(2,end);
-    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
-    dEdx = (E1-E0)/2;
+%%% Boundary Condition Stuff
+% Build forward J values (mainly copied from establish_bc_for_VEF
+inc=dat.psiIncPert;
+ndir = snq.n_dir;
+ii = find (inc(1:ndir/2)>0);
+if isempty(ii) % vacuum
+    JForwardRite = 0;
+else
+    Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
+    JForwardRite = -Jinc;
+end
+ii = find (inc(ndir/2+1:end)>0);
+if isempty(ii) % vacuum
+    JForwardLeft = 0;
+else
+    Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
+    JForwardLeft = Jinc;
+end
+BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
+BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
+%fprintf('BCqoiRite value %g  \n',BCqoiRite);
+%fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+d_qoi = d_qoi + BCqoiLeft + BCqoiRite;

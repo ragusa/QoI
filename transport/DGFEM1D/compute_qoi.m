@@ -108,17 +108,31 @@ if ~use_forward_flux
     else % adjoint VEF
         %warning('not yet implemented BC in adjoint Qoi with VEF');
         % Boundary Condition Stuff
-        % Build forward J values
-        establish_bc_for_VEF(true)
-        JForwardRite=dat.bcVEF.rite.C;
-        JForwardLeft=dat.bcVEF.left.C;
+        % Build forward J values (mainly copied from establish_bc_for_VEF)
+        inc=dat.inc_forward;
+        ndir = snq.n_dir;
+        ii = find (inc(1:ndir/2)>0);
+        if isempty(ii) % vacuum
+            JForwardRite = 0;
+        else
+            Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
+            JForwardRite = -Jinc;
+        end
+        ii = find (inc(ndir/2+1:end)>0);
+        if isempty(ii) % vacuum
+            JForwardLeft = 0;
+        else
+            Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
+            JForwardLeft = Jinc;
+        end
         BCqoiRite=2*JForwardRite*phi(npar.porder+1,npar.nel);
         BCqoiLeft=2*JForwardLeft*phi(1,1);
         % The next two line are I think what we would have to add if we did
         % NOT specify 0 on the adjoint flux BC. This would require us to
         % know the forward solution though, which sort of defeats the
-        % purpose, but could be useful for validation. I will keel them
-        % just commented out. May need to deal with a +/- sign.
+        % purpose, but could be useful for validation. I will keep them
+        % just commented out. May need to deal with a +/- sign. Need to
+        % define some values (JAdjointRite/Left) though.
         %BCqoiRite= BCqoiRite-2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
         %BCqoiLeft= BCqoiLeft-2*JAdjointLeft*phi_unpert(1,1);
         %Just some debug output

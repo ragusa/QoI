@@ -1,17 +1,21 @@
-function [pqoi_sn_f,pqoi_sn_a,pqoi_vef_math_adj] = sn1d_iterator(sigsFactor,sigtFactor)
+function sn1d_iterator
 % Linear Discontinous FEM code for Sn transport in 1D
 % Jean Ragusa,
-close all; clc; % closes all plotting figures, clears console
+close all; clc; clear variables; clear global;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-global npar dat snq
+global npar dat snq IO_opts
+% set variable once for all
+forward_flux = true;
+adjoint_flux = ~forward_flux;
+do_transport_adjoint=false;
+IO_opts.show_dqoi_pre_bc=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select angular approx (must be an even number)
 sn=8;
-n_moments=1;
-logi_galerkin=false;
+n_moments=1; logi_galerkin=false;
 [M,D,omega,weights] = gauss_legendre_1d(sn,n_moments,logi_galerkin);
 snq.D = D; snq.M = M; snq.n_dir = sn;
 snq.mu = omega; snq.w = weights;
@@ -21,119 +25,142 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=12;
+pb_ID=19;
 load_input(pb_ID);
+console_io = false;
+do_dsa = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Specify Output FIle Path
+outputMatrix=[];
+today=datestr(now,'mmddyyHHMM');
+%[pathstr,name,ext] = fileparts(pwd); 
+file=['DGFEM1D_prob',int2str(pb_ID),'_',today,'.csv'];
+filename=fullfile('C:\Users\Ian\checkout','output',file);
+% outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
+% outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
+% outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
+% Iterators for perturbation factors
+sigtPertFactor=[0 0.05 0.1];
+sigsPertFactor=[0 0.01];
+sourcePertFactor=[0 0.02];
+incPertFactor=[0];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
-forward = true;
-do_dsa = true;
-[phi,E,Ebd,psi]=solve_transport(forward,do_dsa);
-%Ebd
-% pretty plots
-%do_plot(phi,0,E)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% solve forward VEF problem using IP
-forward = true;
-[phiVEF]=solve_VEF(forward,E,Ebd);
-% pretty plots
-%do_plot(phiVEF,0)
-%do_plot((phiVEF./reshape(phi,npar.ndofs,1)-1),22)
+[phi,E,Ebd,psi]=solve_transport(forward_flux,do_dsa,console_io);
+do_plot(phi,'Sn',0,forward_flux)
+do_plot(E,'E',50,forward_flux,true)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve adjoint transport problem using sweeps
-forward = false;
-do_dsa = true;
-[phia,Ea,Ebda,psia]=solve_transport(forward,do_dsa);
-%Ebda
-% pretty plots
-%do_plot(phia,100,Ea)
+[phia,Ea,Ebda,psia]=solve_transport(adjoint_flux,do_dsa,console_io);
+do_plot(phia,'Sn',100,adjoint_flux)
+% do_plot(Ea,'Ea',50,forward_flux,true)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% solve adjoint VEF problem using IP
-forward = false;
-[phiVEFa]=solve_VEF(forward,Ea,Ebda);
-% pretty plots
-%do_plot(phiVEFa,100)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-forward = true;
-qoi_sn_f = compute_qoi(~forward,phi);
-%fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
-qoi_vef_f = compute_qoi(~forward,phiVEF);
-%fprintf('qoi using VEFforward: \t %g \n',qoi_vef_f);
-forward=false;
-qoi_sn_a = compute_qoi(~forward,phia);
-%fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
-qoi_vef_a = compute_qoi(~forward,phiVEFa);
-%fprintf('qoi using VEFadjoint: \t %g \n',qoi_vef_a);
+qoi_sn_f = compute_qoi(forward_flux,phi,sn,[],[]);
+fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
+%
+qoi_sn_a = compute_qoi(adjoint_flux,phia,sn,psi,psia);
+fprintf('qoi using sn adjoint: \t %g \n',qoi_sn_a);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
-forward = false;
-[phiVEFmath]=solve_VEF_math_adjoint(forward,E,Ebd);
-% pretty plots
-do_plot(phiVEFmath,300)
-qoi_vef_math_adj = compute_qoi(~forward,phiVEFmath);
-%fprintf('qoi using VEFmathadj: \t %g \n',qoi_vef_math_adj);
-
+[phiVEF]=solve_VEF(forward_flux,E,Ebd);
+do_plot(phiVEF,'VEF',0,forward_flux)
+% figure(22); plot(phiVEF./reshape(phi,npar.ndofs,1)-1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Perturbations
-dat.sourcePert = 0.0;
-dat.sigsPert = sigsFactor*dat.sigs;
-dat.sigtPert = sigtFactor*dat.siga;
-dat.sigaPert = dat.sigtPert - dat.sigsPert;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Compute perturbed QoIs using adjoint method and unperturbed forward
-forward=false;
-pqoi_sn_a = compute_purturbed_qoi_Sn(~forward,phia,phi,E,psi,psia);
-%fprintf('perturbed qoi using sn adjoint: \t %g \n',pqoi_sn_a);
-pqoi_vef_a = compute_purturbed_qoi_VEF(~forward,phiVEFa,phiVEF,E);
-%fprintf('perturbed qoi using VEFadjoint: \t %g \n',pqoi_vef_a);
-pqoi_vef_math_adj = compute_purturbed_qoi_VEF(~forward,phiVEFmath,phiVEF,E);
-%fprintf('perturbed qoi using VEFmathadj: \t %g \n',pqoi_vef_math_adj);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Perturb data values for forward solve
-dat.sigs = dat.sigs+dat.sigsPert;
-dat.siga = dat.siga+dat.sigaPert;
-dat.sigt = dat.sigt+dat.sigtPert;
-dat.cdif = 1./(3*dat.sigt);
-dat.qv_forward=(1+dat.sourcePert)*dat.qv_forward;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%load_input(13);
-% solve forward transport problem using sweeps
-forward = true;
-do_dsa = true;
-[phip,Ep,Ebdp,psip]=solve_transport(forward,do_dsa);
-Ebdp;
-% pretty plots
-%do_plot(phip,0,Ep)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
-forward = true;
-[phiVEFp]=solve_VEF(forward,Ep,Ebdp);
-% pretty plots
-%do_plot(phiVEFp,0)
-%do_plot((phiVEFp./reshape(phip,npar.ndofs,1)-1),122)
+[phiVEFa_math]=solve_VEF_math_adjoint(adjoint_flux,E,Ebd);
+do_plot(phiVEFa_math,'VEF-math',100,adjoint_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% forward = true;
-pqoi_sn_f = compute_qoi(~forward,phip);
-%fprintf('perturbed qoi using sn forward: \t %g \n',pqoi_sn_f);
-pqoi_vef_f = compute_qoi(~forward,phiVEFp);
-%fprintf('perturbed qoi using VEFforward: \t %g \n',pqoi_vef_f);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-return
+qoi_vef_f = compute_qoi(forward_flux,phiVEF,~sn,[],[]);
+fprintf('qoi using VEFforward: \t %g \n',qoi_vef_f);
+%
+qoi_vef_math_adj = compute_qoi(adjoint_flux,phiVEFa_math,~sn,[],[]);
+fprintf('qoi using VEF math adj: \t %g \n',qoi_vef_math_adj);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
+for ii=1:numel(sigtPertFactor)
+    for jj=1:numel(sigsPertFactor)
+        for kk=1:numel(sourcePertFactor)
+            for ll=1:numel(incPertFactor)
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Load Perturbations. Used in adjoint sensitivity
+                    dat.sigtPert = dat.sigtPertRegion.*dat.sigt*sigtPertFactor(ii);
+                    dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFactor(jj);
+                    dat.sigaPert = dat.sigtPert - dat.sigsPert;
+                    dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*sourcePertFactor(kk);
+                    dat.psiIncPert = dat.inc_forward*incPertFactor(ll);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % perturbations
+                    dat_saved = dat;
+                    dat.qv_forward = dat.qv_forward + dat.sourcePert;
+                    dat.sigs = dat.sigs + dat.sigsPert;
+                    dat.sigt = dat.sigt + dat.sigtPert;
+                    dat.siga = dat.siga + dat.sigaPert;
+                    dat.inc_forward = dat.inc_forward + dat.psiIncPert;
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % solve perturbed forward transport problem using sweeps
+                    [phi_pert,E_pert,Ebd_pert,psi_pert]=solve_transport(forward_flux,do_dsa,console_io);
+                    %do_plot(phi_pert,'Sn-pert',0,forward_flux)
+                    %do_plot(E_pert,'Epert',50,forward_flux,true)
+                    %do_plot(E_pert-E,'Epert-E',51,forward_flux,true)
+                    %
+                    qoi_sn_f_pert = compute_qoi(forward_flux,phi_pert,sn,[],[]);
+                    delta_qoi_sn_f=qoi_sn_f_pert - qoi_sn_f;
+                    %fprintf('delta qoi using 2 sn forward runs: \t %g \n',delta_qoi_sn_f);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % solve forward VEF problem using IP
+                    [phiVEF_pert]=solve_VEF(forward_flux,E,Ebd);
+                    %do_plot(phiVEF_pert,'VEF-pert',0,forward_flux)
+                    qoi_vef_f_pert = compute_qoi(forward_flux,phiVEF_pert,~sn,[],[]);
+                    delta_qoi_VEF_f=qoi_vef_f_pert - qoi_vef_f;
+                    %fprintf('delta qoi using 2 VEF forward runs: \t %g \n',delta_qoi_VEF_f);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Compute perturbed QoIs using Sn adjoint method and unperturbed forward
+                    % reset
+                    dat = dat_saved;
+                    %
+                    delta_qoi_sn_a = compute_perturbed_qoi_Sn(adjoint_flux,phia,phi,psi,psia,sn);
+                    %fprintf('delta qoi using sn adjoint: \t\t %g \n',delta_qoi_sn_a);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % Compute perturbed QoIs using VEF math adjoint method and unperturbed forward
+                    delta_qoi_VEF_math_a = compute_perturbed_qoi_VEF(adjoint_flux,phiVEFa_math,phiVEF,E);
+                    %fprintf('delta qoi using VEF math adjoint: \t\t %g \n',delta_qoi_VEF_math_a);
+
+                    Rel_L1_diff=find_Eddington_diff(E,E_pert);
+                    %fprintf('relative L1 difference in E: \t\t %g \n',Rel_L1_diff);
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    outputLine=[pb_ID qoi_sn_f qoi_sn_a qoi_vef_f qoi_vef_math_adj];
+                    outputLine=[outputLine sigtPertFactor(ii) sigsPertFactor(jj) sourcePertFactor(kk) incPertFactor(ll) ];
+                    outputLine=[outputLine  delta_qoi_sn_f  delta_qoi_VEF_f  delta_qoi_sn_a  delta_qoi_VEF_math_a Rel_L1_diff];
+                    outputMatrix = [outputMatrix; outputLine];
+            end
+        end
+    end
 end
+
+csvwrite(filename,outputMatrix)
+disp(['output stored in ',filename]);
+%error('stopping here, not fully done with delta qoi.');

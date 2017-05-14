@@ -1,6 +1,6 @@
 function d_qoi = compute_perturbed_qoi_Sn(use_forward_flux,phia,phi_unpert,psi_unpert,psia,is_sn)
 
-global npar dat snq
+global npar dat snq IO_opts
 
 % source data (volumetric)
 if use_forward_flux
@@ -66,7 +66,9 @@ for iel=1:npar.nel
     end
 end
 
-fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
+if IO_opts.show_dqoi_pre_bc
+    fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
+end
 
 %%%% d_qoi=d_qoi - dot(snq.w.*[incident_left incident_rite]',[adjoint_flx_left adjoint_flx_rite]);
 

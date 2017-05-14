@@ -2,6 +2,10 @@ function do_plot(phi,my_legend,figID,forward,varargin)
 
 global npar dat snq
 
+is_E=false;
+if length(varargin)>=1
+    is_E = varargin{1};
+end
 if forward
     forward_txt='Forward';
 else
@@ -36,31 +40,36 @@ my_markers = ['+', 'o', '*', 's', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
 sss=sprintf('%s-',my_markers(n1));
 figure(1+figID); hold all;
 plot(npar.xf,reshape(phi,npar.ndofs,1),sss,'LineWidth',1);
-title(sprintf('%s scalar flux, problem %d',forward_txt,dat.pb_ID));
-xlabel('x'); ylabel('scalar flux');
+if is_E
+    title(sprintf('%s Eddington Tensor, problem %d',forward_txt,dat.pb_ID));
+    xlabel('x'); ylabel('E');
+else
+    title(sprintf('%s scalar flux, problem %d',forward_txt,dat.pb_ID));
+    xlabel('x'); ylabel('scalar flux');
+end
 % filename=sprintf('scal_%s_sn%i.png',tit,sn);
 % print('-dpng',filename);
 legend(dat.leg{figID+1},'Location','Best');
 hold off;
 
-if length(varargin)>=1
-    
-    figure(2+figID)
-    E = varargin{1};
-    plot(npar.xf,reshape(E,npar.ndofs,1),'+-','LineWidth',1);
-    title(sprintf('%s Eddington tensor, problem %d',forward_txt,dat.pb_ID));
-    xlabel('x'); ylabel('E');
-    
-    if length(varargin)==2
-        psi = varargin{2};
-        for idir=1:snq.n_dir
-            figure(figID+2+idir)
-            plot(npar.xf,reshape(psi(:,:,idir),npar.ndofs,1),'-','LineWidth',1);
-            title(sprintf('%s angular flux %d, problem %d',forward_txt,idir,dat.pb_ID));
-            xlabel('x'); ylabel('angular flux');
-        end
-    end
-end
+% if length(varargin)>=1
+%     
+%     figure(2+figID)
+%     E = varargin{1};
+%     plot(npar.xf,reshape(E,npar.ndofs,1),'+-','LineWidth',1);
+%     title(sprintf('%s Eddington tensor, problem %d',forward_txt,dat.pb_ID));
+%     xlabel('x'); ylabel('E');
+%     
+%     if length(varargin)==2
+%         psi = varargin{2};
+%         for idir=1:snq.n_dir
+%             figure(figID+2+idir)
+%             plot(npar.xf,reshape(psi(:,:,idir),npar.ndofs,1),'-','LineWidth',1);
+%             title(sprintf('%s angular flux %d, problem %d',forward_txt,idir,dat.pb_ID));
+%             xlabel('x'); ylabel('angular flux');
+%         end
+%     end
+% end
 
 return
 end

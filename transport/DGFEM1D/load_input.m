@@ -206,15 +206,109 @@ switch pb_ID
         width_zone = [ 20 4 2 4 20 ]/5;
         % sigt/sigs per zone
         sigt=[1 1 1 1 1];
-        sigs=[1 1 1 1 1]*0;
+        sigs=[1 1 1 1 1]*0.5;
         % volumetric source value, per zone
         qvf=[1 1 1 1 1];
         % incoming flux values
-        incf(1:sn) = 1/2;  incf(1:sn/2)=0.5; incf(sn/2+1:sn)=0;
+        incf(1:sn) = 1/2;  incf(1:sn/2)=1; incf(sn/2+1:sn)=0;
         % volumetric source value, per zone
         qva=[1 1 1 1 1];
         % incoming adj flux values
         inca(1:sn) = 0;
+        
+    case 15 %Two streaming gaps between source and detector
+        % number of elements per zone
+        nel_zone = [ 50 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 20 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1e-8 1 1e-8 1];
+        sigs=[0.3 0 0.3 0 0.3];
+        % volumetric source value, per zone
+        qvf=[1 0 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 0 0 1];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        
+    case 16 %Single large streaming gap between source and detector
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1e-8 1e-8 1e-8 1];
+        sigs=[0.3 0 0 0 0.3];
+        % volumetric source value, per zone
+        qvf=[1 0 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 0 0 1];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        
+    case 17 %Single streaming gap between source and detector. Gap past detector.
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1e-8 1 1e-8 1];
+        sigs=[0.3 0 0.3 0 0.3];
+        % volumetric source value, per zone
+        qvf=[1 0 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        
+    case 18 %Single streaming then high scatter region, to see effect on Eddington.
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1e-8 1 1 1];
+        sigs=[0.3 0 1 1 0.3];
+        % volumetric source value, per zone
+        qvf=[1 0 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 0 0 1];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        
+             
+    case 19 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[2 2 2 2 2];
+        sigs=[1 1 1 1 1];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 1 1 1 1];
+        dat.sigsPertRegion=[1 1 1 1 1];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        
+        
+        
+       
     otherwise
         error('problem ID %g is unknown',pb_ID);
         
@@ -248,7 +342,7 @@ dat.sigt = sigt;
 dat.sigs = sigs;
 dat.qv_forward =qvf;
 dat.inc_forward = incf;
-if pb_ID==12 || pb_ID==7 || pb_ID==13 || pb_ID==14
+if pb_ID>11 || pb_ID==7 
     dat.qv_adjoint =qva;
     dat.inc_adjoint = inca;
 else

@@ -1,6 +1,6 @@
 function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E)
 
-global npar dat snq
+global npar dat snq IO_opts
 
 % source data (volumetric)
 if use_forward_flux
@@ -52,13 +52,15 @@ for iel=1:npar.nel
     % assemble
     d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;
     d_qoi = d_qoi - Jac*delta_siga*dot(phi_unpert(:,iel), m*phia(:,iel));
-    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel).*wq, (Eloc.*dbdx+dEdx.*b)*phia(:,iel));
+    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel).*wq, dbdx*(Eloc.*dbdx+dEdx.*b)*phia(:,iel));
 end
 
-fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
+if IO_opts.show_dqoi_pre_bc
+    fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
+end
 
 %%% Boundary Condition Stuff
-% Build forward J values (mainly copied from establish_bc_for_VEF
+% Build forward J values (mainly copied from establish_bc_for_VEF)
 inc=dat.psiIncPert;
 ndir = snq.n_dir;
 ii = find (inc(1:ndir/2)>0);

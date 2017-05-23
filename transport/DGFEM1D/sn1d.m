@@ -25,7 +25,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=19;
+pb_ID=25;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -36,7 +36,7 @@ do_dsa = true;
 % solve forward transport problem using sweeps
 [phi,E,Ebd,psi]=solve_transport(forward_flux,do_dsa,console_io);
 do_plot(phi,'Sn',0,forward_flux)
-do_plot(E,'E',50,forward_flux,true)
+do_plot(E,'E',50,forward_flux,1)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +64,7 @@ do_plot(phiVEF,'VEF',0,forward_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 [phiVEFa_math]=solve_VEF_math_adjoint(adjoint_flux,E,Ebd);
-do_plot(phiVEFa_math,'VEF-math',100,adjoint_flux)
+do_plot(phiVEFa_math,'VEF',100,adjoint_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if do_transport_adjoint
@@ -101,11 +101,11 @@ end
 fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Perturbations. Used in adjoint sensitivity
-dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0;
-dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0.01+[0.0 0 0.0 0.0 0]*0;
-dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0+[0.0 0 0.0 0.0 0]*0;
+dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.0+dat.sigtPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*-0.1+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
-dat.psiIncPert = 0*dat.inc_forward;
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0;
+dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*0.0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % perturbations
@@ -121,8 +121,8 @@ dat.inc_forward = dat.inc_forward + dat.psiIncPert;
 % solve perturbed forward transport problem using sweeps
 [phi_pert,E_pert,Ebd_pert,psi_pert]=solve_transport(forward_flux,do_dsa,console_io);
 do_plot(phi_pert,'Sn-pert',0,forward_flux)
-do_plot(E_pert,'Epert',50,forward_flux,true)
-do_plot(E_pert-E,'Epert-E',51,forward_flux,true)
+do_plot(E_pert,'Epert',50,forward_flux,1)
+do_plot(E_pert-E,'Epert-E',51,forward_flux,2)
 %
 qoi_sn_f_pert = compute_qoi(forward_flux,phi_pert,sn,[],[]);
 fprintf('delta qoi using 2 sn forward runs: \t %g \n',qoi_sn_f_pert - qoi_sn_f);

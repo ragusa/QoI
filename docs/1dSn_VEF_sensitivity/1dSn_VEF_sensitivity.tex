@@ -373,6 +373,45 @@ Expanding out all values
 \section*{DISCLAIMER}
 Below here are just sections where I am "thinking out loud". Some of it is just rambling that leads nowhere.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Term from perturbed Eddington}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+For our VEF formulation, the change in QoI approximated to the first order using the adjoint method, while also assuming the Eddington tensor remains remains unperturbed is 
+\begin{align*}
+\delta QoI =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right].
+\end{align*}
+where $\delta c = \frac{1}{\sigma_t + \delta \sigma_t} -  \frac{1}{\sigma_t}$.
+Let us focus on the volumetric term due to perturbations in $\sigma_t$
+\[
+\bra \phi^\dag ,  \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket
+\]
+since this is the term (or related to the terms) which are affected by our assumption that the Eddington tensor remains unperturbed.
+\subsection{Considering a $\delta E$}
+If we were to consider a $\delta E = E_{pert} - E$, then our 1st order approximation would pick up an additional volumetric term (while also creating 2 additional 2nd order terms and a 3rd order perturbation term). Ignoring the boundary terms, the inner product would then be
+\[
+\delta QoI = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket
+\]
+An important take away is that this term is scaled with $c$, remembering $c=1/\sigma_t$, low cross-section regions (streaming) has the potential to make "ignoring" this term very costly.
+
+However, a saving grace MAY be present by way of the divergence operators. Green's identity applied to this term yields
+\[
+\bra \phi^\dag , \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket 
+= 
+\bra -\vgrad \phi^\dag , c \vdiv \left( \delta E \phi \right)  \ket + \int_{\delta V} d^2 r \, \phi^\dag  c \vdiv \left( \delta E \phi \right)
+\]
+So, if in this streaming region, the adjoint is constant constant we would have $\vgrad \phi^\dag =0$, and the volumetric term disappears, and we can focus on the boundaries of the streaming region. [I think this may cause some unpleasant things to happen when we make the jump from 1D slab geometry to 2D and 3D geometries, where the scalar flux has geometric dependence in streaming regions.]
+
+\subsection{Idea: $f(,\phi,\phi^\dag,\vec{p},\delta\vec{p}) \approx \delta E$?}
+What if there exists a "function" $f$; which may be a function of the unperturbed forward flux, the adjoint flux, the input parameters, and the perturbation to those parameters such that $f(,\phi,\phi^\dag,\vec{p},\delta\vec{p}) \approx \delta E$? If so, then we could use this function to "improve" our sensitivity estimation by using
+\[
+\delta QoI = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( f \phi \right) \right)  \ket
+\]
+
+
 \section{Some thoughts/questions on operators and adjoints}
 Ok, we have the forward VEF transport operator
 \[

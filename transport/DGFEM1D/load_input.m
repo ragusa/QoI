@@ -181,6 +181,9 @@ switch pb_ID
         qva=[0 0 1];
         % incoming adj flux values
         inca(1:sn) = 0;
+        dat.sigtPertRegion=[1 1 1];
+        dat.sigsPertRegion=[1 1 1];
+        dat.sourcePertRegion=[1 1 1];
         
     case 13 %
         % number of elements per zone
@@ -305,6 +308,161 @@ switch pb_ID
         dat.sigtPertRegion=[1 1 1 1 1];
         dat.sigsPertRegion=[1 1 1 1 1];
         dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 20 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1];
+        sigs=[0.5 0.5 0.5 0.5 0.5];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 1 1 1 1];
+        dat.sigsPertRegion=[1 1 1 1 1];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 21 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[0.5 0.5 0.5 0.5 0.5];
+        sigs=[0.25 0.25 0.25 0.25 0.25];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 1 1 1 1];
+        dat.sigsPertRegion=[1 1 1 1 1];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 22 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[2 2 2 2 2];
+        sigs=[1 1 1 1 1];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[0 1 1 1 0];
+        dat.sigsPertRegion=[0 1 1 1 0];
+        dat.sourcePertRegion=[0 1 1 1 0];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 23 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1];
+        sigs=[0.5 0.5 0.5 0.5 0.5];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[0 1 1 1 0];
+        dat.sigsPertRegion=[0 1 1 1 0];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 24 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[0.5 0.5 0.5 0.5 0.5];
+        sigs=[0.25 0.25 0.25 0.25 0.25];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[0 1 1 1 0];
+        dat.sigsPertRegion=[0 1 1 1 0];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 25 %Uniform, 0 inc flux. Response on right
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[2 2 2 2 2];
+        sigs=[1 1 1 1 1];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 0 0 1];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 1 1 1 1];
+        dat.sigsPertRegion=[1 1 1 1 1];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
+        
+    case 26 %Uniform, 0 inc flux. Response on mid-right
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[2 2 2 2 2];
+        sigs=[1 1 1 1 1];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 0 1 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 1 1 1 1];
+        dat.sigsPertRegion=[1 1 1 1 1];
+        dat.sourcePertRegion=[1 1 1 1 1];
+        dat.incPertRegion(1:sn)=1;
         
         
         

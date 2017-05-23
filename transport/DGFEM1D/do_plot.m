@@ -40,9 +40,12 @@ my_markers = ['+', 'o', '*', 's', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
 sss=sprintf('%s-',my_markers(n1));
 figure(1+figID); hold all;
 plot(npar.xf,reshape(phi,npar.ndofs,1),sss,'LineWidth',1);
-if is_E
+if is_E==1
     title(sprintf('%s Eddington Tensor, problem %d',forward_txt,dat.pb_ID));
     xlabel('x'); ylabel('E');
+elseif is_E==2
+    title(sprintf('%s Eddington Tensor Difference, problem %d',forward_txt,dat.pb_ID));
+    xlabel('x'); ylabel('Delta E');
 else
     title(sprintf('%s scalar flux, problem %d',forward_txt,dat.pb_ID));
     xlabel('x'); ylabel('scalar flux');

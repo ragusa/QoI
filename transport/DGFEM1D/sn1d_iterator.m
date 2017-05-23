@@ -25,14 +25,14 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=19;
+pb_ID=25;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Specify Output FIle Path
+%Specify Output File Path
 outputMatrix=[];
 today=datestr(now,'mmddyyHHMM');
 %[pathstr,name,ext] = fileparts(pwd); 
@@ -42,9 +42,9 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
-sigtPertFactor=[0 0.05 0.1];
-sigsPertFactor=[0 0.01];
-sourcePertFactor=[0 0.02];
+sigtPertFactor=[0];
+sigsPertFactor=[0];
+sourcePertFactor=linspace(-0.1,0.1,21);
 incPertFactor=[0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -81,7 +81,7 @@ do_plot(phiVEF,'VEF',0,forward_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 [phiVEFa_math]=solve_VEF_math_adjoint(adjoint_flux,E,Ebd);
-do_plot(phiVEFa_math,'VEF-math',100,adjoint_flux)
+do_plot(phiVEFa_math,'VEF',100,adjoint_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,7 +104,7 @@ for ii=1:numel(sigtPertFactor)
                     dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFactor(jj);
                     dat.sigaPert = dat.sigtPert - dat.sigsPert;
                     dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*sourcePertFactor(kk);
-                    dat.psiIncPert = dat.inc_forward*incPertFactor(ll);
+                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*incPertFactor(ll);
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % perturbations

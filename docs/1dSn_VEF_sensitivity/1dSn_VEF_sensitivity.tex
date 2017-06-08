@@ -205,11 +205,11 @@ J = \vec{\phi_1}=\frac{\vec{q}_1}{\sigma_{tr} } - \frac{1}{\sigma_{tr} } \vec{\n
 \]
 So the boundary term becomes 
 \[
-\int_{\Omega \cdot n<0} d\Omega \, \left| \Omega \cdot n \right | \psi^{inc} = J^- =  \frac{1}{2} B \phi - \frac{\vec{q}_1}{2 \sigma_{tr} } + \frac{1}{2 \sigma_{tr} } \vec{\nabla} \cdot \left(E \phi_0 \right)  \quad \vr \in \partial V
+\int_{\Omega \cdot n<0} d\Omega \, \left| \Omega \cdot n \right | \psi^{inc} = - J^- =  \frac{1}{2} B \phi - \frac{\vec{q}_1}{2 \sigma_{tr} } + \frac{1}{2 \sigma_{tr} } \vec{\nabla} \cdot \left(E \phi_0 \right)  \quad \vr \in \partial V
 \]
 Then rearrange to what will be the useful form
 \[
-\frac{1}{\sigma_{tr} } \vec{\nabla} \cdot \left(E \phi_0 \right)  = 2J^- - B \phi + \frac{\vec{q}_1}{ \sigma_{tr} } \quad \vr \in \partial V
+\frac{1}{\sigma_{tr} } \vec{\nabla} \cdot \left(E \phi_0 \right)  = - 2J^- - B \phi + \frac{\vec{q}_1}{ \sigma_{tr} } \quad \vr \in \partial V
 \]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -257,12 +257,12 @@ Note that this is NOT the adjoint equation we would expect from an "adjoint part
 \]
 Recalling that the boundary condition for the forward was
 \[
-\frac{1}{\sigma_{tr} } \vec{\nabla} \cdot \left(E \phi_0 \right)  = 2J^- - B \phi + \frac{\vec{q}_1}{\sigma_{tr} } \quad \vr \in \partial V
+\frac{1}{\sigma_{tr} } \vec{\nabla} \cdot \left(E \phi \right)  = - 2J^- - B \phi + \frac{\vec{q}_1}{\sigma_{tr} } \quad \vr \in \partial V
 \]
 Substitution into the boundary term leads to
 \[
  \int d^2 r \, \left( E \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right) \right) \cdot \vec{n} 
-- \int d^2 r \, \phi^\dag \left[ \left( 2J^- - B \phi + \frac{\vec{q}_1}{\sigma_{tr} }  \right) \cdot \vec{n} \right] \quad \vr \in \partial V
++ \int d^2 r \, \phi^\dag \left[ \left( 2J^- + B \phi - \frac{\vec{q}_1}{\sigma_{tr} }  \right) \cdot \vec{n} \right] \quad \vr \in \partial V
 \]
 From the above it appears the the most computationally "beneficial" boundary condition would be specifying 
 \[
@@ -270,26 +270,26 @@ E \cdot \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right)
 \]
 Consider the proposed adjoint boundary condition
 \[
-E \cdot \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) =  2J^{ \dag + } - B \phi^\dag  \quad \vr \in \partial V
+E \cdot \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) =  - 2J^{ \dag + } - B \phi^\dag  \quad \vr \in \partial V
 \]
 Which is reminiscent of the forward boundary condition, but with specified outgoing partial current (which is frequently specified for transport derived adjoints. Using the above condition the boundary term becomes. 
 \[
- \int d^2 r \, \phi \left[ \left( 2J^{ \dag + } - B \phi^\dag \right) \cdot \vec{n} \right]
-- \int d^2 r \, \phi^\dag \left[ \left( 2J^- - B \phi + \frac{\vec{q}_1}{\sigma_{tr} } \right) \cdot \vec{n} \right]  \quad \vr \in \partial V
+ \int d^2 r \, \phi \left[ \left( - 2J^{ \dag + } - B \phi^\dag \right) \cdot \vec{n} \right]
++ \int d^2 r \, \phi^\dag \left[ \left( 2J^- + B \phi + \frac{\vec{q}_1}{\sigma_{tr} } \right) \cdot \vec{n} \right]  \quad \vr \in \partial V
 \]
 Importantly, the boundary Eddington terms cancel, leaving a total boundary term of
 \[
- \int d^2 r \, \left( 2\phi J^{ \dag + }  - 2\phi^\dag J^- -  \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
+ \int d^2 r \, \left(  2\phi^\dag J^- - 2\phi J^{ \dag + }  -  \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
 \]
 \subsection{QoI via adjoint}
 Substitution of the adjoint equation with boundary terms into the test function earlier derivation yields
 \[
-\bra \phi^\dag , q \ket = \bra \phi, q^\dag \ket +  \int d^2 r \, \left( 2\phi J^{ \dag + }  - 2\phi^\dag J^- -  \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
+\bra \phi^\dag , q \ket = \bra \phi, q^\dag \ket +   \int d^2 r \, \left(  2\phi^\dag J^- - 2\phi J^{ \dag + }  -  \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
 \]
 
 Recognizing $\bra \phi, q^\dag \ket $ is the desired QoI
 \[
-J = \bra \phi, q^\dag \ket = \bra \phi^\dag , q \ket + \int d^2 r \, \left( 2\phi^\dag J^- - 2\phi J^{ \dag + }   +  \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
+J = \bra \phi, q^\dag \ket = \bra \phi^\dag , q \ket + \int d^2 r \, \left(  2\phi J^{ \dag + } - 2\phi^\dag J^-  + \frac{\vec{q}_1}{\sigma_{tr}} \right) \cdot \vec{n}
 \]
 \section{VEF Adjoint Sensitivity}
 Assume we perturb $\sigma_{tr}$, $\sigma_r$, and $q_0$; resulting in a perturbed forward solution $\phi_p = \phi + \delta \phi$. Assuming the Eddington tensor remains the same as the unperturbed scenario, we have.
@@ -343,20 +343,47 @@ In terms of the change in QoI
 \delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
 &+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right]
 \end{align*}
-\subsection{Some thoughts on a second order boundary term}
-There is a potential for some second order boundary term resulting from the $- \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right)$ in the expanded perturbed equation. On the boundaries we know $\delta c$ and $\delta \phi$, so we could calculate.
+Express the first boundary term using the BC of the adjoint
 \begin{align*}
-\intrrr \phi^\dag \left[ - \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right) \right] 
-&= \intrrr \delta c  \vgrad \phi^\dag \left[  \left( \vdiv \left( E \delta \phi \right) \right) \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
-&= \intrrr E \vgrad (\delta c  \vgrad \phi^\dag) \left[ \delta \phi  \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
-&\hspace{5mm}+\intrr (\delta c  \vgrad \phi^\dag) \cdot (E \delta \phi \cdot \vec{n}) 
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right]
 \end{align*}
-\textcolor{red}{However, we would never expect to get the boundary terms because we would never apply integration by parts to this term. the $\delta c$ never shows up in the unperturbed operator, so we would never be applying integration by parts to move the operation from $\delta \phi$ to $\phi^\dag$.} In other words, looking at the "suggestive" form from above
-\[ 
--\vdiv \left( c \vdiv \left( E \phi_p \right) \right) + \sigma_r \phi_p
-= q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) 
+Looking at the second boundary term
+\begin{align*}
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) 
+& = \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) - \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \\
+&= (-2J_p^{inc} - B \phi_p) - (-2J^{inc} - B \phi) \\
+&= -2\delta J^{inc} -B \delta \phi
+\end{align*}
+So now for the sensitivity
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ -2\delta J^{inc} -B \delta \phi \right]
+\end{align*}
+The boundary Eddington terms cancel out, leaving
+\[
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} 
 \]
-the term would fit in on the right hand "source" side, and not the LHS (which represents the unperturbed operator).
+\subsection{Form for use in FEM}
+For FEM, we would rather avoid the double div term, so consider the VEF sensitivity
+\[
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket + \bra \phi^\dag , \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} 
+\]
+and apply inner product again
+\begin{align*}
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n}  \\
+&+ \int d^2 r \, \left( \phi^\dag \delta c \vdiv \left( E \phi \right) \right) \cdot \vec{n}
+\end{align*}
+Recalling that the forward boundary term is (in terms of $c=1/ \sigma_{tr}$ 
+\[
+c \vec{\nabla} \cdot \left(E \phi \right)  = -2J^- - B \phi \quad \vr \in \partial V
+\]
+The extra boundary term picked up from the FEM implementation can be expressed as
+\begin{align*}
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n}  \\
+&+ \int d^2 r \, \left(\frac{\delta c}{c} \phi^\dag  \left(  -2J^- - B \phi \right) \right) \cdot \vec{n}
+\end{align*}
+
 
 \subsection*{Alternate boundary condition for forward.}
 Consider the alternate boundary condition for the forward problem \cite{Wiesel}
@@ -372,6 +399,21 @@ Expanding out all values
 
 \section*{DISCLAIMER}
 Below here are just sections where I am "thinking out loud". Some of it is just rambling that leads nowhere.
+
+\section{Some thoughts on a second order boundary term}
+There is a potential for some second order boundary term resulting from the $- \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right)$ in the expanded perturbed equation. On the boundaries we know $\delta c$ and $\delta \phi$, so we could calculate.
+\begin{align*}
+\intrrr \phi^\dag \left[ - \vdiv \left( \delta c \vdiv \left( E \delta \phi \right) \right) \right] 
+&= \intrrr \delta c  \vgrad \phi^\dag \left[  \left( \vdiv \left( E \delta \phi \right) \right) \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
+&= \intrrr E \vgrad (\delta c  \vgrad \phi^\dag) \left[ \delta \phi  \right]  - \intrr \phi^\dag \left[  \left( \delta c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
+&\hspace{5mm}+\intrr (\delta c  \vgrad \phi^\dag) \cdot (E \delta \phi \cdot \vec{n}) 
+\end{align*}
+\textcolor{red}{However, we would never expect to get the boundary terms because we would never apply integration by parts to this term. the $\delta c$ never shows up in the unperturbed operator, so we would never be applying integration by parts to move the operation from $\delta \phi$ to $\phi^\dag$.} In other words, looking at the "suggestive" form from above
+\[ 
+-\vdiv \left( c \vdiv \left( E \phi_p \right) \right) + \sigma_r \phi_p
+= q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) 
+\]
+the term would fit in on the right hand "source" side, and not the LHS (which represents the unperturbed operator).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

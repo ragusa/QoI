@@ -25,13 +25,16 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=25;
+pb_ID=21;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+% dat.sigt=[2.2 1 2.2 1 2.2];
+% dat.siga=dat.sigt-dat.sigs;
+% dat.cdif = 1./(3*dat.sigt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 [phi,E,Ebd,psi]=solve_transport(forward_flux,do_dsa,console_io);
@@ -101,11 +104,11 @@ end
 fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.0+dat.sigtPertRegion.*0;
-dat.sigsPert = dat.sigsPertRegion.*dat.sigs*-0.1+dat.sigsPertRegion.*0;
+dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0+dat.sigtPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
-dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0;
-dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*0.0;
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
+dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % perturbations
@@ -114,6 +117,7 @@ dat.qv_forward = dat.qv_forward + dat.sourcePert;
 dat.sigs = dat.sigs + dat.sigsPert;
 dat.sigt = dat.sigt + dat.sigtPert;
 dat.siga = dat.siga + dat.sigaPert;
+dat.cdif = 1./(3*dat.sigt);
 dat.inc_forward = dat.inc_forward + dat.psiIncPert;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -130,7 +134,7 @@ fprintf('delta qoi using 2 sn forward runs: \t %g \n',qoi_sn_f_pert - qoi_sn_f);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
-[phiVEF_pert]=solve_VEF(forward_flux,E,Ebd);
+[phiVEF_pert]=solve_VEF(forward_flux,E_pert,Ebd_pert);
 do_plot(phiVEF_pert,'VEF-pert',0,forward_flux)
 qoi_vef_f_pert = compute_qoi(forward_flux,phiVEF_pert,~sn,[],[]);
 fprintf('delta qoi using 2 VEF forward runs: \t %g \n',qoi_vef_f_pert - qoi_vef_f);
@@ -163,4 +167,6 @@ end
 
 Rel_L1_diff=find_Eddington_diff(E,E_pert);
 fprintf('relative L1 difference in E: \t\t %g \n',Rel_L1_diff);
+deltaE_term=compute_deltaE_QoI_term(phiVEFa_math,phiVEF,E,E_pert);
+fprintf('deltaE term: \t\t %g \n',deltaE_term);
 %error('stopping here, not fully done with delta qoi.');

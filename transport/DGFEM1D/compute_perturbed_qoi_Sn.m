@@ -62,7 +62,8 @@ for iel=1:npar.nel
     d_qoi = d_qoi + Jac*delta_sigs/snq.sw*dot(m*phi_unpert(:,iel),phia(:,iel));
     % Anglular integration of psi psia product
     for idir=1:snq.n_dir
-        d_qoi = d_qoi - delta_sigt*Jac* snq.w(idir)* dot(m*psi_unpert(:,iel,idir), psia(:,iel,idir));
+        backDir = snq.n_dir+1-idir; 
+        d_qoi = d_qoi - delta_sigt*Jac* snq.w(idir)* dot(m*psi_unpert(:,iel,idir), psia(:,iel,backDir));
     end
 end
 

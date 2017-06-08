@@ -25,7 +25,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=25;
+pb_ID=34;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -42,9 +42,9 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
-sigtPertFactor=[0];
+sigtPertFactor=linspace(0,0.01,21);
 sigsPertFactor=[0];
-sourcePertFactor=linspace(-0.1,0.1,21);
+sourcePertFactor=[0];
 incPertFactor=[0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -113,6 +113,7 @@ for ii=1:numel(sigtPertFactor)
                     dat.sigs = dat.sigs + dat.sigsPert;
                     dat.sigt = dat.sigt + dat.sigtPert;
                     dat.siga = dat.siga + dat.sigaPert;
+                    dat.cdif = 1./(3*dat.sigt);
                     dat.inc_forward = dat.inc_forward + dat.psiIncPert;
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -130,7 +131,7 @@ for ii=1:numel(sigtPertFactor)
 
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % solve forward VEF problem using IP
-                    [phiVEF_pert]=solve_VEF(forward_flux,E,Ebd);
+                    [phiVEF_pert]=solve_VEF(forward_flux,E_pert,Ebd_pert);
                     %do_plot(phiVEF_pert,'VEF-pert',0,forward_flux)
                     qoi_vef_f_pert = compute_qoi(forward_flux,phiVEF_pert,~sn,[],[]);
                     delta_qoi_VEF_f=qoi_vef_f_pert - qoi_vef_f;

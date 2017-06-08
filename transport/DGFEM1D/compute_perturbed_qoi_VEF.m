@@ -79,6 +79,6 @@ else
 end
 BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
 BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
-%fprintf('BCqoiRite value %g  \n',BCqoiRite);
-%fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+fprintf('BCqoiRite value %g  \n',BCqoiRite);
+fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
 d_qoi = d_qoi + BCqoiLeft + BCqoiRite;

@@ -335,12 +335,12 @@ Which is the same as the unperturbed case, except extra terms exist on the RHS "
 \end{align*}
 Since $\bra \phi_p, q^\dag \ket $ is the desired QoI
 \begin{align*}
-J = \bra \phi_p, q^\dag \ket =& \bra \phi^\dag , q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+J = \bra \phi_p, q^\dag \ket =& \bra \phi^\dag , q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right) \right) \cdot \vec{n} \\
 &+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \cdot \vec{n} \right]
 \end{align*}
 In terms of the change in QoI
 \begin{align*}
-\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)\right) \cdot \vec{n} \\
 &+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right]
 \end{align*}
 Express the first boundary term using the BC of the adjoint
@@ -487,37 +487,94 @@ However, a saving grace MAY be present by way of the divergence operators. Green
 \]
 So, if in this streaming region, the adjoint is constant constant we would have $\vgrad \phi^\dag =0$, and the volumetric term disappears, and we can focus on the boundaries of the streaming region. [I think this may cause some unpleasant things to happen when we make the jump from 1D slab geometry to 2D and 3D geometries, where the scalar flux has geometric dependence in streaming regions.]
 
+\subsection{Wait? did we just get lucky.}
+So, the "volumetric" sensitivity, that is, the sensitivity that comes directly from the volume integrals of the adjoint process, including the Eddington perturbations but everything to the first order is
+\[
+\delta J_{vol} = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket
+\]
+We can do some integration by parts on the last two terms to get it to a form that may be preferred in VEF
+\begin{align*}
+\delta J_{vol} =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket -  \bra \vgrad \phi^\dag ,  \delta c \vdiv \left( E \phi  \right) \ket - \bra \vgrad \phi^\dag ,  c \vdiv \left( \delta E \phi \right)   \ket \\
+&+ \int_{\delta V} d^2 r \, \left( \phi^\dag \delta c \vdiv \left( E \phi \right) \right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag  \left(  c \vdiv \left( \delta E \phi \right) \right) \cdot \vec{n}
+\end{align*}
+
+Now, look at the sensitivity due to the "Surface" terms. This refers to terms that directly result from the adjoint process, as opposed to the surface terms we picked up in $\delta J_{vol}$ due to other manipulations.
+
+\[
+\delta J_{surf} = - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} 
+\]
+Now we can use the following to express the $E \delta \phi$ term
+\begin{align*}
+E_p \phi_p &= (E + \delta E)(\phi + \delta \phi) \approx E \phi + E \delta \phi + \delta E \phi  \\
+&\to E \delta \phi \approx E_p \phi_p - E \phi - \delta E \phi
+\end{align*}
+Putting that back in the sensitivity equation
+\begin{align*}
+\delta J_{surf} =& - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( E_p \phi_p \right) \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left(  E \phi \right) \right) \cdot \vec{n} - \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( \delta E \phi \right) \right) \cdot \vec{n}
+\end{align*}
+Now use the relation $c =c_p -\delta c $ to expand the second term
+\begin{align*}
+\delta J_{surf} =& - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag \left( c_p \vdiv \left( E_p \phi_p \right) \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left(  E \phi \right) \right) \cdot \vec{n} - \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( \delta E \phi \right) \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( \delta c \vdiv \left( E_p \phi_p \right) \right) \cdot \vec{n}
+\end{align*}
+The second and third terms are our boundary conditions for the perturbed and unperturbed case, respectively
+\begin{align*}
+\delta J_{surf} =& - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag \left(-2J_p^{inc} -B_p \phi_p \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( -2J^{inc} -B \phi \right) \cdot \vec{n} - \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( \delta E \phi \right) \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( \delta c \vdiv \left( E_p \phi_p \right) \right) \cdot \vec{n}
+\end{align*}
+Rearrange these a little bit to group like terms, and get $\delta J = J_p -J$
+\begin{align*}
+\delta J_{surf} =& - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} + \int_{\delta V} d^2 r \, \phi^\dag \left(-2\delta J^{inc} \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( B_p \phi_p - B \phi \right) \cdot \vec{n} - \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( \delta E \phi \right) \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( \delta c \vdiv \left( E_p \phi_p \right) \right) \cdot \vec{n}
+\end{align*}
+NOW combine the surface and volume terms $\delta J = \delta J_{vol} + \delta J_{surf}$, we see that the $c \vdiv \left( \delta E \phi \right)$ surface term cancels out
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket -  \bra \vgrad \phi^\dag ,  \delta c \vdiv \left( E \phi  \right) \ket - \bra \vgrad \phi^\dag ,  c \vdiv \left( \delta E \phi \right)   \ket \\
+&+ \int_{\delta V} d^2 r \, \left( \phi^\dag \delta c \vdiv \left( E \phi \right) \right) \cdot \vec{n} 
+- \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} \\
+&+ \int_{\delta V} d^2 r \, \phi^\dag \left(-2\delta J^{inc} \right) \cdot \vec{n} 
+- \int_{\delta V} d^2 r \, \phi^\dag \left( B_p \phi_p - B \phi \right) \cdot \vec{n}  \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( \delta c \vdiv \left( E_p \phi_p \right) \right) \cdot
+\end{align*}
+Now if you do the first order approximation again (I feel this is being abused at this point)
+\[
+\delta c \vdiv \left( E_p \phi_p \right) \approx \delta c \vdiv \left( E \phi \right)
+\]
+Then some more terms cancel
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket -  \bra \vgrad \phi^\dag ,  \delta c \vdiv \left( E \phi  \right) \ket - \bra \vgrad \phi^\dag ,  c \vdiv \left( \delta E \phi \right)   \ket \\
+&- \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} 
++ \int_{\delta V} d^2 r \, \phi^\dag \left(-2\delta J^{inc} \right) \cdot \vec{n} \\
+&- \int_{\delta V} d^2 r \, \phi^\dag \left( B_p \phi_p - B \phi \right) \cdot \vec{n}  
+\end{align*}
+Highlighted in red are the terms we gain error from by assuming the Eddington remains unperturbed (including the boundary Eddington B)
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket -  \bra \vgrad \phi^\dag ,  \delta c \vdiv \left( E \phi  \right) \ket  \begingroup\color{red} - \bra \vgrad \phi^\dag ,  c \vdiv \left( \delta E \phi \right)   \ket \endgroup\\
+&- \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} 
++ \int_{\delta V} d^2 r \, \phi^\dag \left(-2\delta J^{inc} \right) \cdot \vec{n} \\
+& \begingroup\color{red} - \int_{\delta V} d^2 r \, \phi^\dag \left( B_p \phi_p - B \phi \right) \cdot \vec{n} \endgroup
+\end{align*}
+We might as well represent that last term using the $B\phi$ definition
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket -  \bra \vgrad \phi^\dag ,  \delta c \vdiv \left( E \phi  \right) \ket  \begingroup\color{red} - \bra \vgrad \phi^\dag ,  c \vdiv \left( \delta E \phi \right)   \ket \endgroup\\
+&- \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} 
++ \int_{\delta V} d^2 r \, \phi^\dag \left(-2\delta J^{inc} \right) \cdot \vec{n} \\
+& \begingroup\color{red} - \int_{\delta V} d^2 r \, \phi^\dag \left( \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \delta \psi \right) \cdot \vec{n} \endgroup
+\end{align*}
+
 \subsection{Considering a $\delta B$}
-IMPORTANT: We would usually expect that we would be able to compute the effect of the boundary perturbations exactly. However, because there are two terms in the boundary perturbation, (The specified perturbation, and the perturbed  $B$ value, this is not correct.
+TODO
 
-Consider what the sensitivity formulation would look like if we included the perturbed Eddington (for the moment, keep the volumetric term first order)
+\subsection{SCRATCH WORK. IGNORE}
+The first term will eventually be dealt with using the adjoint boundary conditions. The second term can be split using $\delta \phi = \phi_p - \phi$
 \begin{align*}
-J = \bra \phi_p, q^\dag \ket =& \bra \phi^\dag , q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
-&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \cdot \vec{n} \right]
-\end{align*}
-
-
-The above formulation of the boundary condition term isn't exactly correct. We also have the perturbed Eddington factor on the boundaries $B_p$. So go back a few steps, and what we actually have after applying the adjoint boundary condition is 
-\begin{align*}
-\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
-&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \delta \phi \right) \right) \cdot \vec{n} \right]
-\end{align*} 
-Looking at the second boundary term again, but now with our perturbed Eddington
-\begin{align*}
-\left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \delta \phi \right) \right) 
-& = \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \phi_p \right) \right) - \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \phi \right) \right) \\
-&= (-2J_p^{inc} - B_p \phi_p) - (-2J^{inc} - B_p \phi) \\
-&= -2\delta J^{inc} -B_p \delta \phi
-\end{align*}
-So now for the sensitivity
-\begin{align*}
-\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
-&+ \int d^2 r \, \phi^\dag \left[ -2\delta J^{inc} -B_p \delta \phi \right]
-\end{align*}
-The boundary Eddington terms no longer cancel out, but form a $\delta B$ term.
-\begin{align*}
-\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} \\ 
-&- \int d^2 r \, \phi^\dag \delta \phi \delta B
+\delta J_{surf} =& - \int_{\delta V} d^2 r \, \left( E \delta \phi \cdot \left( c  \vgrad \phi^\dag \right)\right) \cdot \vec{n} - \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( E \phi \right) \right) \cdot \vec{n}\\
+& 
++ \int_{\delta V} d^2 r \, \phi^\dag \left( c \vdiv \left( E \phi_p \right) \right) \cdot \vec{n}
 \end{align*}
 
 \section*{DISCLAIMER}

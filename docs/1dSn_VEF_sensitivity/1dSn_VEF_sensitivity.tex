@@ -184,8 +184,8 @@ Assume for the boundary condition to the system, the incident angular flux $\psi
 Convert the above into a full $4 \pi$ range interval, and split into two integrals
 \begin{align*}
 \int_{\Omega_i n_i<0} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc} 
-&= \frac{1}{2} \int_{4 \pi} d\Omega \, \left(\left| \Omega_i n_i \right | - \Omega_i n_i  \right)\psi^{inc} \\
-&= \frac{1}{2} \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc} - \frac{1}{2} \int_{4 \pi} d\Omega \,  \Omega_i n_i \psi^{inc} \\ 
+&= \frac{1}{2} \int_{4 \pi} d\Omega \, \left(\left| \Omega_i n_i \right | - \Omega_i n_i  \right)\psi \\
+&= \frac{1}{2} \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi - \frac{1}{2} \int_{4 \pi} d\Omega \,  \Omega_i n_i \psi \\ 
 \end{align*}
 We then recognize that the second term on the RHS is $n_i J_i$. We also multiply the first term by the identity factor.
 \[
@@ -193,11 +193,11 @@ We then recognize that the second term on the RHS is $n_i J_i$. We also multiply
 \]
 So the above becomes
 \[
-\int_{\Omega_i n_i<0} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc} = \frac{1}{2} \left( \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc}}{\int_{4\pi} d\Omega \, \psi} \right) \phi - \frac{1}{2} n_i J_i
+\int_{\Omega_i n_i<0} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc} = \frac{1}{2} \left( \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \right) \phi - \frac{1}{2} n_i J_i
 \]
 Now define a "Boundary Eddington Factor" B such that
 \[
-B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi^{inc}}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \partial V
+B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \partial V
 \]
 We also know
 \[
@@ -324,8 +324,8 @@ Convert to the suggestive form
 The LHS is simply the operator from the unperturbed scenario, so multiplication (of the first term) by $\phi^\dag$ and integration proceeds the same.
 \begin{align*}
 \int d^3r \, \phi^\dag \left[  -\vdiv \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \right] 
-=& \int d^3r \, \left[- E^T \vgrad \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right] : \left[ \phi_p \right] 
-+ \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+=& \int d^3r \, \left[- E \vgrad \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right] : \left[ \phi_p \right] 
++ \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right) \right) \cdot \vec{n} \\
 &- \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \cdot \vec{n} \right]
 \end{align*}
 Which is the same as the unperturbed case, except extra terms exist on the RHS "source" term in the forward.
@@ -364,14 +364,72 @@ The boundary Eddington terms cancel out, leaving
 \[
 \delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} 
 \]
-\subsection{Form for use in FEM}
+
+\subsection{WAIT, that was wrong!}
+Backing up for a second, to where we said
+Looking at the second boundary term
+\begin{align*}
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) 
+& = \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) - \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi \right) \right) \\
+&= (-2J_p^{inc} - B \phi_p) - (-2J^{inc} - B \phi) \\
+&= -2\delta J^{inc} -B \delta \phi
+\end{align*}
+The above is not strictly true. the first quantity is meaningless, and is not set by any boundary condition
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \neq (-2J_p^{inc} - B \phi_p)
+\]
+The boundary that is set by our perturbation is
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \phi_p \right) \right) = (-2J_p^{inc} - B_p \phi_p)
+\]
+We can express each term in the LHS using a $\delta$
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( (E+ \delta E) (\phi + \delta \phi) \right) \right) = (-2J_p^{inc} - B_p \phi_p)
+\]
+Expanding and dropping the 2nd order term gives
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( (E \phi + \delta E \phi + E \delta \phi) \right) \right) = (-2J_p^{inc} - B_p \phi_p)
+\]
+So
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left(  E \delta \phi \right) \right) = (-2J_p^{inc} - B_p \phi_p) - \left( \frac{1}{\sigma_{tr}} \vdiv \left( (E \phi + \delta E \phi ) \right) \right)
+\]
+Now, we see our unperturbed boundary condition appear
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left(  E \delta \phi \right) \right) = (-2J_p^{inc} - B_p \phi_p) - (-2J^{inc} - B \phi)  - \left( \frac{1}{\sigma_{tr}} \vdiv \left( \delta E \phi  \right) \right)
+\]
+Combine some terms. We still get the $\delta J $ term as before.
+\[
+\left( \frac{1}{\sigma_{tr}} \vdiv \left(  E \delta \phi \right) \right) = (-2\delta J^{inc}) - (B_p \phi_p) + (B \phi)  - \left( \frac{1}{\sigma_{tr}} \vdiv \left( \delta E \phi  \right) \right)
+\]
+Now taking into account the boundary term from the adjoint
+\begin{align*}
+\delta J =& \bra VolumeTerm \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+& \quad + \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right] \\
+=& \bra VolumeTerm \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+& \quad + \int d^2 r \, \phi^\dag \left[ \left( (-2\delta J^{inc}) - (B_p \phi_p) + (B \phi)  - \left( \frac{1}{\sigma_{tr}} \vdiv \left( \delta E \phi  \right) \right) \right) \cdot \vec{n} \right] \\
+\end{align*}
+It is important to remember the definition of $B \phi$ (which extends to $B_p \phi_p$)
+\[ B \phi = \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi
+\]
+So 
+\[
+-B_p \phi_p + B \phi = - \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \delta \psi
+\]
+So our boundary term can now be expressed as
+\begin{align*}
+\delta J =& \bra VolumeTerm \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+& \quad + \int d^2 r \, \phi^\dag \left[ \left( (-2\delta J^{inc}) - \left( \int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \delta \psi \right)  - \left( \frac{1}{\sigma_{tr}} \vdiv \left( \delta E \phi  \right) \right) \right) \cdot \vec{n} \right] \\
+\end{align*}
+So, the first surface term is specified by the adjoint boundary conditions, and should be set to 0. The second boundary term relates to the change in the forward incoming flux ($\delta J^{inc}$) which is what we expect and need to do sensitivity. The fourth term in the above is related to the perturbation of the Eddington $E$ at the boundary, which is something that we should have expected may show up from the beginning. The third term is a bit more unexpected, and seems to related. (We also dropped some second order terms)
+\subsection{Form for use in FEM (CORRECT THIS FOR NEW BC)}
 For FEM, we would rather avoid the double div term, so consider the VEF sensitivity
 \[
-\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket + \bra \phi^\dag , \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} 
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket + \bra \phi^\dag , \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + [\text{Sensitivity Boundary Terms}]
 \]
 and apply inner product again
 \begin{align*}
-\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n}  \\
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ [\text{Sensitivity Boundary Terms}]  \\
 &+ \int d^2 r \, \left( \phi^\dag \delta c \vdiv \left( E \phi \right) \right) \cdot \vec{n}
 \end{align*}
 Recalling that the forward boundary term is (in terms of $c=1/ \sigma_{tr}$ 
@@ -380,12 +438,12 @@ c \vec{\nabla} \cdot \left(E \phi \right)  = -2J^- - B \phi \quad \vr \in \parti
 \]
 The extra boundary term picked up from the FEM implementation can be expressed as
 \begin{align*}
-\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n}  \\
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi \ket - \bra \vgrad \phi^\dag , \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ [\text{Sensitivity Boundary Terms}]  \\
 &+ \int d^2 r \, \left(\frac{\delta c}{c} \phi^\dag  \left(  -2J^- - B \phi \right) \right) \cdot \vec{n}
 \end{align*}
 
 
-\subsection*{Alternate boundary condition for forward.}
+\subsection*{Alternate boundary condition for forward. (In Progress)}
 Consider the alternate boundary condition for the forward problem \cite{Wiesel}
 \[
 \vec{n} \cdot \vec{J} + J_{IN} = C (\phi - \phi_{IN})
@@ -396,6 +454,71 @@ Expanding out all values
 + \int_{\vec{n}\cdot \vO <0} d\Omega \,  \left|\vec{n}\cdot \vO \right| \psi_{IN}
 = C \left(  \int_{4 \pi} d\Omega \, \psi   - \int_{\vec{n}\cdot \vO <0} d\Omega \, \psi_{IN} \right)
 \]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Term from perturbed Eddington}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+For our VEF formulation, the change in QoI approximated to the first order using the adjoint method, while also assuming the Eddington tensor remains remains unperturbed is 
+\begin{align*}
+\delta QoI =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right].
+\end{align*}
+where $\delta c = \frac{1}{\sigma_t + \delta \sigma_t} -  \frac{1}{\sigma_t}$.
+Let us focus on the volumetric term due to perturbations in $\sigma_t$
+\[
+\bra \phi^\dag ,  \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket
+\]
+since this is the term (or related to the terms) which are affected by our assumption that the Eddington tensor remains unperturbed.
+
+\subsection{Considering a $\delta E$}
+If we were to consider a $\delta E = E_{pert} - E$, then our 1st order approximation would pick up an additional volumetric term (while also creating 2 additional 2nd order terms and a 3rd order perturbation term). Ignoring the boundary terms, the inner product would then be
+\[
+\delta QoI = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket
+\]
+An important take away is that this term is scaled with $c$, remembering $c=1/\sigma_t$, low cross-section regions (streaming) has the potential to make "ignoring" this term very costly.
+
+However, a saving grace MAY be present by way of the divergence operators. Green's identity applied to this term yields
+\[
+\bra \phi^\dag , \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket 
+= 
+\bra -\vgrad \phi^\dag , c \vdiv \left( \delta E \phi \right)  \ket + \int_{\delta V} d^2 r \, \phi^\dag  c \vdiv \left( \delta E \phi \right)
+\]
+So, if in this streaming region, the adjoint is constant constant we would have $\vgrad \phi^\dag =0$, and the volumetric term disappears, and we can focus on the boundaries of the streaming region. [I think this may cause some unpleasant things to happen when we make the jump from 1D slab geometry to 2D and 3D geometries, where the scalar flux has geometric dependence in streaming regions.]
+
+\subsection{Considering a $\delta B$}
+IMPORTANT: We would usually expect that we would be able to compute the effect of the boundary perturbations exactly. However, because there are two terms in the boundary perturbation, (The specified perturbation, and the perturbed  $B$ value, this is not correct.
+
+Consider what the sensitivity formulation would look like if we included the perturbed Eddington (for the moment, keep the volumetric term first order)
+\begin{align*}
+J = \bra \phi_p, q^\dag \ket =& \bra \phi^\dag , q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \phi_p \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \phi_p \right) \right) \cdot \vec{n} \right]
+\end{align*}
+
+
+The above formulation of the boundary condition term isn't exactly correct. We also have the perturbed Eddington factor on the boundaries $B_p$. So go back a few steps, and what we actually have after applying the adjoint boundary condition is 
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \delta \phi \right) \right) \cdot \vec{n} \right]
+\end{align*} 
+Looking at the second boundary term again, but now with our perturbed Eddington
+\begin{align*}
+\left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \delta \phi \right) \right) 
+& = \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \phi_p \right) \right) - \left( \frac{1}{\sigma_{tr}} \vdiv \left( E_p \phi \right) \right) \\
+&= (-2J_p^{inc} - B_p \phi_p) - (-2J^{inc} - B_p \phi) \\
+&= -2\delta J^{inc} -B_p \delta \phi
+\end{align*}
+So now for the sensitivity
+\begin{align*}
+\delta J =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket + \int d^2 r \, \left(\delta \phi \left( 2J^{ \dag out } + B \phi^\dag \right) \right) \cdot \vec{n} \\
+&+ \int d^2 r \, \phi^\dag \left[ -2\delta J^{inc} -B_p \delta \phi \right]
+\end{align*}
+The boundary Eddington terms no longer cancel out, but form a $\delta B$ term.
+\begin{align*}
+\delta J = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket &+ \int d^2 r \, \left(  \delta \phi 2J^{ \dag out }  - \phi^\dag 2\delta J^{inc} \right) \cdot \vec{n} \\ 
+&- \int d^2 r \, \phi^\dag \delta \phi \delta B
+\end{align*}
 
 \section*{DISCLAIMER}
 Below here are just sections where I am "thinking out loud". Some of it is just rambling that leads nowhere.
@@ -416,38 +539,9 @@ There is a potential for some second order boundary term resulting from the $- \
 the term would fit in on the right hand "source" side, and not the LHS (which represents the unperturbed operator).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Term from perturbed Eddington}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-For our VEF formulation, the change in QoI approximated to the first order using the adjoint method, while also assuming the Eddington tensor remains remains unperturbed is 
-\begin{align*}
-\delta QoI =& \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket - \int d^2 r \, \left( E \delta \phi \cdot \left( \frac{1}{ \sigma_{tr}} \left(  \vgrad \phi^\dag \right) \right)^T \right) \cdot \vec{n} \\
-&+ \int d^2 r \, \phi^\dag \left[ \left( \frac{1}{\sigma_{tr}} \vdiv \left( E \delta \phi \right) \right) \cdot \vec{n} \right].
-\end{align*}
-where $\delta c = \frac{1}{\sigma_t + \delta \sigma_t} -  \frac{1}{\sigma_t}$.
-Let us focus on the volumetric term due to perturbations in $\sigma_t$
-\[
-\bra \phi^\dag ,  \vdiv \left( \delta c \vdiv \left( E \phi \right) \right)  \ket
-\]
-since this is the term (or related to the terms) which are affected by our assumption that the Eddington tensor remains unperturbed.
-\subsection{Considering a $\delta E$}
-If we were to consider a $\delta E = E_{pert} - E$, then our 1st order approximation would pick up an additional volumetric term (while also creating 2 additional 2nd order terms and a 3rd order perturbation term). Ignoring the boundary terms, the inner product would then be
-\[
-\delta QoI = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket
-\]
-An important take away is that this term is scaled with $c$, remembering $c=1/\sigma_t$, low cross-section regions (streaming) has the potential to make "ignoring" this term very costly.
 
-However, a saving grace MAY be present by way of the divergence operators. Green's identity applied to this term yields
-\[
-\bra \phi^\dag , \vdiv \left( c \vdiv \left( \delta E \phi \right) \right)  \ket 
-= 
-\bra -\vgrad \phi^\dag , c \vdiv \left( \delta E \phi \right)  \ket + \int_{\delta V} d^2 r \, \phi^\dag  c \vdiv \left( \delta E \phi \right)
-\]
-So, if in this streaming region, the adjoint is constant constant we would have $\vgrad \phi^\dag =0$, and the volumetric term disappears, and we can focus on the boundaries of the streaming region. [I think this may cause some unpleasant things to happen when we make the jump from 1D slab geometry to 2D and 3D geometries, where the scalar flux has geometric dependence in streaming regions.]
 
-\subsection{Idea: $f(,\phi,\phi^\dag,\vec{p},\delta\vec{p}) \approx \delta E$?}
+\section{Idea: $f(,\phi,\phi^\dag,\vec{p},\delta\vec{p}) \approx \delta E$?}
 What if there exists a "function" $f$; which may be a function of the unperturbed forward flux, the adjoint flux, the input parameters, and the perturbation to those parameters such that $f(,\phi,\phi^\dag,\vec{p},\delta\vec{p}) \approx \delta E$? If so, then we could use this function to "improve" our sensitivity estimation by using
 \[
 \delta QoI = \bra \phi^\dag , \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right) + \vdiv \left( c \vdiv \left( f \phi \right) \right)  \ket

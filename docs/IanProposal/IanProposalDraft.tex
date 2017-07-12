@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath, amsthm, amssymb, booktabs, hyperref, graphicx, float, esint, xcolor}
+\usepackage{amsmath, amsthm, amssymb, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption}
 \setlength{\abovedisplayskip}{0pt}
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
@@ -35,6 +35,7 @@
 \newcommand{\scalSource}{q}
 \newcommand{\angResp}{r_\Omega}
 \newcommand{\scalResp}{r}
+\newcommand{\qoi}{QoI}
 
 \begin{document}
 \begin{center}
@@ -80,30 +81,41 @@ In the above equation, scattering terms for $g^\prime \neq q$ are inscattering t
 
 {\color{red}[IWH: I feel like I need to go back through the literature and cite more for the simplifying assumptions.]}
 
-
 \subsection{Sensitivity}
 {\color{red}[IWH: This I really just need to go back into the literature, (particularly National Research Council) and present why obtaining the sensitivity is of importance for verification/validation/UQ. What are sour of important things for me to look at here?]}
-
-\subsection{Adjoint Method}
-{\color{red}[IWH: Primarily distilling some of the basic ideas from Marchuk. Not sure how lengthy I need to go with this.]}
-
-\subsubsection{Inner Products}
-{\color{red}[IWH: Probably doesn't need it's own heading. Will introduce some QoI basics here. We have two inner products which should be unambiguous which we are talking about at any given time]}
+\subsubsection{Response/Inner Products}
+For this paper, two inner products are defined both using $\bra \bullet , \bullet \ket$ notation. These two inner-products are for use with angular dependent and scalar functions, so the use of a single notation should be unambiguous.
 \begin{equation}
 \bra f(\vr, \vO) , g(\vr, \vO) \ket  = \int_V dV \int_{4 \pi} d \vO \,  f(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \begin{equation}
 \bra f(\vr) , g(\vr) \ket  = \int_V dV \,  f(\vr)g(\vr)
 \end{equation}
-\subsubsection{Generalized Adjoint Method}
+
+[define QoI]
 \begin{equation}
-\label{adjGeneral}
-A^\dag \psi^\dag = \angResp
+\label{QoIDef}
+\qoi = \bra \psi(\vr,\vO), \angResp(\vr,\vO) \ket = \bra \phi(\vr) , \scalResp(\vr) \ket
 \end{equation}
+
+\subsubsection{Sensitivity to Inputs}
+A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $sigs$, $q$, and $\psi^{inc}$) are never known exactly.
+
+
+\subsection{Adjoint sensitivity (Alternate writeup, Marchuk Cite)}
+Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A}f = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Considering valid test function $\varphi$, that adjoint operator $\mathbf{A^\dag}$ is defined as $\bra \mathbf{A} f, \varphi \ket = \bra f, \mathbf{A^\dag} \varphi \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generaly relies on Green's first identity, typically resulting in boundary terms not show here. Using the response function coresponding to the desired $\qoi$, the adjoint system can be constructed as $\mathbf{A^\dag} \varphi=r$ leading to an alternate expresion of the $\qoi$ using the adjoint solution $\varphi$.
 \begin{equation}
-\label{adjGeneral2}
-QoI = \bra \psi, r \ket = \bra \psi  , A^\dag \psi^\dag \ket =  \bra A \psi  , \psi^\dag \ket =  \bra q  , \psi^\dag \ket 
+\label{genAdjQoI}
+\qoi = \bra f, r \ket = \bra s , \varphi \ket
+\end{equation} 
+From the above, it follows that a first order approximation to the change in the quantity of interest based on perturbations to the initial system, including perturbation to the forward operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the form shown in equation \ref{genAdjSens} \cite{Marchuk}.
+\begin{equation}
+\label{genAdjSens}
+\delta \qoi \approx \bra \delta q - \delta \mathbf{A} f , \varphi \ket 
 \end{equation}
+The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate teh sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
+
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrete Ordinates (Sn) Transport}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -119,14 +131,21 @@ The unknowns in the above include the angular dependent flux $\psi=\psi(\vr,\vO)
 \[
 \phi(\vr) \approx \sum_{j=1}^n w_j \psi_n(\vr)
 \] 
-where $\psi_n(\vr) = \psi(\vr, S_n)$.
+where $\psi_n(\vr) = \psi(\vr, S_n)$. This leads to a coupled system of $n$ equations of the form shown in equation \cite{SnFwd}, where the system is coupled through the scalar flux term.
+\begin{equation}
+\label{snFwd}
+\vO \cdot \vgrad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + q
+\end{equation}
+\begin{equation}
+\psi(\vr) = \psi^{\text{out}}(\vr) \quad \vr \in \Gamma, Sn \cdot \vec{n} < 0
+\end{equation}
 
-{\color{red}[Put more stuff here, get to final SN form. Is the Sn form just discrete ordinates, or doe sit require full decomposition into the discretized FEM form?]}
+{\color{red}[Is the Sn form just discrete ordinates, or does it require full decomposition into the discretized FEM form?]}
 \subsection{Adjoint Sn formulation}
-In a fairly straight forward application of the adjoint method shown in equation \ref{adjGeneral2}, the adjoint equation which corresponds to the Sn transport formulation with response $\angSource$ is
+In a fairly straight forward application of the adjoint method previously shown, the adjoint equation which corresponds to the Sn transport formulation with response $\angResp$ is
 \begin{equation}
 \label{snAdj}
-- \vO \cdot \vgrad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \angSource
+- \vO \cdot \vgrad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \angResp
 \end{equation}
 \begin{equation}
 \psi^\dag(\vr,\vO) = \psi^{\dag \text{out}}(\vr,\vO) \quad \vr \in \Gamma, \vO \cdot \vec{n} > 0
@@ -250,7 +269,7 @@ The usual adjoint process is performed, starting with the QoI definition using t
 \begin{equation}
 \label{VETSensDeriv}
 \begin{split}
-QoI=&\bra \phi_p , \scalResp \ket \\
+\qoi=&\bra \phi_p , \scalResp \ket \\
 =&\bra \phi_p , - \Edd : \left( \vgrad \isigt \vgrad \phi^\dag \right) + \siga \phi^\dag \ket \\
 =& \bra - \vdiv \isigt \vdiv \left( \Edd \phi_p \right) + \siga \phi_p, \phi^\dag \ket 
 - \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n}  \\ 
@@ -261,7 +280,7 @@ A first order perturbation approximation of equation \ref{VEFPert} can be used t
 \begin{equation}
 \label{QoIVETAdjNoBC}
 \begin{split}
-QoI =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n} 
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n} 
 \\ &+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vdiv \Edd \phi_p \right) \cdot \vec{n} 
 \end{split}
 \end{equation}
@@ -269,15 +288,15 @@ The first surface term can be dealt with readily using the adjoint boundary cond
 \begin{equation}
 \label{QoIVETAdj}
 \begin{split}
-QoI =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} 
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} 
 \\ &+ \int_\Gamma d^2 r \, \phi^\dag \left( - 2J_p^- - B \phi_p - \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n} 
 \end{split}
 \end{equation}
-Subtract the adjoint QoI formulation from equation \ref{VETQoIAdj} to obtain the sensitivity expression for the adjoint VET formulation.
+Subtract the adjoint $\qoi$ formulation from equation \ref{VETQoIAdj} to obtain the sensitivity expression for the adjoint VET formulation.
 \begin{equation}
 \label{SensVETAdjNoBC}
 \begin{split}
-\delta QoI =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \int_\Gamma d^2 r \, 2  \left( \delta \phi J^{\dag +}  - \phi^\dag \delta J^- \right) \cdot \vec{n}
+\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \int_\Gamma d^2 r \, 2  \left( \delta \phi J^{\dag +}  - \phi^\dag \delta J^- \right) \cdot \vec{n}
 \\ &- \int_\Gamma d^2 r \,  \phi^\dag \left( \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n} 
 \end{split}
 \end{equation}
@@ -292,11 +311,11 @@ Beyond the first order approximation common to adjoint formulations, the VET sen
 \begin{equation}
 (\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  = - 2J_p^- - (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \Gamma
 \end{equation}
-The above can be substituted into equation \ref{VETSensDeriv} to yield an expanded QoI equation, including the Eddington perturbation terms
+The above can be substituted into equation \ref{VETSensDeriv} to yield an expanded $\qoi$ equation, including the Eddington perturbation terms
 \begin{equation}
 \label{QoIVETAdjNoBCEdd}
 \begin{split}
-QoI =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
 &- \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n} 
 + \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vdiv \Edd \phi_p \right) \cdot \vec{n} 
 \end{split}
@@ -305,7 +324,7 @@ The boundary condition for the perturbed forward solution takes on a slightly mo
 \begin{equation}
 \label{QoIVETAdjEdd}
 \begin{split}
-\delta QoI =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
+\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
 &+ \int_\Gamma d^2 r \, 2  \left( \delta \phi J^{\dag +}  - \phi^\dag \delta J^- \right) \cdot \vec{n}
 - \int_\Gamma d^2 r \,  \phi^\dag \left( \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n}
 \\
@@ -323,11 +342,155 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 
 \section{Preliminary results}
 {\color{red}[IWH: Explain what I am looking at (VET adjoint versus Sn adjoint, versus multiple forward solves). I need to touch up these graphs (do them in Matlab, not Excel). Introduce the FEM parameters used.]}
+
 \subsection{Homogeneous initial system, Uniform Perturbations}
-[Define system,  perturbations, and QoI. Vary MFP between cases.]
+The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. Solutions were obtained using a 200 element FEM mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous.
+
+\begin{figure}[H]
+\label{HomoPertt}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/19sigtSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/20sigtSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/21sigtSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigt$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
+
+\begin{figure}[H]
+\label{HomoPerts}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/19sigsSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/20sigsSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/21sigsSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigs$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
+
+\begin{figure}[H]
+\label{HomoPertq}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/19qSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/20qSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/21qSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of source perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
 
 \subsection{Homogeneous initial system, Non-Uniform Perturbations}
 [Define system,  perturbations, and QoI. Vary MFP between cases.]
+\begin{figure}[H]
+\label{InHomoPertt}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/39sigtSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/40sigtSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/41sigtSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigt$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
+
+\begin{figure}[H]
+\label{InHomoPerts}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/39sigsSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/40sigsSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/41sigsSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigs$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
+
+\begin{figure}[H]
+\label{InHomoPertq}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/39qSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/40qSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/41qSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of source perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
 
 \subsection{Streaming system}
 [Define system,  perturbations, and QoI.]
@@ -343,6 +506,44 @@ $\bullet$ Implement the Sn and VET adjoint methods in a 1D FEM solver. Using sim
 \\ \\
 $\bullet$ Consider the alternate boundary conditions presented in Wieselquest. If promise is shown, derive the sensitivity inner products using this boundary condition. Repeat select test cases of the 1D implementation.
 
+\newpage
+\section{SCRAP SECTION}
+{\color{red}[IWH: TO BE DELETED!!!!!!!!!!! HOLDING FOR SCRAPPED SECTIONS.]}
+\subsection{Adjoint Method SCRAP}
+{\color{red}[IWH: Primarily distilling some of the basic ideas from Marchuk. Not sure how lengthy I need to go with this.]}
+\subsubsection{Adjoint operator and QoI}
+[Basics of adjoint]
+\begin{equation}
+\bra \mathbf{A^\dag} f^\dag, f \ket = \bra f^\dag, \mathbf{A} f \ket 
+\end{equation}
+\begin{equation}
+\mathbf{A^\dag} f^\dag = r
+\end{equation}
+\begin{equation}
+\qoi = \bra r , f \ket = \bra f^\dag, s \ket 
+\end{equation}
+
+\subsection{Adjoint sensitivity SCRAP}
+While the adjoint formulation has limited use in $\qoi$ calculation, it can be a powerful tool for determining sensitivity of the $\qoi$ to perturbation. Consider introducing perturbations to equation {\color{red}XX} in which the operator is perturbed by some value $\delta \mathbf{A}$ and the source term by $\delta q$, resulting in a perturbed solution $f_p=f+\delta f$. Assuming the perturbations are relatively small, a first order approximation can be used to expand the LHS.
+\begin{equation}
+\left( \mathbf{A} + \delta \mathbf{A} \right) \left( f + \delta f \right) \approx q + \delta q 
+\end{equation}
+\begin{equation}
+\mathbf{A} f  + \delta \mathbf{A} f + \mathbf{A}\delta f  = q + \delta q 
+\end{equation}
+\begin{equation}
+\mathbf{A} f_p   = q + \delta q - \delta \mathbf{A} f
+\end{equation}
+Taking the inner product of the perturbed equation with the unperturbed adjoint and moving the operator to the adjoint yields an expression for the perturbed $\qoi$, which yields the solution's sensitivity to the parameter perturbation.
+\begin{equation}
+\bra \mathbf{A} f_p , f^\dag \ket  = \bra  q + \delta q - \delta \mathbf{A} f , f^\dag \ket 
+\end{equation}
+\begin{equation}
+\qoi = \bra  f_p , \mathbf{A^\dag} f^\dag \ket  = \bra  q + \delta q - \delta \mathbf{A} f , f^\dag \ket 
+\end{equation}
+\begin{equation}
+\delta \qoi = \bra \delta q - \delta \mathbf{A} f , f^\dag \ket 
+\end{equation}
 
 \newpage
 

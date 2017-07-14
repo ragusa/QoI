@@ -33,8 +33,8 @@
 \newcommand{\isigt}{c}
 \newcommand{\angSource}{q_\Omega}
 \newcommand{\scalSource}{q}
-\newcommand{\angResp}{r_\Omega}
-\newcommand{\scalResp}{r}
+\newcommand{\angResp}{q^\dag}
+\newcommand{\scalResp}{q^\dag}
 \newcommand{\qoi}{QoI}
 
 \begin{document}
@@ -64,37 +64,11 @@ Adjoint-based sensitivity for radiation transport using an Eddington tensor form
 \subsection{Steady-state one-group neutron transport equation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The time dependent neutron transport equation without fission is given to be 
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \int_{4 \pi} d \Omega^\prime \, \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E, \vO^\prime \to \vO) \psi + S(\vr,E,\vO,t) 
-\end{equation}
-{\color{red}[IWH: Add boundary condition (numbering? should the BC have its own EQ number, or be lumped with the main). Introduction of terms in the TE here. Definition of relevant volume $V$ and boundary $\Gamma$]}
-\\ \\
-{\color{red}[IWH: Present why the TE in its complete form is unwieldy. Transition into the simplifying approximations below.]}
-The first simplifying approximation to be made is that scattering is isotropic, allowing the use of an energy differential scattering cross section $\sigs(\vr,E^\prime \to E)$. This also allows for the use of the scalar flux $\phi$ in the scattering term.
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \frac{\phi}{4 \pi} \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E) + S(\vr,E,\vO,t) 
-\end{equation}
- \\ \\
-For practicality, the energy dependence is discritized into a finite number of energy groups. Let each each energy group be denoted by the subscript $g \in (1,G)$. 
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g + \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g = \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) 
-\end{equation}
-In the above equation, scattering terms for $g^\prime \neq q$ are inscattering terms, and act as a source term for a given energy group. Making the assumption that the fixed source term $S_g$ is isotropic, allows the generation of a total source term $q$.
-\begin{equation}
-\begin{split}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g &+ \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g \\
-&= \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) \\
-&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
-+ \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t)  \quad :g^\prime \neq g\\
-&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
-+ \frac{q_g}{4 \pi}\
-\end{split}
-\end{equation}
-{\color{red}[IWH: NEED TO SWITCH TO STEADY STATE AT SOME POINT! I think I need guidance on how to transition from the time dependent equation to the steady state, to transition into the steady state Sn and VET formulations we have primarily been working with]}
 
-{\color{red}[IWH: I feel like I need to go back through the literature and cite more for the simplifying assumptions.]}
-
+\begin{equation}
+\label{SS1GTE}
+\vO \cdot \vgrad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO) 
+\end{equation}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Quantity of interest and their sensitivities}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -104,38 +78,34 @@ In the above equation, scattering terms for $g^\prime \neq q$ are inscattering t
 solution of a simulation is not necessarily the sought after answer. -- QoI which depends on the solution itself
 
 %----------------------------------------------------------------------------------------------
-\subsubsection{Quantity of interest, response function and inner products}
+\subsubsection{Quantity of interest, response function, and inner products}
 %----------------------------------------------------------------------------------------------
-
-Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{eq:transport_eq}), one typically seeks a QoI
+Frequently, the solution to the transport equation is not the sought after value, rather some Quantity of Interest ($\qoi$) which depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{eq:SS1GTE}), a QoI
 defined as
-
-\[
+\begin{equation}
 \qoi =  \int_V dV \int_{4 \pi} d \vO \,  r(\vr, \vO) \psi(\vr, \vO)
-\]
+\end{equation}
+where $ r(\vr, \vO)$ is termed the ''response function" which is used to characterize the meaning of the desired $\qoi$. The response function can take on physically defined forms, such as the cross section of a detector; or it may take a form of a mathematical construct, such as $r(\vr, \vO)=1$ to return the total neutrons present in the system. To avoid confusion with the spacial location vector $\vr$ and for reasons that will become clear later, the response function will frequently be expressed as $q^\dag$.
 
-explain $r$ (and already mention $r$ will be switched to $q^\dag$ later) and then introduce inner products
-
-For this paper, two inner products are defined both using $\bra \bullet , \bullet \ket$ notation. These two inner-products are for use with angular dependent and scalar functions, so the use of a single notation should be unambiguous.
+For the sake of brevity in this paper, particularly for expressing the $\qoi$, two volumetric inner products are defined both using $\bra \bullet , \bullet \ket$ notation. These two inner-products are for use with angular and scalar flux respectively. 
 \begin{equation}
-\bra f , g \ket_{V \times \mathcal{S}_2}  = \int_V dV \int_{4 \pi} d \vO \,  f(\vr, \vO)g(\vr, \vO)
+\bra \psi , \angResp \ket_{V \times \mathcal{S}_2}  = \int_V dV \int_{4 \pi} d \vO \,  \psi(\vr, \vO)\angResp(\vr, \vO)
 \end{equation}
 
 \begin{equation}
-\bra f(\vr) , g(\vr) \ket  = \int_V dV \,  f(\vr)g(\vr)
+\bra \phi(\vr) ,\angResp \ket_V  = \int_V dV \,  \phi(\vr)\angResp(\vr)
 \end{equation}
-
-when unambiguous, say you drop the ...
+For later use, two additional inner products are also defined as surface integrals over the region boundary $\partial V$. The latter splinting incoming and outgoing surface integrals.
 
 \begin{equation}
-( f , g )_{\partial V \times \mathcal{S}_2}  = \int_{\partial V} dS \int_{4 \pi} d \vO \, \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+( \psi , g )_{\partial V \times \mathcal{S}_2}  = \int_{\partial V} dS \int_{4 \pi} d \vO \, \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \begin{equation}
-( f , g )_{\pm}   = \int_{\partial V} dS \int_{\vO \cdot \vn \gtrless 0} d\vO \,  \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+( \phi , g )_{\pm}   = \int_{\partial V} dS \int_{\vO \cdot \vn \gtrless 0} d\vO \,  \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
 \end{equation}
 
 
-[define QoI]
+The inner product subscripts will frequently be dropped when it is unambiguous which one being used, typically indicated by $\psi$ or $\phi$. Therefore, with this notation, the quantity of interest can be compactly expressed as shown below.
 \begin{equation}
 \label{QoIDef}
 \qoi = \bra \psi(\vr,\vO), \angResp(\vr,\vO) \ket = \bra \phi(\vr) , \scalResp(\vr) \ket
@@ -144,24 +114,22 @@ when unambiguous, say you drop the ...
 %----------------------------------------------------------------------------------------------
 \subsubsection{Sensitivity to Inputs}
 %----------------------------------------------------------------------------------------------
-sensitivity to what? parameter of the equation .... sigma's, q ....
-
-A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $sigs$, $q$, and $\psi^{inc}$) are never known exactly.
+A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are never known exactly.
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Adjoint sensitivity (Alternate writeup, Marchuk Cite)}
+\subsection{Adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A}f = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Considering valid test function $\varphi$, that adjoint operator $\mathbf{A^\dag}$ is defined as $\bra \mathbf{A} f, \varphi \ket = \bra f, \mathbf{A^\dag} \varphi \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on Green's first identity (integration by parts), typically resulting in boundary terms not show here. Using the response function corresponding to the desired $\qoi$, the adjoint system can be constructed as $\mathbf{A^\dag} \varphi=r$ leading to an alternate expression of the $\qoi$ using the adjoint solution $\varphi$.
+Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A} \psi = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Consider a test function $\psi^\dag$, the adjoint operator $\mathbf{A^\dag}$ is defined such that $\bra \mathbf{A} \psi, \psi^\dag \ket = \bra \psi, \mathbf{A^\dag} \psi^\dag \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on Green's first identity (integration by parts), typically resulting in boundary terms ($BC$). Using the response function of the desired $\qoi$, the adjoint system can be constructed as $\mathbf{A^\dag} \psi^\dag = q^\dag$, leading to an alternate expression of the $\qoi$ using the adjoint solution $\psi^\dag $.
 \begin{equation}
 \label{genAdjQoI}
-\qoi = \bra f, r \ket = \bra s , \varphi \ket + bc
+\qoi = \bra \psi, r \ket = \bra q , \psi^\dag \ket + BC
 \end{equation} 
 From the above, it follows that a first order approximation to the change in the quantity of interest based on perturbations to the initial system, including perturbation to the forward operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the form shown in Eq.~\eqref{genAdjSens} \cite{Marchuk}.
 \begin{equation}
 \label{genAdjSens}
-\delta \qoi \approx \bra \delta q - \delta \mathbf{A} f , \varphi \ket 
+\delta \qoi \approx \bra \delta q - \delta \mathbf{A} \psi , \psi^\dag \ket 
 \end{equation}
 The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
 
@@ -177,7 +145,7 @@ With the energy discretization performed, the transport equation system has beco
 \begin{equation}
 \psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
 \end{equation}
-The unknowns in the above include the angular flux $\psi=\psi(\vr,\vO)$ and the scalar flux $\phi=\phi(\vr)$. A discrete ordinates (Sn) method can be used to discretize the angular variable. Using a an gular quadrature with $D$ directions $\vO_d$, the transport equation is solved along each direction:
+The unknowns in the above include the angular flux $\psi=\psi(\vr,\vO)$ and the scalar flux $\phi=\phi(\vr)$. A discrete ordinates (Sn) method can be used to discretize the angular variable. Using a angular quadrature with $D$ directions $\vO_d$, the transport equation is solved along each direction:
 \begin{equation}
 \label{1gTE}
 \vO_d \cdot \vgrad \psi_d + \sigt \psi_d = \frac{\sigs}{4 \pi} \phi + \frac{q}{4 \pi} \quad \vr \in V , \forall d\in [1,D]
@@ -619,6 +587,43 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 
 \section{SCRAP SECTION}
 {\color{red}[IWH: TO BE DELETED!!!!!!!!!!! HOLDING FOR SCRAPPED SECTIONS.]}
+
+%%%%%%%----------------------------------------------------------------------------------------------
+\subsection{Steady-state one-group neutron transport equation SCRAP}
+%%%%%%%----------------------------------------------------------------------------------------------
+
+The time dependent neutron transport equation without fission is given to be 
+\begin{equation}
+\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \int_{4 \pi} d \Omega^\prime \, \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E, \vO^\prime \to \vO) \psi + S(\vr,E,\vO,t) 
+\end{equation}
+{\color{red}[IWH: Add boundary condition (numbering? should the BC have its own EQ number, or be lumped with the main). Introduction of terms in the TE here. Definition of relevant volume $V$ and boundary $\Gamma$]}
+\\ \\
+{\color{red}[IWH: Present why the TE in its complete form is unwieldy. Transition into the simplifying approximations below.]}
+The first simplifying approximation to be made is that scattering is isotropic, allowing the use of an energy differential scattering cross section $\sigs(\vr,E^\prime \to E)$. This also allows for the use of the scalar flux $\phi$ in the scattering term.
+\begin{equation}
+\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \frac{\phi}{4 \pi} \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E) + S(\vr,E,\vO,t) 
+\end{equation}
+ \\ \\
+For practicality, the energy dependence is discritized into a finite number of energy groups. Let each each energy group be denoted by the subscript $g \in (1,G)$. 
+\begin{equation}
+\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g + \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g = \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) 
+\end{equation}
+In the above equation, scattering terms for $g^\prime \neq q$ are inscattering terms, and act as a source term for a given energy group. Making the assumption that the fixed source term $S_g$ is isotropic, allows the generation of a total source term $q$.
+\begin{equation}
+\begin{split}
+\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g &+ \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g \\
+&= \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) \\
+&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
++ \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t)  \quad :g^\prime \neq g\\
+&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
++ \frac{q_g}{4 \pi}\
+\end{split}
+\end{equation}
+{\color{red}[IWH: NEED TO SWITCH TO STEADY STATE AT SOME POINT! I think I need guidance on how to transition from the time dependent equation to the steady state, to transition into the steady state Sn and VET formulations we have primarily been working with]}
+
+{\color{red}[IWH: I feel like I need to go back through the literature and cite more for the simplifying assumptions.]}
+
+
 \subsection{Adjoint Method SCRAP}
 {\color{red}[IWH: Primarily distilling some of the basic ideas from Marchuk. Not sure how lengthy I need to go with this.]}
 \subsubsection{Adjoint operator and QoI}

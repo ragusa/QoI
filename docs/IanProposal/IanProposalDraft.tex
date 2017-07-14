@@ -10,6 +10,8 @@
 \newcommand{\vO}{\vec{\Omega}}
 \newcommand{\bra}{\left\langle}
 \newcommand{\ket}{\right\rangle}
+\newcommand{\sbra}{\left[}
+\newcommand{\sket}{\right]}
 \newcommand{\vdiv}{\vec{\nabla} \cdot}
 \newcommand{\vgrad}{\vec{\nabla}}
 \newcommand{\vbeta}{\vec{\beta} }
@@ -24,6 +26,7 @@
 \newcommand{\dBdp}{\partial_p B \,}
 \newcommand{\adj}{\phi^\dag}
 \newcommand{\surf}{\int_{\partial V}}
+\newcommand{\bound}{\partial V}
 \newcommand{\vn}{\vec{n}}
 \newcommand{\Edd}{\mathbf{E}}
 \newcommand{\BEdd}{\mathbf{B}}
@@ -69,6 +72,9 @@ Adjoint-based sensitivity for radiation transport using an Eddington tensor form
 \label{SS1GTE}
 \vO \cdot \vgrad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO) 
 \end{equation}
+\begin{equation}
+\psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
+\end{equation}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Quantity of interest and their sensitivities}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -80,7 +86,7 @@ solution of a simulation is not necessarily the sought after answer. -- QoI whic
 %----------------------------------------------------------------------------------------------
 \subsubsection{Quantity of interest, response function, and inner products}
 %----------------------------------------------------------------------------------------------
-Frequently, the solution to the transport equation is not the sought after value, rather some Quantity of Interest ($\qoi$) which depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{eq:SS1GTE}), a QoI
+Frequently, the solution to the transport equation is not the sought after value, rather some Quantity of Interest ($\qoi$) which depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), a QoI
 defined as
 \begin{equation}
 \qoi =  \int_V dV \int_{4 \pi} d \vO \,  r(\vr, \vO) \psi(\vr, \vO)
@@ -98,10 +104,10 @@ For the sake of brevity in this paper, particularly for expressing the $\qoi$, t
 For later use, two additional inner products are also defined as surface integrals over the region boundary $\partial V$. The latter splinting incoming and outgoing surface integrals.
 
 \begin{equation}
-( \psi , g )_{\partial V \times \mathcal{S}_2}  = \int_{\partial V} dS \int_{4 \pi} d \vO \, \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+\sbra \psi , g \sket_{\bound \times \mathcal{S}_2}  = \int_{\bound} dS \int_{4 \pi} d \vO \, \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \begin{equation}
-( \phi , g )_{\pm}   = \int_{\partial V} dS \int_{\vO \cdot \vn \gtrless 0} d\vO \,  \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+\sbra \phi , g \sket_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\vO \,  \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
 \end{equation}
 
 
@@ -121,7 +127,7 @@ A hurdle in utilizing the transport equation numerically to make real world pred
 \subsection{Adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A} \psi = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Consider a test function $\psi^\dag$, the adjoint operator $\mathbf{A^\dag}$ is defined such that $\bra \mathbf{A} \psi, \psi^\dag \ket = \bra \psi, \mathbf{A^\dag} \psi^\dag \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on Green's first identity (integration by parts), typically resulting in boundary terms ($BC$). Using the response function of the desired $\qoi$, the adjoint system can be constructed as $\mathbf{A^\dag} \psi^\dag = q^\dag$, leading to an alternate expression of the $\qoi$ using the adjoint solution $\psi^\dag $.
+Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A} \psi = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Consider a test function $\psi^\dag$, the adjoint operator $\mathbf{A^\dag}$ is defined such that $\bra \mathbf{A} \psi, \psi^\dag \ket = \bra \psi, \mathbf{A^\dag} \psi^\dag \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on application of the divergence theorem (integration by parts), typically resulting in boundary terms ($BC$). Using the response function of the desired $\qoi$, the adjoint system can be constructed as $\mathbf{A^\dag} \psi^\dag = q^\dag$, leading to an alternate expression of the $\qoi$ using the adjoint solution $\psi^\dag $.
 \begin{equation}
 \label{genAdjQoI}
 \qoi = \bra \psi, r \ket = \bra q , \psi^\dag \ket + BC
@@ -137,15 +143,7 @@ The advantage of the above expression for $\delta \qoi$ is that two solves, one 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrete Ordinates (Sn) Transport}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-With the energy discretization performed, the transport equation system has become a system of $G$ equations of the form shown in equation \ref{1gTE}, coupled by the inscattering terms wrapped up in the source term $q$.
-\begin{equation}
-\label{1gTE}
-\vO \cdot \vgrad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + \frac{q}{4 \pi} \quad \vr \in V , \forall \vO \in \mathcal{S}_2
-\end{equation}
-\begin{equation}
-\psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
-\end{equation}
-The unknowns in the above include the angular flux $\psi=\psi(\vr,\vO)$ and the scalar flux $\phi=\phi(\vr)$. A discrete ordinates (Sn) method can be used to discretize the angular variable. Using a angular quadrature with $D$ directions $\vO_d$, the transport equation is solved along each direction:
+A discrete ordinates (Sn) method can be used to solve the one group steady state transport equation (Eq.~\eqref{SS1GTE}). The focus of this method is to discretize the angular variable into discrete directions. Using an angular quadrature with $D$ directions $\vO_d$, the transport equation is solved along each direction:
 \begin{equation}
 \label{1gTE}
 \vO_d \cdot \vgrad \psi_d + \sigt \psi_d = \frac{\sigs}{4 \pi} \phi + \frac{q}{4 \pi} \quad \vr \in V , \forall d\in [1,D]
@@ -155,70 +153,66 @@ The scalar flux can be computed from the angular flux as follows
 \[
 \phi(\vr) \approx \sum_{d=1}^D w_d \psi_d(\vr)
 \] 
-where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is a quadrature weight. This leads to a coupled system of $D$ equations of the form shown in equation \cite{SnFwd}, where the system is coupled through the scalar flux term.
+where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is a quadrature weight. This leads to a coupled system of $D$ equations of the form shown in Eq.~\eqref{snFwd}, where the system is coupled through the scalar flux terms.
 %
 \begin{equation}
 \label{snFwd}
 \vO \cdot \vgrad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + q
 \end{equation}
 \begin{equation}
-\psi(\vr) = \psi^{\text{out}}(\vr) \quad \vr \in \Gamma, Sn \cdot \vec{n} < 0
+\psi(\vr) = \psi^{\text{out}}(\vr) \quad \vr \in \bound , Sn \cdot \vec{n} < 0
 \end{equation}
-
-{\color{red}[Is the Sn form just discrete ordinates, or does it require full decomposition into the discretized FEM form?]}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint Sn formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
-[in MS thesis, put demonstration]\\
-
-In a fairly straight forward application of the adjoint method previously shown, the adjoint equation which corresponds to the Sn transport formulation with response $\angResp$ is
+In a fairly straightforward application of the adjoint method previously shown, the adjoint equation which corresponds to the Sn transport formulation with response $\angResp$ is
 \begin{equation}
 \label{snAdj}
 - \vO \cdot \vgrad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \angResp
 \end{equation}
 %
 \begin{equation}
-\psi^\dag(\vr,\vO) = \psi^{\dag \text{out}}(\vr,\vO) \quad \vr \in \Gamma, \vO \cdot \vec{n} > 0
+\psi(\vr)^\dag = \psi^{\dag \text{out}}(\vr) \quad \vr \in \bound , Sn \cdot \vec{n} > 0
 \end{equation}
-where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to the forward definition. It is worth noting that the SN adjoint equation is in the form of a transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward Sn transport solvers to be easily adapted to solving the Sn adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equation \ref{adjGeneral2}. 
+where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to the forward definition. It is worth noting that the Sn adjoint equation is in the form of a transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward Sn transport solvers to be easily adapted to solving the Sn adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equation \ref{adjGeneral2}. 
 %
 \begin{equation}
 \label{snAdjQoI}
-QoI = \bra \psi^\dag , \angSource \ket - \int d^2 r \, \int d  \Omega \, \psi^\dag \psi ( \vO \cdot \vec{n} )
+QoI = \bra \psi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket
 \end{equation}
 %
 The surface interval in \ref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. 
 %
 \begin{equation}
-QoI = \bra \psi^\dag , q \ket - \int d^2 r \, \int_{\vO \cdot \vec{n} >0} d  \Omega \, \psi^\dag \psi ( \vO \cdot \vec{n} ) - \int d^2 r \, \int_{\vO \cdot \vec{n} <0} d  \Omega \, \psi^\dag \psi ( \vO \cdot \vec{n} )
+QoI = \bra \psi^\dag , q \ket - \sbra \psi^{\dag \text{out}},  \psi \sket_+ - \sbra \psi^\dag,  \psi^{\text{inc}} \sket_-
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Sn Transport Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $delta \psi^{inc}$. These perturbations result is a perturbed solution to the Sn-transport equation $\psi_p$. Using this $\delta$ notation, the perturbed Sn-equation is shown in \ref{snPert}
+Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $delta \psi^{inc}$. These perturbations result is a perturbed solution to the Sn-transport equation $\psi_p$. Using this $\delta$ notation, the perturbed Sn-equation is shown below
 \begin{equation}
-\label{snPert}
-\vO \cdot \vgrad \psi_p + \left( \sigt + \delta \sigt \right) \psi_p = \frac{\left( \sigs + \delta \sigs \right)}{4 \pi} \phi_p + \left( \angSource + \delta \angSource \right)
+\label{snFwdPert}
+\vO \cdot \vgrad \psi_p + \sigt \psi_p = \frac{\sigs}{4 \pi} \phi+p + q+p
 \end{equation}
 \begin{equation}
-\psi_p(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) + \delta \psi^{\text{inc}}(\vr,\vO)\quad \vr \in \Gamma
+\psi_p(\vr) = \psi+p^{\text{out}}(\vr) \quad \vr \in \bound , Sn \cdot \vec{n} < 0
 \end{equation}
-This perturbation may result in a change to the QoI, now given by $QOI_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in \ref{snAdj} and using a first order approximation of the perturbed Sn transport equation \ref{snPert}, the perturbed QoI can be represented as an inner product not dependent on the perturbed forward solution.
+This perturbation may result in a change to the QoI, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in \ref{snAdj} and using a first order approximation of the perturbed Sn transport equation \ref{snPert}, the perturbed QoI can be represented as an inner product not dependent on the perturbed forward solution.
 \begin{equation}
 \label{snSens}
 \begin{split}
 QoI_p &=\bra \psi_p , \angResp \ket \\
 &=\bra \psi_p , - \vO \cdot \vgrad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  \ket \\
-&= \bra  \vO \cdot \vgrad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \int_{\Gamma} \int_{\Omega} \psi_p \psi^\dag \vO \cdot \vec{n}\\
-&= \bra  \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \int_{\Gamma} \int_{\Omega} \psi_p \psi^\dag \vO \cdot \vec{n}\\
+&= \bra  \vO \cdot \vgrad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
+&= \bra  \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
 \end{split}
 \end{equation}
 Subtraction of the unperturbed $QoI$ expression in equation \ref{snAdjQoI} supplies a final equation for computing the change in $QoI$ using only the system perturbations and the unperturbed forward and adjoint solutions, removing the need to solve the perturbed forward equation.
 \begin{equation}
-\delta QoI_p = \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \int_{\Gamma} \int_{\Omega} \delta \psi \psi^\dag \vO \cdot \vec{n}\\
+\delta QoI_p = \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -229,7 +223,7 @@ Subtraction of the unperturbed $QoI$ expression in equation \ref{snAdjQoI} suppl
 \subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
 
-While the Sn adjoint sensitivity formulation given by \ref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only a single forward and adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. For a spatially 3-dimensional system, this translates to storing descritized data across 5-dimensions.
+While the Sn adjoint sensitivity formulation given by \ref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only a single forward and adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. For a spatially 3-dimensional system, this translates to storing discretized data across 5-dimensions.
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -263,10 +257,10 @@ The inclusion of the Eddington tensor allow equation \ref{1am} to be expressed a
 \end{equation}
 The known incident flux can be used to generate a suitable boundary condition using a "Boundary Eddington Factor" $B$ \cite{Miften}.
 \begin{equation}
-\frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - B \phi \quad \vr \in \Gamma
+\frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - B \phi \quad \vr \in \bound
 \end{equation}
 \begin{equation}
-B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \Gamma
+B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \bound
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -290,17 +284,17 @@ To obtain the QoI using this formulation, begin with the typical QoI definition,
 QoI=&\bra \phi , \scalResp \ket \\
 =&\bra \phi , - \Edd : \left( \vgrad \isigt \vgrad \phi^\dag \right) + \siga \phi^\dag \ket \\
 =& \bra - \vdiv \isigt \vdiv \left( \Edd \phi \right) + \siga \phi, \phi^\dag \ket 
-- \int_\Gamma d^2 r \, \phi \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n}  \\ 
-&+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vgrad \Edd \phi \right) \cdot \vec{n} \\
+- \sbra \phi, \Edd \cdot \isigt \vgrad \phi^\dag \sket  
++ \sbra \phi^\dag, \isigt \vgrad \Edd \phi \sket \\
 =&\bra \scalSource , \phi^\dag \ket 
-- \int_\Gamma d^2 r \, \phi \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} + \int_\Gamma d^2 r \, \phi^\dag \left( - 2J^- - B \phi  \right) \cdot \vec{n}
+- \sbra \phi , - 2J^{\dag +} - B \phi^\dag \sket + \sbra \phi^\dag, - 2J^- - B \phi  \sket
 \end{split}
 \end{equation}
 The boundary Eddington terms negate and yield a relatively compact form for the QoI
 \begin{equation}
 \label{VETQoIAdj}
 QoI=\bra \scalSource , \phi^\dag \ket 
-+ \int_\Gamma d^2 r \, 2  \left( \phi J^{\dag +}  - \phi^\dag J^- \right) \cdot \vec{n}
++ \sbra 2\phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, J^- \sket
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -313,7 +307,7 @@ As was done in the Sn transport formulation, once again consider perturbations t
 - \vdiv \left((\isigt + \delta \isigt)\vdiv \Edd \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
 \end{equation}
 \begin{equation}
-(\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  = - 2J_p^- - B \phi_p \quad \vr \in \Gamma
+(\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  = - 2J_p^- - B \phi_p \quad \vr \in \bound
 \end{equation}
 The usual adjoint process is performed, starting with the QoI definition using the perturbed solution and response. 
 \begin{equation}
@@ -330,8 +324,7 @@ A first order perturbation approximation of equation \ref{VEFPert} can be used t
 \begin{equation}
 \label{QoIVETAdjNoBC}
 \begin{split}
-\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n} 
-\\ &+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vdiv \Edd \phi_p \right) \cdot \vec{n} 
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \sbra \phi_p, \Edd \cdot \isigt \vgrad \phi^\dag \sket + \sbra \phi^\dag, \isigt \vdiv \Edd \phi_p \sket 
 \end{split}
 \end{equation}
 The first surface term can be dealt with readily using the adjoint boundary condition. For the second surface term, a first order approximation of the perturbed forward boundary condition is used for substitution.
@@ -346,8 +339,8 @@ Subtract the adjoint $\qoi$ formulation from equation \ref{VETQoIAdj} to obtain 
 \begin{equation}
 \label{SensVETAdjNoBC}
 \begin{split}
-\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \int_\Gamma d^2 r \, 2  \left( \delta \phi J^{\dag +}  - \phi^\dag \delta J^- \right) \cdot \vec{n}
-\\ &- \int_\Gamma d^2 r \,  \phi^\dag \left( \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n} 
+\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
+\\ &- \sbra \phi^\dag, \delta \isigt \vdiv \Edd \phi \sket
 \end{split}
 \end{equation}
 
@@ -369,8 +362,8 @@ The above can be substituted into equation \ref{VETSensDeriv} to yield an expand
 \label{QoIVETAdjNoBCEdd}
 \begin{split}
 \qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&- \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n} 
-+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vdiv \Edd \phi_p \right) \cdot \vec{n} 
+&- \sbra \phi_p, \Edd \cdot \isigt \vgrad \phi^\dag \sket 
++ \sbra \phi^\dag , \isigt \vdiv \Edd \phi_p \sket
 \end{split}
 \end{equation}
 The boundary condition for the perturbed forward solution takes on a slightly more complex form, as the additional $\delta \Edd$ and $\delta \BEdd$ terms come into play, but the derivation of the sensitivity proceeds similarly to the case ignoring Eddington perturbations.
@@ -378,27 +371,28 @@ The boundary condition for the perturbed forward solution takes on a slightly mo
 \label{QoIVETAdjEdd}
 \begin{split}
 \delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&+ \int_\Gamma d^2 r \, 2  \left( \delta \phi J^{\dag +}  - \phi^\dag \delta J^- \right) \cdot \vec{n}
-- \int_\Gamma d^2 r \,  \phi^\dag \left( \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n}
+&+ \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
+- \sbra \phi^\dag, \delta \isigt \vdiv \Edd \phi \sket
 \\
-&- \int_\Gamma d^2 r \,  \phi^\dag \left( \isigt \vdiv \delta \Edd \phi \right) \cdot \vec{n}
-- \int_\Gamma d^2 r \,  \phi^\dag \phi \delta \BEdd \cdot \vec{n}
+&- \sbra  \phi^\dag ,\isigt \vdiv \delta \Edd \phi \sket
+- \sbra \phi^\dag, \phi \delta \BEdd \sket
 \end{split}
 \end{equation} 
-Comparing the above formulation with the unperturbed Eddington case shows that the perms lost by the Unperturbed Eddington assumption are 
+Comparing the above formulation with the unperturbed Eddington case shows that the terms lost by the Unperturbed Eddington assumption are 
 \begin{equation}
 \label{EddErr}
  \bra \vdiv \isigt \vdiv \left( \delta \Edd \phi \right), \phi^\dag \ket
-- \int_\Gamma d^2 r \,  \phi^\dag \left( \isigt \vdiv \delta \Edd \phi \right) \cdot \vec{n}
-- \int_\Gamma d^2 r \,  \phi^\dag \phi \delta \BEdd \cdot \vec{n}
+- \sbra  \phi^\dag ,\isigt \vdiv \delta \Edd \phi \sket
+- \sbra \phi^\dag, \phi \delta \BEdd \sket
 \end{equation} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Preliminary results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-{\color{red}[IWH: Explain what I am looking at (VET adjoint versus Sn adjoint, versus multiple forward solves). I need to touch up these graphs (do them in Matlab, not Excel). Introduce the FEM parameters used.]}
+At this point, four separate methods for $\qoi$ calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. THe adjoint methods for sensitivity are relying on a first order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
 
+The four methods were implemented in a MATLAB finite element method (FEM) solver. Simple one-dimensional test  cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity.
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous initial system, Uniform Perturbations}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -431,6 +425,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 
 \begin{figure}[H]
 \label{HomoPerts}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/19sigsSens.png}
@@ -455,6 +450,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 
 \begin{figure}[H]
 \label{HomoPertq}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/19qSens.png}
@@ -484,6 +480,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 [Define system,  perturbations, and QoI. Vary MFP between cases.]
 \begin{figure}[H]
 \label{InHomoPertt}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39sigtSens.png}
@@ -508,6 +505,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 
 \begin{figure}[H]
 \label{InHomoPerts}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39sigsSens.png}
@@ -532,6 +530,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 
 \begin{figure}[H]
 \label{InHomoPertq}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39qSens.png}
@@ -558,7 +557,7 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \subsection{Streaming system}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-[Define system,  perturbations, and QoI.]
+[Formatting graphs]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Goals}
@@ -585,106 +584,13 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 %%%%%%%----------------------------------------------------------------------------------------------
 %%%%%%%----------------------------------------------------------------------------------------------
 
-\section{SCRAP SECTION}
-{\color{red}[IWH: TO BE DELETED!!!!!!!!!!! HOLDING FOR SCRAPPED SECTIONS.]}
-
-%%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Steady-state one-group neutron transport equation SCRAP}
-%%%%%%%----------------------------------------------------------------------------------------------
-
-The time dependent neutron transport equation without fission is given to be 
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \int_{4 \pi} d \Omega^\prime \, \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E, \vO^\prime \to \vO) \psi + S(\vr,E,\vO,t) 
-\end{equation}
-{\color{red}[IWH: Add boundary condition (numbering? should the BC have its own EQ number, or be lumped with the main). Introduction of terms in the TE here. Definition of relevant volume $V$ and boundary $\Gamma$]}
-\\ \\
-{\color{red}[IWH: Present why the TE in its complete form is unwieldy. Transition into the simplifying approximations below.]}
-The first simplifying approximation to be made is that scattering is isotropic, allowing the use of an energy differential scattering cross section $\sigs(\vr,E^\prime \to E)$. This also allows for the use of the scalar flux $\phi$ in the scattering term.
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi + \vO \cdot \vgrad \psi + \sigt(\vr,E,t) \psi = \frac{\phi}{4 \pi} \int_0^\infty dE^\prime \sigs(\vr,E^\prime \to E) + S(\vr,E,\vO,t) 
-\end{equation}
- \\ \\
-For practicality, the energy dependence is discritized into a finite number of energy groups. Let each each energy group be denoted by the subscript $g \in (1,G)$. 
-\begin{equation}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g + \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g = \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) 
-\end{equation}
-In the above equation, scattering terms for $g^\prime \neq q$ are inscattering terms, and act as a source term for a given energy group. Making the assumption that the fixed source term $S_g$ is isotropic, allows the generation of a total source term $q$.
-\begin{equation}
-\begin{split}
-\frac{1}{v(E)} \frac{\partial}{\partial t}\psi_g &+ \vO \cdot \vgrad \psi_g + \sigt(\vr,E,t) \psi_g \\
-&= \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t) \\
-&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
-+ \frac{1}{4 \pi} \sum_{g^\prime=1}^G  \Sigma_{s,g^\prime}(\vr) \phi_{g^\prime} + S_g(\vr,\vO,t)  \quad :g^\prime \neq g\\
-&= \frac{1}{4 \pi} \Sigma_{s,g^\prime}(\vr) \phi_{g}
-+ \frac{q_g}{4 \pi}\
-\end{split}
-\end{equation}
-{\color{red}[IWH: NEED TO SWITCH TO STEADY STATE AT SOME POINT! I think I need guidance on how to transition from the time dependent equation to the steady state, to transition into the steady state Sn and VET formulations we have primarily been working with]}
-
-{\color{red}[IWH: I feel like I need to go back through the literature and cite more for the simplifying assumptions.]}
-
-
-\subsection{Adjoint Method SCRAP}
-{\color{red}[IWH: Primarily distilling some of the basic ideas from Marchuk. Not sure how lengthy I need to go with this.]}
-\subsubsection{Adjoint operator and QoI}
-[Basics of adjoint]
-\begin{equation}
-\bra \mathbf{A^\dag} f^\dag, f \ket = \bra f^\dag, \mathbf{A} f \ket 
-\end{equation}
-\begin{equation}
-\mathbf{A^\dag} f^\dag = r
-\end{equation}
-\begin{equation}
-\qoi = \bra r , f \ket = \bra f^\dag, s \ket 
-\end{equation}
-
-\subsection{Adjoint sensitivity SCRAP}
-While the adjoint formulation has limited use in $\qoi$ calculation, it can be a powerful tool for determining sensitivity of the $\qoi$ to perturbation. Consider introducing perturbations to equation {\color{red}XX} in which the operator is perturbed by some value $\delta \mathbf{A}$ and the source term by $\delta q$, resulting in a perturbed solution $f_p=f+\delta f$. Assuming the perturbations are relatively small, a first order approximation can be used to expand the LHS.
-\begin{equation}
-\left( \mathbf{A} + \delta \mathbf{A} \right) \left( f + \delta f \right) \approx q + \delta q 
-\end{equation}
-\begin{equation}
-\mathbf{A} f  + \delta \mathbf{A} f + \mathbf{A}\delta f  = q + \delta q 
-\end{equation}
-\begin{equation}
-\mathbf{A} f_p   = q + \delta q - \delta \mathbf{A} f
-\end{equation}
-Taking the inner product of the perturbed equation with the unperturbed adjoint and moving the operator to the adjoint yields an expression for the perturbed $\qoi$, which yields the solution's sensitivity to the parameter perturbation.
-\begin{equation}
-\bra \mathbf{A} f_p , f^\dag \ket  = \bra  q + \delta q - \delta \mathbf{A} f , f^\dag \ket 
-\end{equation}
-\begin{equation}
-\qoi = \bra  f_p , \mathbf{A^\dag} f^\dag \ket  = \bra  q + \delta q - \delta \mathbf{A} f , f^\dag \ket 
-\end{equation}
-\begin{equation}
-\delta \qoi = \bra \delta q - \delta \mathbf{A} f , f^\dag \ket 
-\end{equation}
-
 \newpage
 
-%%%%%%%----------------------------------------------------------------------------------------------
-{\color{red}[IWH: I need to get all my resources into a bibtex file+formatting.]}
-\begin{thebibliography}{9}
-
-
-\bibitem{Miften}
-  M.M. Miften and Edward W. Larsen, \emph{A Symmetrized Quasidiffusion Method For Solving Transport Problems In Multidimensional Geometeries}, University of Michigan, Ann Arbor Michigan 1992.
-  
-  
-\bibitem{Marchuk}
-  Guri I. Marchuk, \emph{Adjoint Equations and Analysis of Complex Systems}, Institute of Numerical Mathematics, Russian Academy of Sciences, Moscow, Russia 1995. Springer.
-  
-  
-\bibitem{Wiesel}
-  William A. Wieselquest, \emph{The Quasidiffusion Method for Transport Problems on Unstructured Meshes}, North Carolina State University, 2009.
-
-\bibitem{NRCVVUQ}
-  National Research Council, \emph{Assessing the Reliability of Complex Models. Mathematical and Statistical Foundations of Verification, Validation, and Uncertainty Quantification.}, Washington, D.C. 2012. The National Academic Press.
-
-
-\end{thebibliography}
+%%%%%%
 %%%%%%%----------------------------------------------------------------------------------------------
 
+\bibliography{IanProp} 
+\bibliographystyle{ieeetr}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \end{document}

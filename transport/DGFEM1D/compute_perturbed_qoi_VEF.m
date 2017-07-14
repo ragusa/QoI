@@ -29,9 +29,13 @@ porder= npar.porder;
 [b,dbdx] =feshpln(xq,porder);
 % compute elementary mass matrix
 m=zeros(porder+1,porder+1);
+md=zeros(porder+1,porder+1);
+mdd=zeros(porder+1,porder+1);
 for i=1:porder+1
     for j=1:porder+1
         m(i,j)= dot(wq.*b(:,i), b(:,j));
+        md(i,j)= dot(wq.*dbdx(:,i), b(:,j));
+        mdd(i,j)= dot(wq.*dbdx(:,i), dbdx(:,j));
     end
 end
 d_qoi=0;
@@ -45,14 +49,14 @@ for iel=1:npar.nel
     delta_isigtr=isigtrp-isigtr;
     E0=E(1,iel);
     E1=E(2,iel);
-    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
+    Eloc = (E1+E0)/2;%+xq*(E1-E0)/2;
     dEdx = (E1-E0)/2;
     delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
     d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;
     d_qoi = d_qoi - Jac*delta_siga*dot(phi_unpert(:,iel), m*phia(:,iel));
-    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel).*wq, dbdx*(Eloc.*dbdx+dEdx.*b)*phia(:,iel));
+    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel),(Eloc*mdd+dEdx*md)*phia(:,iel));
 end
 
 if IO_opts.show_dqoi_pre_bc
@@ -79,6 +83,6 @@ else
 end
 BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
 BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
-fprintf('BCqoiRite value %g  \n',BCqoiRite);
-fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+%fprintf('BCqoiRite value %g  \n',BCqoiRite);
+%fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
 d_qoi = d_qoi + BCqoiLeft + BCqoiRite;

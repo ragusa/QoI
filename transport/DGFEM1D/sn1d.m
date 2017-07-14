@@ -104,11 +104,11 @@ end
 fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0+dat.sigtPertRegion.*0;
+dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.1+dat.sigtPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
-dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*1;
+dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % perturbations

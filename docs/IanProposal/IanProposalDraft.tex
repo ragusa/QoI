@@ -60,14 +60,26 @@ Adjoint-based sensitivity for radiation transport using an Eddington tensor form
 \item idea investigated in this these: use of an low-order representation for rad transport: VET. 
 \item: setting of the study: single group (one-speed) steady state transport 
 \end{itemize}
+[IWH: REMOVE ABOVE LIST]
 
-{\color{red}[IWH: Notation Questions? At what point does it become acceptable to drop the independent variables ($(\vr,\vO,E)$ and such) on the flux and cross section terms? Should I be using uppercase $\Sigma$ instead of $\sigma$ for the cross-sections in this context? I know that the uppercase is more technically correct for neutrons, but we seemed to always just use lower cases when talking.]}
+Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three process \cite{NRCVVUQ}
+\begin{itemize}
+\item Verification - How accurately does the computation solve the underlying equations of the model for the quantities of interest?
+\item Validation - How accurately does the model represent reality for the quantities of interest?
+\item Uncertainty Quantification (UQ) -  How do the various sources of error and uncertainty feed into uncertainty in the model-based prediction of the quantity of interest?
+\end{itemize}
 
+Adjoint methods are particularly useful for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. They accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario.
+
+These adjoint methods have been applied across various complex and time dependent systems, including {\color{red}[IWH: find some examples and add here]}
+
+Application of the adjoint method to time dependent transport can pose a major technical limitation. In general, the adjoint method would require storing six-dimensional data at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable.
+
+A potential solution to the memory requirement for the time dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport equation. The method examined in this paper is termed  as a ''Variable Eddington Tensor" formulation, which utilizes a tensor value to relate the scalar flux to higher order angular flux moments. 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Steady-state one-group neutron transport equation}
 %%%%%%%----------------------------------------------------------------------------------------------
-
-
+This paper will focus on a relatively simple transport equation form, the one-group steady state transport equation. Examination of the quasi-diffusion's effectiveness in this simple case may provide insight to advantages and shortcomings when applied to a full time dependent transport equation. The one-group steady state transport equation for a volume $V$ bounded by the surface $\partial V$ is given below.
 \begin{equation}
 \label{SS1GTE}
 \vO \cdot \vgrad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO) 
@@ -75,13 +87,10 @@ Adjoint-based sensitivity for radiation transport using an Eddington tensor form
 \begin{equation}
 \psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
 \end{equation}
+The given system variables are the total and scattering cross-sections $\sigt$ and $\sigs$, the particle source term $q$, and the external flux incident on the system given by $\psi^{\text{inc}}$. The unknowns are the angular flux $\psi$ and the scalar flux $\phi$.
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Quantity of interest and their sensitivities}
+%\subsection{Quantity of interest and their sensitivities}
 %%%%%%%----------------------------------------------------------------------------------------------
-
-{\color{red}[IWH: This I really just need to go back into the literature, (particularly National Research Council) and present why obtaining the sensitivity is of importance for verification/validation/UQ. What are sour of important things for me to look at here?]}
-
-solution of a simulation is not necessarily the sought after answer. -- QoI which depends on the solution itself
 
 %----------------------------------------------------------------------------------------------
 \subsubsection{Quantity of interest, response function, and inner products}
@@ -120,7 +129,7 @@ The inner product subscripts will frequently be dropped when it is unambiguous w
 %----------------------------------------------------------------------------------------------
 \subsubsection{Sensitivity to Inputs}
 %----------------------------------------------------------------------------------------------
-A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are never known exactly.
+A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are ever known exactly. This error in the system parameters is expected to translate to error in the QoI value
 
 
 %%%%%%%----------------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ Adjoint-based sensitivity for radiation transport using an Eddington tensor form
 \item idea investigated in this these: use of an low-order representation for rad transport: VET. 
 \item: setting of the study: single group (one-speed) steady state transport 
 \end{itemize}
-[IWH: REMOVE ABOVE LIST]
+{\color{red}[IWH: REMOVE ABOVE LIST]}
 
 Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three process \cite{NRCVVUQ}
 \begin{itemize}
@@ -129,7 +129,7 @@ The inner product subscripts will frequently be dropped when it is unambiguous w
 %----------------------------------------------------------------------------------------------
 \subsubsection{Sensitivity to Inputs}
 %----------------------------------------------------------------------------------------------
-A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are ever known exactly. This error in the system parameters is expected to translate to error in the QoI value
+A hurdle in utilizing the transport equation numerically to make real world predictions is that none of the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are ever known exactly. This error in the system parameters is expected to translate to error in the QoI value. Ideally a reasonable range error rage would be determined for each system parameter and the system simulation would run over a finely discretized space of all the parameter error ranges, using the numerous QoI values to generate an error range for the QoI. However, this straightforward method tends to be resource intensive, requiring a complete forward solve of the transport equation for each input error scenario. Adjoint methods offer a way to drastically reduce the number of solves, while generally remaining fairly accurate for small error cases.
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ While the Sn adjoint sensitivity formulation given by \ref{snSens} provides a fi
 \subsection{VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The "Variable Eddington Tensor" (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity. To begin the formulation, the steady state transport equation is expanded to the scalar and first angular moment by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to equation \ref{1gTE}, respectively. Using the notation
+The Variable Eddington Tensor (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity. To begin the formulation, the steady state transport equation is expanded to the scalar and first angular moment by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to equation \ref{1gTE}, respectively. Using the notation
 \begin{equation}
 \phi=\int d\Omega \, \psi( \vO )
 ,\quad
@@ -392,7 +392,7 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 \label{EddErr}
  \bra \vdiv \isigt \vdiv \left( \delta \Edd \phi \right), \phi^\dag \ket
 - \sbra  \phi^\dag ,\isigt \vdiv \delta \Edd \phi \sket
-- \sbra \phi^\dag, \phi \delta \BEdd \sket
+- \sbra \phi^\dag, \phi \delta \BEdd \sket.
 \end{equation} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -401,11 +401,17 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 
 At this point, four separate methods for $\qoi$ calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. THe adjoint methods for sensitivity are relying on a first order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
 
-The four methods were implemented in a MATLAB finite element method (FEM) solver. Simple one-dimensional test  cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity.
+The four methods were implemented in a MATLAB finite element method (FEM) solver. Simple one-dimensional test  cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% QoI response is plotted against the \% change in a given parameter $p$, which are defined as
+\begin{equation}
+\text{\% QoI response}=\frac{\delta QoI}{QoI}
+\end{equation}
+\begin{equation}
+\text{p \% change}=\frac{\delta p}{p}.
+\end{equation}    
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous initial system, Uniform Perturbations}
 %%%%%%%----------------------------------------------------------------------------------------------
-The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. Solutions were obtained using a 200 element FEM mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous.
+The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element FEM mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired QoI is the total flux in the middle fifth of the system.
 
 \begin{figure}[H]
 \label{HomoPertt}
@@ -486,7 +492,8 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \subsection{Homogeneous initial system, Non-Uniform Perturbations}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-[Define system,  perturbations, and QoI. Vary MFP between cases.]
+The next test case has the same initial conditions as the previous homogeneous case. however the system is perturbed into a inhomogeneous system. The system is split into 5 equal widths. The first, third, and fifth sections (corresponding to the center and the end sections) have the relevant variable perturbed in one direction, while the other two segments are perturbed in the opposite direction. The result is a system that is inhomogeneous, but with regular variations and symmetric about the midpoint. The QoI is also retained from the previous case.
+
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
@@ -565,8 +572,80 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Streaming system}
 %%%%%%%----------------------------------------------------------------------------------------------
+\begin{figure}[H]
+\label{InHomoPertt}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/49sigtSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/50sigtSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/51sigtSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigt$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
 
-[Formatting graphs]
+\begin{figure}[H]
+\label{InHomoPerts}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/49sigsSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/50sigsSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/51sigsSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of $\sigs$ perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
+
+\begin{figure}[H]
+\label{InHomoPertq}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/49qSens.png}
+  \caption{$\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/50qSens.png}
+  \caption{$\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.8\linewidth]{figures/51qSens.png}
+  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}
+\caption{Plots of source perturbation sensitivity.}
+\label{fig:fig}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Goals}

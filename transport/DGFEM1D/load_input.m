@@ -751,7 +751,31 @@ switch pb_ID
         dat.sigtPertRegion=[1 -1 1 -1 1];
         dat.sigsPertRegion=[1 -1 1 -1 1];
         dat.sourcePertRegion=[1 -1 1 -1 1];
-        dat.incPertRegion(1:sn)=0;      
+        dat.incPertRegion(1:sn)=1;      
+        dat.incPertRegion(1:sn/2)=1;
+        dat.incPertRegion(sn/2+1:sn)=1;
+        
+case 42 %Uniform, 0 inc flux. Response in middle
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*16;
+        % width of each zone
+        width_zone = [ 2 2 2 2 2];
+        % sigt/sigs per zone
+        sigt=[0.5 0.5 0.5 0.5 0.5];
+        sigs=[0.25 0.25 0.25 0.25 0.25];
+        % volumetric source value, per zone
+        qvf=[1 1 1 1 1];
+        % incoming flux values
+        incf(1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigtPertRegion=[1 -1 1 -1 1];
+        dat.sigsPertRegion=[1 -1 1 -1 1];
+        dat.sourcePertRegion=[1 -1 1 -1 1];
+        dat.incPertRegion(1:sn)=1;      
         dat.incPertRegion(1:sn/2)=1;
         dat.incPertRegion(sn/2+1:sn)=1;
         

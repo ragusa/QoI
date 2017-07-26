@@ -1,6 +1,6 @@
 function sn1d
 % Linear Discontinous FEM code for Sn transport in 1D
-% Jean Ragusa,
+% Jean Ragusa, Ian Halvic
 close all; clc; clear variables; clear global;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,7 +25,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=21;
+pb_ID=42;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -104,10 +104,10 @@ end
 fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.1+dat.sigtPertRegion.*0;
+dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.0+dat.sigtPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
-dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.1;
 dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -165,8 +165,33 @@ if do_transport_adjoint
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('-----BEGIN DATA ON EDDINGTON PERTURBATION----- \n')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fprintf('VEF adjoint error from SN forward \t\t %g \n',(qoi_sn_f_pert - qoi_sn_f)-delta_qoi_VEF_math_a);
+fprintf('VEF adjoint error from VEF forward \t\t %g \n',(qoi_vef_f_pert - qoi_vef_f)-delta_qoi_VEF_math_a);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% solve forward VEF problem using IP
+[phiVEFa_Epert]=solve_VEF_math_adjoint(adjoint_flux,E_pert,Ebd_pert);
+do_plot(phiVEFa_Epert,'VEF_Epert',100,adjoint_flux)
+do_plot(phiVEFa_Epert-phiVEFa_math,'VEF_diff',120,adjoint_flux)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[phiVEFa_deltaE]=solve_VEF_math_adjoint(adjoint_flux,E-E_pert,Ebd-Ebd_pert);
+do_plot(phiVEFa_deltaE,'VEF_deltaE',130,adjoint_flux)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Rel_L1_diff=find_Eddington_diff(E,E_pert);
+delta_qoi_VEF_math_a_Epert = compute_perturbed_qoi_VEF(adjoint_flux,phiVEFa_Epert,phiVEF_pert,E_pert);
+fprintf('delta qoi using VEF math adjoint and Epert: \t\t %g \n',delta_qoi_VEF_math_a_Epert);
+fprintf('Diff from using Epert: \t\t %g \n',delta_qoi_VEF_math_a-delta_qoi_VEF_math_a_Epert);
 fprintf('relative L1 difference in E: \t\t %g \n',Rel_L1_diff);
-deltaE_term=compute_deltaE_QoI_term(phiVEFa_math,phiVEF,E,E_pert);
-fprintf('deltaE term: \t\t %g \n',deltaE_term);
+[deltaE_term,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(phiVEFa_math,phiVEF,phiVEF_pert,E,E_pert,Ebd,Ebd_pert);
+fprintf('Total delta E term: \t\t %g \n',deltaE_term+deltaB_L-deltaB_R);
+fprintf('-deltaE term: \t\t %g \n',deltaE_term);
+fprintf('-deltaB term: \t\t %g \n',deltaB_L-deltaB_R);
+fprintf('--deltaB_L term: \t\t %g \n',deltaB_L);
+fprintf('--deltaB_R term: \t\t %g \n',deltaB_R);
+figure(70)
+plot(volValues)
+adjDiff = compute_qoi(adjoint_flux,phiVEFa_Epert,~sn,[],[])-compute_qoi(adjoint_flux,phiVEFa_math,~sn,[],[]);
+printf('Diff from using two VEF adjoints: \t\t %g \n',adjDiff);
 %error('stopping here, not fully done with delta qoi.');

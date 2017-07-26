@@ -1,8 +1,10 @@
-function d_qoi = compute_deltaE_QoI_term(phia,phi_unpert,E,E_pert)
+function [d_qoi,BCdqoiLeft,BCdqoiRite,volValues] = compute_deltaE_QoI_term(phia,phi_unpert,phi_pert,E,E_pert,B,B_pert)
 
 global npar dat snq IO_opts
 d_qoi=0;
 deltaE=E_pert-E;
+deltaB=B_pert-B;
+volValues=[];
 
 % type of solution data passed in
 [n1,n2]=size(phia);
@@ -12,6 +14,10 @@ end
 [n1,n2]=size(phi_unpert);
 if n2==1
     phi_unpert=reshape(phi_unpert,npar.porder+1,npar.nel);
+end
+[n1,n2]=size(phi_pert);
+if n2==1
+    phi_pert=reshape(phi_pert,npar.porder+1,npar.nel);
 end
 
 % shortcuts
@@ -39,6 +45,12 @@ for iel=1:npar.nel
     dDEdx = (DE1-DE0)/2;
     Jac   = npar.dx(iel)/2;
     % assemble
-    d_qoi = d_qoi - Jac*isigtr*dot(phi_unpert(:,iel), (Eloc*mdd+dDEdx*md)*phia(:,iel));
+    segment= - Jac*isigtr*dot(phi_unpert(:,iel), (Eloc*mdd+dDEdx*md)*phia(:,iel));
+    volValues=[volValues segment];
+    d_qoi = d_qoi +segment;
 end
+
+BCdqoiLeft=phia(1,1)*phi_pert(1,1)*deltaB(2);
+BCdqoiRite=phia(npar.porder+1,npar.nel)*phi_pert(npar.porder+1,npar.nel)*deltaB(1);
+
 return

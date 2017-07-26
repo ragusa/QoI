@@ -10,6 +10,8 @@
 \newcommand{\vO}{\vec{\Omega}}
 \newcommand{\bra}{\left\langle}
 \newcommand{\ket}{\right\rangle}
+\newcommand{\sbra}{\left[}
+\newcommand{\sket}{\right]}
 \newcommand{\vdiv}{\vec{\nabla} \cdot}
 \newcommand{\vgrad}{\vec{\nabla}}
 \newcommand{\vbeta}{\vec{\beta} }
@@ -18,6 +20,25 @@
 \newcommand{\pdz}{\frac{\partial}{\partial z}}
 \newcommand{\intrrr}{\int d^3 r \,}
 \newcommand{\intrr}{\int d^2 r \,}
+\newcommand{\dEdphi}{\partial_\phi E \,}
+\newcommand{\dEdp}{\partial_p E \,}
+\newcommand{\dBdphi}{\partial_\phi B \,}
+\newcommand{\dBdp}{\partial_p B \,}
+\newcommand{\adj}{\phi^\dag}
+\newcommand{\surf}{\int_{\partial V}}
+\newcommand{\bound}{\partial V}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\Edd}{\mathbf{E}}
+\newcommand{\BEdd}{\mathbf{B}}
+\newcommand{\sigt}{\sigma_t}
+\newcommand{\sigs}{\sigma_s}
+\newcommand{\siga}{\sigma_a}
+\newcommand{\isigt}{c}
+\newcommand{\angSource}{q_\Omega}
+\newcommand{\scalSource}{q}
+\newcommand{\angResp}{q^\dag}
+\newcommand{\scalResp}{q^\dag}
+\newcommand{\qoi}{QoI}
 
 \begin{document}
 \begin{center}
@@ -729,6 +750,206 @@ So
 \[
 J_p = \bra q_0 + \delta q_0 - \delta \sigma_r \phi + \vdiv \left( \delta c \vdiv \left( E \phi \right) \right), \phi^\dag \ket - \left. \left( E \phi_p   \left( \frac{1}{\sigma_{tr}} \pdx \phi^\dag \right) \right)  \right|_a^b + \left. \left( \frac{1}{\sigma_{tr}} \pdx \left( E \phi_p \right) \right) (\phi^\dag) \right|_a^b
 \]
+
+
+
+\section{Using Ep}
+%%%%%%
+\subsection{$\delta q$ test case}
+\subsubsection{Unperturbed equations}
+Forward unperturbed equation. Using a homogeneous BC (in sn) such that $\psi^{\text{inc}}=0 \to J^{\text{inc}}=0$. Similar for the adjoint.
+\begin{equation}
+- \vdiv \left(\isigt\vdiv \Edd \phi \right) + (\siga )\phi = \scalSource 
+\end{equation}
+\begin{equation}
+\isigt   \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^{\text{inc}} - B \phi =  - B \phi \quad \vr \in \bound
+\end{equation}
+What we define our unperturbed adjoint as
+\begin{equation}
+- \Edd : \left( \vgrad \left( \frac{1}{\sigt}\vgrad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
+\end{equation}
+\begin{equation}
+\Edd : \isigt \ \vec{\nabla} \cdot \left( \phi^\dag \right)  = - 2J^{\dag \text{out}} - B \phi^\dag =  - B \phi^\dag \quad \vr \in \bound
+\end{equation}
+Straightforward to show we have our expected QoI representation
+\begin{equation}
+\qoi=\bra \phi , \scalResp \ket = \bra \phi^\dag , \scalSource\ket 
+\end{equation}
+
+
+\subsubsection{Perturbed equations}
+Forward perturbed equation, using only a simple source perturbation (which also perturbs the Eddington). Using a homogeneous BC again.
+\begin{equation}
+- \vdiv \left(\isigt\vdiv \Edd_p \phi_p \right) + (\siga )\phi = \scalSource + \delta \scalSource 
+\end{equation}
+\begin{equation}
+\isigt   \vec{\nabla} \cdot \left(\Edd_p \phi_p \right)  = - 2J^{\text{inc}} - B_p \phi_p =  - B_p \phi_p \quad \vr \in \bound
+\end{equation}
+An alternate form of the above is to use $\Edd_p = \Edd + \delta \Edd$, which comes into play later. This is shown below, with the $\delta \Edd$ term moves to the RHS
+\begin{equation}
+- \vdiv \left(\isigt\vdiv \Edd \phi_p \right) + (\siga )\phi = \scalSource + \delta \scalSource +  \vdiv \left(\isigt\vdiv \delta \Edd \phi_p \right) 
+\end{equation}
+\begin{equation}
+\isigt   \vec{\nabla} \cdot \left(\Edd \phi_p \right)  =   - B_p \phi_p  - \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi_p \right) \quad \vr \in \bound
+\end{equation}
+
+What we define a perturbed adjoint as below. This isn't typically used in sensitivity, I just may want to reference something like this for troubleshooting
+\begin{equation}
+- \Edd_p : \left( \vgrad \left( \frac{1}{\sigt}\vgrad \phi^\dag_p \right) \right) + \siga \phi^\dag_p = \scalResp
+\end{equation}
+\begin{equation}
+\Edd : \isigt \ \vec{\nabla} \cdot \left( \phi^\dag_p \right)  = - 2J^{\dag \text{out}} - B_p \phi^\dag_p =  - B_p \phi^\dag_p \quad \vr \in \bound
+\end{equation}
+We have our perturbed QOI
+\begin{equation}
+\qoi_p=\bra \phi_p , \scalResp \ket = \bra \phi^\dag_p , \scalSource +\delta \scalSource \ket 
+\end{equation}
+
+\subsubsection{Sensitivity}
+Ok so now for the sensitivity/perturbed QoI using the unperturbed adjoint. 
+\begin{equation}
+\begin{split}
+\qoi_p&=\bra \phi_p , \scalResp \ket\\
+&=\bra \phi_p , - \Edd : \left( \vgrad \left( c \vgrad \phi^\dag \right) \right) + \siga \phi^\dag \ket\\
+&=\bra  \vdiv \Edd \phi_p , c \vgrad \phi^\dag  \ket + \bra \siga \phi_p , \phi^\dag \ket + \left( B \phi^\dag , \phi_p \right)\\
+&= \bra  \vdiv c \vdiv \Edd \phi_p + \siga \phi_p , \phi^\dag  \ket  + \left( B \phi^\dag , \phi_p \right)+ \left( - B \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi \right) , \phi^\dag \right) \\
+&= \bra  q + \delta q + \vdiv \left(\isigt\vdiv \delta \Edd \phi_p \right), \phi^\dag  \ket  - \left( \delta B \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi_p \right) , \phi^\dag \right) \\
+\end{split}
+\end{equation}
+From the above it is easy to see the sensitivity is 
+\begin{equation}
+\delta \qoi = \bra  \delta q + \vdiv \left(\isigt\vdiv \delta \Edd \phi_p \right), \phi^\dag  \ket  - \left( \delta B \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi_p \right) , \phi^\dag \right)
+\end{equation}
+Putting it in a slightly more VEF friendly form by removing the double $\vdiv$ term gives
+\begin{equation}
+\delta \qoi = \bra  \delta q , \phi^\dag \ket - \bra  \isigt\vdiv \delta \Edd \phi_p , \vgrad \phi^\dag  \ket  - \left( \delta B \phi_p , \phi^\dag \right) 
+\end{equation}
+The current problem is that the above does not give a correct answer in the MATLAB code, even using the perturbed Eddington terms, so I am guessing there is an issue somewhere. Note that no approximations have been made. All other methods  give the correct/nearly-same solution; including using $ \bra \phi^\dag_p , \scalSource +\delta \scalSource \ket $, which I figured would show if it was a problem with the VEF approximation. he MATLAB routine that calculates these extra values is compute\_deltaE\_QoI\_term
+
+%----------------------------------------------------------------------------------------------
+\subsection{Adjoint VET formulation}
+%%%%%%%----------------------------------------------------------------------------------------------
+[Copied and modified from proposal to use $E_p$]
+The VET formulation necessitates a reformulation of our adjoint. As shown in Eq.~\eqref{adjForm}, the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation.
+\begin{equation}
+\label{adjForm}
+- \Edd_p : \left( \vgrad \left( \frac{1}{\sigt}\vgrad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
+\end{equation}
+For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
+\begin{equation}
+\label{adjVETBC}
+\Edd_p \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag  = - 2J^{\dag +} - B_p \phi^\dag \quad \vr \in \Gamma
+\end{equation}
+To obtain the QoI using this formulation, begin with the typical QoI definition, relocate operators to the forward to substitute the forward source, and apply boundary conditions.
+\begin{equation}
+\label{VETQoIAdjUnpDeriv}
+\begin{split}
+QoI=&\bra \phi , \scalResp \ket \\
+=&\bra \phi , - \Edd_p : \left( \vgrad \isigt \vgrad \phi^\dag \right) + \siga \phi^\dag \ket \\
+=& \bra - \vdiv \isigt \vdiv \left( \Edd_p \phi \right) + \siga \phi, \phi^\dag \ket 
+- \sbra \phi, \Edd_p \cdot \isigt \vgrad \phi^\dag \sket  
++ \sbra \phi^\dag, \isigt \vgrad \Edd_p \phi \sket \\
+=&\bra \scalSource , \phi^\dag \ket 
+- \sbra \phi , - 2J^{\dag +} - B_p \phi^\dag \sket + \sbra \phi^\dag, - 2J^- - B_p \phi  \sket
+\end{split}
+\end{equation}
+The boundary Eddington terms negate and yield a relatively compact form for the QoI
+\begin{equation}
+\label{VETQoIAdj}
+QoI=\bra \scalSource , \phi^\dag \ket 
++ \sbra 2\phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, J^- \sket
+\end{equation}
+
+%%%%%%%----------------------------------------------------------------------------------------------
+\subsection{VET adjoint sensitivity}
+%%%%%%%----------------------------------------------------------------------------------------------
+
+As was done in the Sn transport formulation, once again consider perturbations to the system parameters. However, in contrast to the Sn case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
+\begin{equation}
+\label{VEFPert}
+- \vdiv \left((\isigt + \delta \isigt)\vdiv \Edd_p \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
+\end{equation}
+\begin{equation}
+(\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd_p \phi_p \right)  = - 2J_p^- - B_p \phi_p \quad \vr \in \bound
+\end{equation}
+The usual adjoint process is performed, starting with the QoI definition using the perturbed solution and response. 
+\begin{equation}
+\label{VETSensDeriv}
+\begin{split}
+\qoi=&\bra \phi_p , \scalResp \ket \\
+=&\bra \phi_p , - \Edd_p : \left( \vgrad \isigt \vgrad \phi^\dag \right) + \siga \phi^\dag \ket \\
+=& \bra - \vdiv \isigt \vdiv \left( \Edd_p \phi_p \right) + \siga \phi_p, \phi^\dag \ket 
+- \int_\Gamma d^2 r \, \phi_p \left( \Edd_p \cdot \isigt \vgrad \phi^\dag \right) \cdot \vec{n}  \\ 
+&+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \vgrad \Edd_p \phi_p \right) \cdot \vec{n} \\
+\end{split}
+\end{equation}
+A first order perturbation approximation of Eq.~\eqref{VEFPert} can be used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution.
+\begin{equation}
+\label{QoIVETAdjNoBC}
+\begin{split}
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd_p \phi \right) - \delta \siga \phi, \phi^\dag \ket - \sbra \phi_p, \Edd_p \cdot \isigt \vgrad \phi^\dag \sket + \sbra \phi^\dag, \isigt \vdiv \Edd_p \phi_p \sket 
+\end{split}
+\end{equation}
+The first surface term can be dealt with readily using the adjoint boundary condition. For the second surface term, a first order approximation of the perturbed forward boundary condition is used for substitution.
+\begin{equation}
+\label{QoIVETAdj}
+\begin{split}
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} 
+\\ &+ \int_\Gamma d^2 r \, \phi^\dag \left( - 2J_p^- - B \phi_p - \delta \isigt \vdiv \Edd \phi \right) \cdot \vec{n} 
+\end{split}
+\end{equation}
+Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the sensitivity expression for the adjoint VET formulation.
+\begin{equation}
+\label{SensVETAdjNoBC}
+\begin{split}
+\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
+\\ &- \sbra \phi^\dag, \delta \isigt \vdiv \Edd \phi \sket
+\end{split}
+\end{equation}
+
+
+%%%%%%%----------------------------------------------------------------------------------------------
+\subsection{Error from unperturbed Eddington assumption}
+%%%%%%%----------------------------------------------------------------------------------------------
+Beyond the first order approximation common to adjoint formulations, the VET sensitivity formulation also made the assumption that the Eddington tensor remained unperturbed under perturbations of the other parameters. To observe the terms that were dropped in this approximation, consider a reformulation of the perturbed forward equation, this time introducing $\delta \Edd$ and $\delta  B$ terms. 
+\begin{equation}
+\label{VEFPerEdd}
+- \vdiv \left((\isigt + \delta \isigt)\vdiv (\Edd + \delta \Edd) \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
+\end{equation}
+\begin{equation}
+(\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  = - 2J_p^- - (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \Gamma
+\end{equation}
+The above can be substituted into Eq.~\eqref{VETSensDeriv} to yield an expanded $\qoi$ equation, including the Eddington perturbation terms
+\begin{equation}
+\label{QoIVETAdjNoBCEdd}
+\begin{split}
+\qoi =& \bra \scalSource + \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
+&- \sbra \phi_p, \Edd \cdot \isigt \vgrad \phi^\dag \sket 
++ \sbra \phi^\dag , \isigt \vdiv \Edd \phi_p \sket
+\end{split}
+\end{equation}
+The boundary condition for the perturbed forward solution takes on a slightly more complex form, as the additional $\delta \Edd$ and $\delta \BEdd$ terms come into play, but the derivation of the sensitivity proceeds similarly to the case ignoring Eddington perturbations.
+\begin{equation}
+\label{QoIVETAdjEdd}
+\begin{split}
+\delta \qoi =& \bra \delta \scalSource + \vdiv \delta \isigt \vdiv \left( \Edd \phi \right) + \vdiv \isigt \vdiv \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
+&+ \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
+- \sbra \phi^\dag, \delta \isigt \vdiv \Edd \phi \sket
+\\
+&- \sbra  \phi^\dag ,\isigt \vdiv \delta \Edd \phi \sket
+- \sbra \phi^\dag, \phi \delta \BEdd \sket
+\end{split}
+\end{equation} 
+Comparing the above formulation with the unperturbed Eddington case shows that the terms lost by the Unperturbed Eddington assumption are 
+\begin{equation}
+\label{EddErr}
+ \bra \vdiv \isigt \vdiv \left( \delta \Edd \phi \right), \phi^\dag \ket
+- \sbra  \phi^\dag ,\isigt \vdiv \delta \Edd \phi \sket
+- \sbra \phi^\dag, \phi \delta \BEdd \sket.
+\end{equation} 
+
+
+
 
 \newpage
 

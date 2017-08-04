@@ -59,31 +59,19 @@ Ian Halvic, Texas A\&M University, NUEN \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{itemize}
-\item predictive science -> need for UQ and sensitivity [Nat'l Aca]
-\item adjoint methods have been dev. to provide sensi coefs; [Marchuk]; mathematical technique based on inner products; why useful: many sources -> many direct solve (forward) but only 1 forward and 1 adjoint for same answers
-\item adjoint methods also used for time-dep problems [find refs, fluid flow, Sandia]. in time-dep problem, the forward time-dep solution needs to be stored for later use in the adjoitn formalism [put that proof with a simple linear operator du/dt + Au = q in appendix of thesis]
-\item time-dep transport would require very large memory usage to store forward solution because rad transport is a 6D (high dimensional phase space problem at every time step)
-\item idea investigated in this these: use of an low-order representation for rad transport: VET. 
-\item: setting of the study: single group (one-speed) steady state transport 
-\end{itemize}
-<<<<<<< HEAD
-\iwh{REMOVE ABOVE LIST}
 \jcr{I created nice shortcuts for comments from you and me. Let's use them. Every star in the margin denotes a new comment. red is for you. Blue for me.}
-\jcr{The explanation below is well written. Make sure it is 100\% your own. Do not  copy-paste from published documents; it's called plagiarism and it is a major offense in the academic setting.}
-Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three process \cite{NRCVVUQ}
-=======
-{\color{red}[IWH: REMOVE ABOVE LIST]}
+\jcr{The explanation below is well written. Make sure it is 100\% your own. Do not  copy-paste from published documents; it's called plagiarism and it is a major offense in the academic setting.} \iwh{ The only thing that I quoted verbatim was the VVUQ process definitions after the next paragraph. I had it cited, but I make the citation a bit more explicit. Is there a better way to cite something when quoting a sort of "definition" of terms like this?}
 
-Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real world system. This can be accomplished using three processes \cite{NRCVVUQ}
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
+Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three process outlined by the National Research Council \cite{NRCVVUQ}
+
+
 \begin{itemize}
 \item Verification - How accurately does the computation solve the underlying equations of the model for the quantities of interest?
 \item Validation - How accurately does the model represent reality for the quantities of interest?
 \item Uncertainty Quantification (UQ) -  How do the various sources of error and uncertainty feed into uncertainty in the model-based prediction of the quantity of interest?
 \end{itemize}
 
-<<<<<<< HEAD
+
 Adjoint methods are particularly useful for UQ. In general, adjoint methods provide a mechanism for computing quantities of interest (\qoi) and sensitivity coefficients and, more generally, for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. They accomplish this in a particularly economical way, requiring only two full system solves (one forward and one adjoint solve) in order to determine sensitivity coefficients for any combination of sources of uncertainty, as opposed to performing an multiple forward system solve to determine
 the sensitivity due to each individual uncertain parameter.
 
@@ -104,28 +92,29 @@ an estimation of the sensitivity coefficient
 The subsequent sections will provide additional details and will apply these formulations to neutron transport problems. However, it is already evident that if the forward source $q$ is uncertain and only a few \qoi are requested, it is preferable to employ the adjoint formulation to compute the quantity of interest. Furthermore, the sensitivity of the
 \qoi to many uncertain parameters is more advantageously computed using the adjoint.
 
-These adjoint methods have been applied across various complex and time dependent systems, including 
-\iwh{find some examples and add here} \jcr{there are plenty of examples, in nuen and outside; find some and add them as references here, make sure you read a bit more on it. one should not put down a reference that one has not read}
+
+Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Djoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. \iwh{REDO this} 
+
+These adjoint methods have been applied across various complex and time dependent systems. An example of adjoint methods applied to hydrodynamic systems with shocks can be found in Wildey et al. \cite{Wildey}. A more relevant adjoint example to neutron transport occurs in Stripling et al. in the form of reactor burn-up equations \cite{Stripling}.
 
 
-Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method would require storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. \jcr{you may say that checkpointing for the scalar flux was employed by Hayes Stripling for depletion problems, but he only needed to store the converged scattering source or equivalently the converged flux moments at optimized checkpoints in order to reconstruct/interpolate data needed
+Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method would require storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. As an aside, for the previously mentioned depletion problem, this limitation was resolved by storing the converged flux moments only at defined checkpoints then using interpolation to reconstruct the forward flux for use in the adjoint, however this method does not extend to transport in general \cite{Stripling}.
+
+\jcr{you may say that checkpointing for the scalar flux was employed by Hayes Stripling for depletion problems, but he only needed to store the converged scattering source or equivalently the converged flux moments at optimized checkpoints in order to reconstruct/interpolate data needed
 because the depletion problem is a succession of steady states and typically only a few moments are needed whereas one employ many directions}
+\iwh{I'm not sure if I have a shorter version of Stripling paper, but (from my reading) it doesn't go into why this checkpointing is acceptable for depletion problems}
 
-A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space+direction+energy+time) to 4D+time (space+energy+time). The method examined in this work is termed  as a ''Variable Eddington Tensor" formulation, and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
-=======
-Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Djoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. These adjoint methods have been applied across various complex and time dependent systems, some examples including nuclear reactor burnup \cite{Stripling} and hydrodynamic systems with shocks \cite{Wildey}.
+A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time) to 4D+time (space, energy, time). The method examined in this work is termed  as a ''Variable Eddington Tensor" formulation, and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
 
-Application of the adjoint method to time dependent transport can pose a major technical limitation however. In general, for particle transport, the adjoint method requires storing the full six-dimensional flux data at each time step. When dealing with high resolution meshes and many time steps, this can potentially require an unreasonable amount of system memory for data storage, rendering the method functionally unusable.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Steady-state one-group neutron transport equation}
 %%%%%%%----------------------------------------------------------------------------------------------
-<<<<<<< HEAD
+
 This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of the quasi-diffusion's effectiveness in this setting will provide sufficient insight to advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. The one-group steady-state transport equation with isotropic scattering for a volume $V$ bounded by its surface $\partial V$ is given below.
-=======
+
 This paper will focus on a relatively simple transport equation form, the one-group steady state transport equation. Examination of the quasi-diffusion's effectiveness in this simple case may provide insight to advantages and shortcomings when applied to a full time-dependent transport equation. The one-group steady state transport equation for a volume $V$ bounded by the surface $\partial V$ is given below.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
+
 \begin{equation}
 \label{SS1GTE}
 \vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO), \quad \forall \vr \in V
@@ -144,7 +133,7 @@ The possibly uncertain parameters in this system are: the total and scattering c
 %----------------------------------------------------------------------------------------------
 \subsubsection{Quantity of interest, response function, and inner products}
 %----------------------------------------------------------------------------------------------
-Frequently, the solution to the transport equation is not the sought after value, but rather some Quantity of Interest \jcr{you can remove the dollar signs around qoi, I redefine it to ensure math typeset}(\qoi), a functional that depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), a \qoi
+Frequently, the solution to the transport equation is not the sought after value, but rather some Quantity of Interest (\qoi), a functional that depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), a \qoi
 defined as
 \begin{equation}
 \qoi =  \int_V dV \int_{4 \pi} d \vO \,  r(\vr, \vO) \psi(\vr, \vO)
@@ -154,9 +143,10 @@ where $ r(\vr, \vO)$ is termed the ``response function'' which is used to charac
 For the sake of brevity in this paper, particularly for expressing the \qoi, two volumetric inner products are defined both using $\bra \bullet , \bullet \ket$ notation. These two inner-products are for use with angular and scalar flux respectively. 
 \begin{subequations}
 \begin{equation}
-\bra \psi , \angResp \ket_{V \times \mathcal{S}_2}  = \int_V dV \int_{4 \pi} d \vO \,  \psi(\vr, \vO)\angResp(\vr, \vO)
+\bra \psi , \angResp \ket_{V \times \mathcal{S}_2}  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)\angResp(\vr, \vO)
 \end{equation}
 \jcr{in $d\Omega$, there should be no vector sign. it is an infinitesimal area on the unit sphere}
+\iwh{fixed}
 where $\mathcal{S}_2$ denotes the unit sphere.
 \begin{equation}
 \bra \phi(\vr) ,\angResp \ket_V  = \int_V dV \,  \phi(\vr)\angResp(\vr)
@@ -165,24 +155,27 @@ where $\mathcal{S}_2$ denotes the unit sphere.
 For later use, two additional inner products are also defined as surface integrals over the region boundary $\partial V$. The latter splinting incoming and outgoing surface integrals.
 \begin{subequations}
 \begin{equation}
-\sbra \psi , g \sket_{\bound \times \mathcal{S}_2}  = \int_{\bound} dS \int_{4 \pi} d \vO \, \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+\sbra \psi , g \sket_{\bound \times \mathcal{S}_2}  = \int_{\bound} dS \int_{4 \pi} d \Omega \, \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \jcr{in $d\Omega$, there should be no vector sign. it is an infinitesimal area on the unit sphere}
+\iwh{fixed}
 \begin{equation}
-\sbra \phi , g \sket_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\vO \,  \vO \cdot \vn(\vr) \, f(\vr, \vO)g(\vr, \vO)
+\sbra \phi , g \sket_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \phi(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \jcr{in $d\Omega$, there should be no vector sign. it is an infinitesimal area on the unit sphere}
 \end{subequations}
 \jcr{you have $f$ and $g$ in the RHS above, but not in the bracket notation}
 \jcr{I do not know where the first surface inner product is used. I have always used the second one. Please show me an equation where the first one is needed!}
+\iwh{I sort of use the first one as a "general" form when doing integration by parts. The second one is used moreso when the actual boundary conditions are applied (since the first can be expressed as a sum of the + and - versions of the second). Its the difference/step between Eq.~\eqref{snAdjQoI} and Eq.~\eqref{snAdjQoIBCsplit}}
 
 The inner product subscripts will frequently be dropped when it is unambiguous which one being used, typically indicated by the presence of an angular-dependent variable, e.g., $\psi$ or an angular-independent variable, e.g., $\phi$. Therefore, with this notation, the quantity of interest can be compactly expressed as shown below.
 \begin{equation}
 \label{QoIDef}
-\qoi = \bra \psi(\vr,\vO), \angResp(\vr,\vO) \ket = \bra \phi(\vr) , \scalResp(\vr) \ket + \text{ boundary terms}
+\qoi = \bra \psi(\vr,\vO), \angResp(\vr,\vO) \ket  = \bra \phi(\vr) , \scalResp(\vr) \ket
 \end{equation}
 The boundary terms arise from the integration by parts of the streaming terms.
 \jcr{In the thesis, the above must be demonstrated, including what the boundary terms look like}
+\iwh{This is the forward QoI solution, using the response function. I don't think that we generally have boundary terms this way (though I guess you could create a surface response).}
 
 %----------------------------------------------------------------------------------------------
 \subsubsection{Sensitivity Coefficients}
@@ -206,6 +199,7 @@ From the above, it follows that a first order approximation to the change in the
 \end{equation}
 The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
 \jcr{in the thesis, you need to go through the algebra for the transport and the VET equations. not here, this is only the proposal}
+\iwh{Will do}
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrete Ordinates (Sn) Transport}
@@ -221,6 +215,13 @@ The scalar flux can be computed from the angular flux as follows
 \phi(\vr) \approx \sum_{d=1}^D w_d \psi_d(\vr)
 \] 
 where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is the angular quadrature weight. This leads to a coupled system of $D$ equations of the form shown in Eq.~\eqref{snFwd}, where the system is coupled through the scattering source term.
+\begin{equation}
+\label{snFwd}
+\vO \cdot \grad \psi + \sigma_{t,p} \psi = \frac{\sigma_{s}}{4 \pi} \phi + q,  \quad \forall \vr \in V
+\end{equation}
+\begin{equation}
+\psi(\vr) = \psi^{\text{inc}}(\vr), \quad \forall \vr \in \partial V^{-}
+\end{equation}
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -233,10 +234,10 @@ In a fairly straightforward application of the adjoint method previously shown, 
 \end{equation}
 %
 \begin{equation}
-\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr) \quad \vr \in \partial V^{+} = \{ \quad \vr \in \bound , \vO \cdot \vec{n} > 0 \}
+\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
 \end{equation}
 \jcr{put dag before the parenthesis, that is do $\psi^\dag(\vr)$, not $\psi(\vr)^\dag$}
-where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to the forward definition. It is worth noting that the Sn adjoint equation is in the form of a transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward Sn transport solvers to be easily adapted to solving the Sn adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equation \ref{adjGeneral2}. \jcr{missing eq ref}
+where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to the forward definition. It is worth noting that the Sn adjoint equation is in the form of a transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward Sn transport solvers to be easily adapted to solving the Sn adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equation Eq.~\eqref{genAdjQoI}. \jcr{missing eq ref}
 %
 \begin{equation}
 \label{snAdjQoI}
@@ -246,6 +247,7 @@ QoI = \bra \psi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket
 The surface interval in \ref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. 
 %
 \begin{equation}
+\label{snAdjQoIBCsplit}
 \qoi = \bra \psi^\dag , q \ket - \sbra \psi^{\dag \text{out}},  \psi \sket_+ - \sbra \psi^\dag,  \psi^{\text{inc}} \sket_-
 \end{equation}
 
@@ -253,42 +255,55 @@ The surface interval in \ref{snAdjQoI} can be split into incoming and outgoing f
 \subsection{Sn Transport Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $\delta \psi^{inc}$. These perturbations result is a perturbed solution to the Sn-transport equation $\psi_p$. Using this $\delta$ notation, the perturbed Sn-equation is shown below
+Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $\delta \psi^{inc}$. These perturbations result is a perturbed solution to the Sn-transport equation $\psi_p$. 
 \jcr{first, there is no delta notation in the equation below}
 \jcr{second, be very clear. Maybe say that $\psi_p=\psi+\delta \psi$}
 \jcr{third, I have added the subscript p to the sigma's as well}
+\iwh{Slightly reorganized this section and made the delta-notation a bit more explicit}
 \begin{equation}
 \label{snFwdPert}
 \vO \cdot \grad \psi_p + \sigma_{t,p} \psi_p = \frac{\sigma_{s,p}}{4 \pi} \phi_p + q_p,  \quad \forall \vr \in V
 \end{equation}
 \begin{equation}
-\psi_p(\vr) = \psi_p^{\text{out}}(\vr), \quad \forall \vr \in \partial V^{-}
+\psi_p(\vr) = \psi_p^{\text{inc}}(\vr), \quad \forall \vr \in \partial V^{-}
 \end{equation}
-<<<<<<< HEAD
-These perturbations will lead in a new (perturbed) value of the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in \ref{snAdj} \jcr{eq. ref} and using a first-order approximation of the perturbed Sn transport equation \ref{snPert}, the perturbed \qoi can be represented as an inner product that does not dependent on the perturbed forward solution (to first-order).
-=======
-This perturbation may result in a change to the QoI, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in Eq.~\eqref{snAdj} and using a first order approximation of the perturbed Sn transport equation \ref{snPert}, the perturbed QoI can be represented as an inner product not dependent on the perturbed forward solution.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
+
+
+This perturbation may result in a change to the QoI, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in Eq.~\eqref{snAdj} and using a first order approximation of Eq.~\eqref{snFwdPert}, the perturbed QoI can be represented as an inner product not dependent on the perturbed forward solution.
+
 \begin{equation}
-\label{snSens}
+\label{snSensPart}
 \begin{split}
 QoI_p &=\bra \psi_p , \angResp \ket \\
 &=\bra \psi_p , - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  \ket \\
 &= \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
-&= \bra  \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
 \end{split}
 \end{equation}
-<<<<<<< HEAD
+
 \jcr{fix the last steps. I need to see perturbed sigma and psi too and then you say you drop the double delta terms because you only do a first-order expansion}
 
-Subtraction of the unperturbed \qoi expression in equation \ref{snAdjQoI} \jcr{eq.ref} supplies a final equation for computing the change in \qoi using only the system perturbations and the unperturbed forward and adjoint solutions, removing the need to solve the perturbed forward equation.
-\jcr{use more explicit references to equations: Eq.~\eqref{snAdjQoI}} 
+Using a $\delta$ notation for the perturbed system variables ($\sigma_{s,p} = \sigs + \delta \sigs$ for example), the first order approximation previously mentioned is shown below in Eq.~\eqref{snFwdPertDelta}. A rearrangement of this formulation and be used to substitute in for the $\psi_p$ terms of Eq.~\eqref{snSensPart} to yield the useful perturbed $\qoi$ formulation shown in Eq.~\eqref{snSens}.
 
-=======
-Subtraction of the unperturbed $QoI$ expression in Eq.~\eqref{snAdjQoI} supplies a final equation for computing the change in $QoI$ using only the system perturbations and the unperturbed forward and adjoint solutions, removing the need to solve the perturbed forward equation.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
 \begin{equation}
-\delta QoI = \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket
+\label{snFwdPertDelta}
+\vO \cdot \grad \psi_p + \sigma_{t} \psi_p + \delta \sigma_{t} \psi = \frac{\sigma_{s}}{4 \pi} \phi_p +\frac{\delta \sigma_{s}}{4 \pi} \phi + q_p + \delta q_p,  \quad \forall \vr \in V
+\end{equation}
+\begin{equation}
+\psi_p(\vr) = \psi^{\text{out}}(\vr) +\delta \psi^{\text{out}}(\vr), \quad \forall \vr \in \partial V^{-}
+\end{equation}
+
+\begin{equation}
+\label{snSens}
+QoI_p = \bra  \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
+\end{equation}
+
+Subtraction of the unperturbed $QoI$ expression in Eq.~\eqref{snAdjQoI} supplies a final equation for computing the change in $QoI$ using only the system perturbations and the unperturbed forward and adjoint solutions, removing the need to solve the perturbed forward equation. Furthermore the boundary terms and be split into incoming and outgoing, with the boundary condition of the adjoint eliminating the outgoing portion since $\sbra \delta \psi, \psi^{\dag,\text{out}} \sket_+=0$.
+
+\begin{equation}
+\begin{split}
+\delta QoI &= \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \delta \psi, \psi^\dag \sket \\
+&= \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_-
+\end{split}
 \end{equation}
 \jcr{not quite correct. check it}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -299,24 +314,15 @@ Subtraction of the unperturbed $QoI$ expression in Eq.~\eqref{snAdjQoI} supplies
 \subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-While the Sn adjoint sensitivity formulation given by \ref{snSens}
-\jcr{use more explicit references to equations: Eq.~\eqref{snSens}} 
-provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only a single forward and adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time-independent system,  the forward and adjoint system in space and angle must be stored for retrieval later. For a spatially 3-dimensional system, this translates to storing discretized data across 5 dimension.
-=======
 While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only a single forward and adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. For a spatially 3-dimensional system, this translates to storing discretized data across 5-dimensions.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-The Variable Eddington Tensor (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity. To begin the formulation, the steady-state transport equation is expanded to the zero-th and first angular moment by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to equation \ref{1gTE}, \jcr{eq.ref} respectively. Using the notation
-=======
 The Variable Eddington Tensor (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity. To begin the formulation, the steady state transport equation is expanded to the scalar and first angular moment by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
+
 \begin{equation}
 \phi(\vr)=\int d\Omega \, \psi( \vr,\vO )
 ,\quad
@@ -345,12 +351,12 @@ If $\psi(\vr,\vO)$ is a linear function in angle, then $\Edd(\vr)=\tfrac{1}{3}\m
 \label{VEFForm}
 - \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource
 \end{equation}
-The known incident flux can be used to generate a suitable boundary condition using a "Boundary Eddington Factor" $B$ \cite{Miften}.
+The known incident flux can be used to generate a suitable boundary condition using a "Boundary Eddington Factor" $\BEdd$, constructed elementwise as shown below. \cite{Miften}.
 \begin{equation}
-\frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - B \phi \quad \vr \in \bound
+\frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - \BEdd \phi \quad \vr \in \bound
 \end{equation}
 \begin{equation}
-B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \bound
+B_i= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \bound , \, \, i=x,y,z 
 \end{equation}
 \jcr{explain subscript i}
 
@@ -359,16 +365,16 @@ B= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} 
 %%%%%%%----------------------------------------------------------------------------------------------
 
 The VET formulation necessitates a reformulation of our adjoint. As shown in Eq.~\eqref{adjForm}, the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation.
+
 \begin{equation}
 \label{adjForm}
 - \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
 \end{equation}
-<<<<<<< HEAD
 \jcr{in thesis, you must demonstrate this}
 For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \ref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
-=======
+
 For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
+
 \begin{equation}
 \label{adjVETBC}
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag  = - 2J^{\dag +} - B \phi^\dag \quad \vr \in \Gamma
@@ -486,11 +492,9 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 \section{Preliminary results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-<<<<<<< HEAD
 At this point, four separate methods for \qoi calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
-=======
+
 At this point, four separate methods for $\qoi$ calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
->>>>>>> d874a08e910f01b54618d4aad8a7f0e814bbd2b4
 
 The four methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% QoI response is plotted against the \% change in a given parameter $p$, which are defined as
 \begin{equation}
@@ -511,22 +515,22 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/19sigtSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$. }
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/20sigtSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$. }
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/21sigtSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$.}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity.}
+\caption{Plots of $\sigt$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -536,22 +540,22 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/19sigsSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/20sigsSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/21sigsSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$.}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity.}
+\caption{Plots of $\sigs$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -561,22 +565,22 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/19qSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/20qSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/21qSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of source perturbation sensitivity.}
+\caption{Plots of source perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -592,22 +596,22 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39sigtSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/40sigtSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/41sigtSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity.}
+\caption{Plots of $\sigt$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -617,22 +621,22 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39sigsSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/40sigsSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/41sigsSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity.}
+\caption{Plots of $\sigs$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -642,50 +646,52 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/39qSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/40qSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/41qSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of source perturbation sensitivity.}
+\caption{Plots of source perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Streaming system}
 %%%%%%%----------------------------------------------------------------------------------------------
+To generate a streaming system, we retain the 5 equal width sectioning of the previous inhomogeneous example, but the second and fourth sections are converted to streaming regions ($\sigt \approx 0 $). Leaving three neutron producing sections separated by two streaming gaps. The \qoi remains as the total neutron count in the center fifth section.
+
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/49sigtSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/50sigtSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/51sigtSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity.}
+\caption{Plots of $\sigt$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -695,22 +701,22 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/49sigsSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/50sigsSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/51sigsSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity.}
+\caption{Plots of $\sigs$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -720,22 +726,22 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/49qSens.png}
-  \caption{$\sigt=2$, $\sigs=1$}
+  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/50qSens.png}
-  \caption{$\sigt=1$, $\sigs=0.5$}
+  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{figures/51qSens.png}
-  \caption{$\sigt=0.5$, $\sigs=0.25$}
+  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of source perturbation sensitivity.}
+\caption{Plots of source perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 

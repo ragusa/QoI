@@ -49,14 +49,21 @@ for iel=1:npar.nel
     delta_isigtr=isigtrp-isigtr;
     E0=E(1,iel);
     E1=E(2,iel);
-    Eloc = (E1+E0)/2;%+xq*(E1-E0)/2;
+    Eloc = (E1+E0)/2+xq*(E1-E0)/2;
     dEdx = (E1-E0)/2;
     delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
-    d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;
-    d_qoi = d_qoi - Jac*delta_siga*dot(phi_unpert(:,iel), m*phia(:,iel));
-    d_qoi = d_qoi + Jac*delta_isigtr*dot(phi_unpert(:,iel),(Eloc*mdd+dEdx*md)*phia(:,iel));
+    d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
+    d_qoi = d_qoi - Jac*delta_siga*dot(phia(:,iel), m*phi_unpert(:,iel));
+    %%Think I need to redo the below, once I figure out the
+    for i=1:porder+1
+        for j=1:porder+1
+            k(i,j)= dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
+        end
+    end
+    d_qoi = d_qoi + delta_isigtr/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
+    %d_qoi = d_qoi + delta_isigtr/Jac*dot(phi_unpert(:,iel),(mdd*Eloc.*phia(:,iel))+(dEdx*md*phia(:,iel)));
 end
 
 if IO_opts.show_dqoi_pre_bc
@@ -83,6 +90,8 @@ else
 end
 BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
 BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
-%fprintf('BCqoiRite value %g  \n',BCqoiRite);
-%fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+if IO_opts.show_dqoi_from_bc
+    fprintf('BCqoiRite value %g  \n',BCqoiRite);
+    fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+end
 d_qoi = d_qoi + BCqoiLeft + BCqoiRite;

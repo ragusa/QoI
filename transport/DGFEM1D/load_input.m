@@ -757,7 +757,7 @@ switch pb_ID
         
 case 42 %Uniform, 0 inc flux. Response in middle
         % number of elements per zone
-        nel_zone = [ 10 10 10 10 10]*16;
+        nel_zone = [ 10 10 10 10 10]*20;
         % width of each zone
         width_zone = [ 2 2 2 2 2];
         % sigt/sigs per zone
@@ -774,7 +774,7 @@ case 42 %Uniform, 0 inc flux. Response in middle
         %Regions to be perturbed. Use value of 1 to specify
         dat.sigtPertRegion=[1 -1 1 -1 1];
         dat.sigsPertRegion=[1 -1 1 -1 1];
-        dat.sourcePertRegion=[1 -1 1 -1 1];
+        dat.sourcePertRegion=[0 -1 1 -2 0];
         dat.incPertRegion(1:sn)=1;      
         dat.incPertRegion(1:sn/2)=1;
         dat.incPertRegion(sn/2+1:sn)=1;

@@ -69,6 +69,7 @@ for iel=1:npar.nel
     % compute local matrices + load vector
     for i=1:porder+1
         for j=1:porder+1
+            %Switched Eloc.*dbdx(:,j) to Eloc(j)*dbdx(:,j) - 8/10
             k(i,j) = dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
             m(i,j) = dot(wq.*b(:,i)    , b(:,j));
         end

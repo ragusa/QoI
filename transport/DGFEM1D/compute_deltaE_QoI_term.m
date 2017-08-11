@@ -28,29 +28,39 @@ porder= npar.porder;
 [b,dbdx] =feshpln(xq,porder);
 % compute elementary mass matrix
 md=zeros(porder+1,porder+1);
-mdd=zeros(porder+1,porder+1);
+k=zeros(porder+1,porder+1);
+stif=zeros(porder+1,porder+1);
 for i=1:porder+1
     for j=1:porder+1
         md(i,j)= dot(wq.*dbdx(:,i), b(:,j));
-        mdd(i,j)= dot(wq.*dbdx(:,i), dbdx(:,j));
+        stif(i,j)= dot(wq.*dbdx(:,i), dbdx(:,j));
     end
 end
 % loop over elements
 for iel=1:npar.nel
     my_zone=npar.iel2zon(iel);
     isigtr = 3*dat.cdif(my_zone); % inverse of sigma_tr 
+    isigtrp= 3*1./(3*(dat.sigt(my_zone)+dat.sigtPert(my_zone)));
     DE0=deltaE(1,iel);
     DE1=deltaE(2,iel);
-    Eloc = (DE1+DE0)/2;%+xq*(DE1-DE0)/2;
+    Eloc = (DE1+DE0)/2+xq*(DE1-DE0)/2;
     dDEdx = (DE1-DE0)/2;
     Jac   = npar.dx(iel)/2;
     % assemble
-    segment= - Jac*isigtr*dot(phi_unpert(:,iel), (Eloc*mdd+dDEdx*md)*phia(:,iel));
+    %segment= - isigtr/Jac*dot(phi_pert(:,iel), (stif*Eloc.*phia(:,iel)));
+    for i=1:porder+1
+        for j=1:porder+1
+            k(i,j)= dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dDEdx*b(:,j));
+        end
+    end
+    %segment= - isigtr/Jac*dot(phi_pert(:,iel), (stif*Eloc.*phia(:,iel)+dDEdx*md*phia(:,iel)));
+    %segment= - isigtr/Jac*dot(phi_pert(:,iel), (stif*(Eloc.*phia(:,iel))));
+    segment= - isigtrp/Jac*dot(phia(:,iel), k*phi_pert(:,iel));
     volValues=[volValues segment];
     d_qoi = d_qoi +segment;
 end
 
-BCdqoiLeft=phia(1,1)*phi_pert(1,1)*deltaB(2);
-BCdqoiRite=phia(npar.porder+1,npar.nel)*phi_pert(npar.porder+1,npar.nel)*deltaB(1);
+BCdqoiLeft=-phia(1,1)*phi_pert(1,1)*deltaB(2);
+BCdqoiRite=-phia(npar.porder+1,npar.nel)*phi_pert(npar.porder+1,npar.nel)*deltaB(1);
 
 return

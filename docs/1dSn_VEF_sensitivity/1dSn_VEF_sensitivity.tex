@@ -798,7 +798,7 @@ What we define a perturbed adjoint as below. This isn't typically used in sensit
 - \Edd_p : \left( \vgrad \left( \frac{1}{\sigt}\vgrad \phi^\dag_p \right) \right) + \siga \phi^\dag_p = \scalResp
 \end{equation}
 \begin{equation}
-\Edd : \isigt \ \vec{\nabla} \cdot \left( \phi^\dag_p \right)  = - 2J^{\dag \text{out}} - B_p \phi^\dag_p =  - B_p \phi^\dag_p \quad \vr \in \bound
+\Edd_p : \isigt \ \vec{\nabla} \cdot \left( \phi^\dag_p \right)  = - 2J^{\dag \text{out}} - B_p \phi^\dag_p =  - B_p \phi^\dag_p \quad \vr \in \bound
 \end{equation}
 We have our perturbed QOI
 \begin{equation}
@@ -812,7 +812,7 @@ Ok so now for the sensitivity/perturbed QoI using the unperturbed adjoint.
 \qoi_p&=\bra \phi_p , \scalResp \ket\\
 &=\bra \phi_p , - \Edd : \left( \vgrad \left( c \vgrad \phi^\dag \right) \right) + \siga \phi^\dag \ket\\
 &=\bra  \vdiv \Edd \phi_p , c \vgrad \phi^\dag  \ket + \bra \siga \phi_p , \phi^\dag \ket + \left( B \phi^\dag , \phi_p \right)\\
-&= \bra  \vdiv c \vdiv \Edd \phi_p + \siga \phi_p , \phi^\dag  \ket  + \left( B \phi^\dag , \phi_p \right)+ \left( - B \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi \right) , \phi^\dag \right) \\
+&= \bra  \vdiv c \vdiv \Edd \phi_p + \siga \phi_p , \phi^\dag  \ket  + \left( B \phi^\dag , \phi_p \right)+ \left( - B_p \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi \right) , \phi^\dag \right) \\
 &= \bra  q + \delta q + \vdiv \left(\isigt\vdiv \delta \Edd \phi_p \right), \phi^\dag  \ket  - \left( \delta B \phi_p , \phi^\dag \right) - \left( \isigt   \vec{\nabla} \cdot \left(\delta \Edd \phi_p \right) , \phi^\dag \right) \\
 \end{split}
 \end{equation}

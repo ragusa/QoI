@@ -1,8 +1,8 @@
 function graph_results
 %Specify Input File Path
-file='DGFEM1D_prob51_0710172051.csv';
-%filename=fullfile('C:\Users\Ian\checkout','output',file);
-filename=fullfile('E:\Storage\git_checkout','output',file);
+file='DGFEM1D_prob41_0814171629.csv';
+filename=fullfile('C:\Users\Ian\checkout','output',file);
+%filename=fullfile('E:\Storage\git_checkout','output',file);
 %Load into matrix M and define data values
 M=csvread(filename);
 probID=M(:,1);
@@ -20,14 +20,14 @@ dqoi_sn_a=M(:,12);
 dqoi_VEF_a=M(:,13);
 E_diff=M(:,14);
 
-xvalues=source_pert;
+xvalues=sigt_pert;
 
 close all
 figure(1)
 clf
 hold on
 title(file,'interpreter','none')
-xlabel('Source % change')
+xlabel('\sigma_{t} % change')
 ylabel('QoI % response')
 plot(xvalues,dqoi_sn_f./qoi_sn_f,'-+r')
 plot(xvalues,dqoi_VEF_f./qoi_sn_f,'--+g')

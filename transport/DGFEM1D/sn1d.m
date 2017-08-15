@@ -26,16 +26,12 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=42;
+pb_ID=41;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% dat.sigt=[2.2 1 2.2 1 2.2];
-% dat.siga=dat.sigt-dat.sigs;
-% dat.cdif = 1./(3*dat.sigt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward transport problem using sweeps
 [phi,E,Ebd,psi]=solve_transport(forward_flux,do_dsa,console_io);
@@ -208,8 +204,8 @@ fprintf('A bit of a holding pen for exploratory values/development. \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % solve forward VEF problem using IP
 [phiVEFa_Epert]=solve_VEF_math_adjoint(adjoint_flux,E_pert,Ebd_pert);
-do_plot(phiVEFa_Epert,'VEF_Epert',100,adjoint_flux)
-do_plot(phiVEFa_Epert-phiVEFa,'VEF_diff',120,adjoint_flux)
+do_plot(phiVEFa_Epert,'VEF Using E_{pert}',100,adjoint_flux)
+do_plot(phiVEFa_Epert-phiVEFa,'VEF_{diff}',120,adjoint_flux)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Rel_L1_diff=find_Eddington_diff(E,E_pert);
 delta_qoi_VEF_math_a_Epert = compute_perturbed_qoi_VEF(adjoint_flux,phiVEFa_Epert,phiVEF_pert,E_pert);

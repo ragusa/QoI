@@ -9,13 +9,13 @@ global npar dat snq IO_opts
 forward_flux = true;
 adjoint_flux = ~forward_flux;
 do_transport_adjoint=false;
-IO_opts.show_dqoi_pre_bc=false;
-IO_opts.show_dqoi_from_bc=false;
+IO_opts.show_dqoi_pre_bc=true;
+IO_opts.show_dqoi_from_bc=true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select angular approx (must be an even number)
-sn=8;
+sn=2;
 n_moments=1; logi_galerkin=false;
 [M,D,omega,weights] = gauss_legendre_1d(sn,n_moments,logi_galerkin);
 snq.D = D; snq.M = M; snq.n_dir = sn;
@@ -26,7 +26,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=41;
+pb_ID=53;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -106,7 +106,7 @@ dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.1+dat.sigtPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
-dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*0;
+dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0.0+dat.incPertRegion*0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % perturbations
@@ -146,10 +146,16 @@ dat = dat_saved;
 %
 delta_qoi_sn_a = compute_perturbed_qoi_Sn(adjoint_flux,phia,phi,psi,psia,sn);
 fprintf('delta qoi using sn adjoint: \t\t\t %g \n',delta_qoi_sn_a);
+%
+delta_qoi_sn_a_pert = compute_perturbed_qoi_Sn(adjoint_flux,phia,phi_pert,psi_pert,psia,sn);
+fprintf('delta qoi using sn adjoint (pert phi): \t\t\t %g \n',delta_qoi_sn_a_pert);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute perturbed QoIs using VEF math adjoint method and unperturbed forward
 delta_qoi_VEF_a = compute_perturbed_qoi_VEF(adjoint_flux,phiVEFa,phiVEF,E);
 fprintf('delta qoi using VEF math adjoint: \t\t %g \n',delta_qoi_VEF_a);
+% Compute perturbed QoIs using VEF math adjoint method and unperturbed forward
+delta_qoi_VEF_a_pert = compute_perturbed_qoi_VEF(adjoint_flux,phiVEFa,phiVEF,E_pert);
+fprintf('delta qoi using VEF math adjoint (phi pert): \t\t %g \n',delta_qoi_VEF_a_pert);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute perturbed QoIs using VEF math adjoint method and unperturbed

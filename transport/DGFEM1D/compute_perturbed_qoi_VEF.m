@@ -74,14 +74,14 @@ end
 % Build forward J values (mainly copied from establish_bc_for_VEF)
 inc=dat.psiIncPert;
 ndir = snq.n_dir;
-ii = find (inc(1:ndir/2)>0);
+ii = find (inc(1:ndir/2)~=0);
 if isempty(ii) % vacuum
     JForwardRite = 0;
 else
     Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
     JForwardRite = -Jinc;
 end
-ii = find (inc(ndir/2+1:end)>0);
+ii = find (inc(ndir/2+1:end)~=0);
 if isempty(ii) % vacuum
     JForwardLeft = 0;
 else

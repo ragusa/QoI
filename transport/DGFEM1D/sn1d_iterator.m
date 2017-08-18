@@ -26,7 +26,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=41;
+pb_ID=52;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -44,10 +44,10 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
-sigtPertFactor=linspace(-0.1,0.1,21);
+sigtPertFactor=[0];
 sigsPertFactor=[0];
 sourcePertFactor=[0];
-incPertFactor=[0];
+incPertFactor=linspace(-0.1,0.1,21);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -106,7 +106,7 @@ for ii=1:numel(sigtPertFactor)
                     dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFactor(jj);
                     dat.sigaPert = dat.sigtPert - dat.sigsPert;
                     dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*sourcePertFactor(kk);
-                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0+dat.incPertRegion*incPertFactor(ll);
+                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*incPertFactor(ll);
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % perturbations
@@ -154,10 +154,15 @@ for ii=1:numel(sigtPertFactor)
 
                     Rel_L1_diff=find_Eddington_diff(E,E_pert);
                     %fprintf('relative L1 difference in E: \t\t %g \n',Rel_L1_diff);
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    [deltaE_term,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(phiVEFa,phiVEF,phiVEF_pert,E,E_pert,Ebd,Ebd_pert);
+                    total_deltaE_term=deltaE_term+deltaB_L+deltaB_R;
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     outputLine=[pb_ID qoi_sn_f qoi_sn_a qoi_vef_f qoi_vef_a];
                     outputLine=[outputLine sigtPertFactor(ii) sigsPertFactor(jj) sourcePertFactor(kk) incPertFactor(ll) ];
                     outputLine=[outputLine  delta_qoi_sn_f  delta_qoi_VEF_f  delta_qoi_sn_a  delta_qoi_VEF_math_a Rel_L1_diff];
+                    outputLine=[outputLine  total_deltaE_term];
                     outputMatrix = [outputMatrix; outputLine];
             end
         end

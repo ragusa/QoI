@@ -41,29 +41,29 @@ for idir=1:snq.n_dir;
     % retrieve boundary condition for that direction
     psi_in = inc(idir); 
     % shortcut
-    m = snq.mu(idir);
-    gradient = grad*m;
+    mu = snq.mu(idir);
+    gradient = grad*mu;
     
     % loop over spatial cells
     for i=ibeg:incr:iend
         my_zone=npar.iel2zon(i);
-        sig = dat.sigt(my_zone);
+        sig = dat.sigt(my_zone);     %IWH look at this angular vs non-angular sigma. Add /snq.sw ?;
         
         dx   = npar.dx(i);
         % compute L/R psi for given cell i
         rhs = mass * dx * q(:,i);
         L = gradient + mass * dx * sig;
-        if (m>0)
-            rhs(1) = rhs(1) + psi_in*m;
-            L      = L      + edgp*m;
+        if (mu>0)
+            rhs(1) = rhs(1) + psi_in*mu;
+            L      = L      + edgp*mu;
         else
-            rhs(2) = rhs(2) - psi_in*m;
-            L      = L      - edgm*m;
+            rhs(2) = rhs(2) - psi_in*mu;
+            L      = L      - edgm*mu;
         end
         % psi_out gives array of psi_R and psi_L (in order) of cell i
         psi_local = L\rhs;
         % prepare for next cell solve
-        if m>0
+        if mu>0
             psi_in = psi_local(2);
         else
             psi_in = psi_local(1);

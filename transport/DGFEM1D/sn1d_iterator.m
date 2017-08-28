@@ -1,6 +1,4 @@
 function sn1d_iterator
-% Linear Discontinous FEM code for Sn transport in 1D
-% Jean Ragusa,
 close all; clc; clear variables; clear global;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -26,7 +24,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=52;
+pb_ID=51;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -45,9 +43,9 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
 sigtPertFactor=[0];
-sigsPertFactor=[0];
+sigsPertFactor=linspace(-0.1,0.1,21);
 sourcePertFactor=[0];
-incPertFactor=linspace(-0.1,0.1,21);
+incPertFactor=[0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

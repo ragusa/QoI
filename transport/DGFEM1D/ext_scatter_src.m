@@ -11,7 +11,7 @@ if forward
 else
     % we want q^\dagger(x,mu) = response function(x) given in load_input so
     % no change here
-    qv  = dat.qv_adjoint; 
+    qv   = dat.qv_adjoint;%  / snq.sw; 
 end
 
 % initialize

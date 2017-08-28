@@ -62,8 +62,7 @@ for iel=1:npar.nel
             k(i,j)= dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
         end
     end
-    d_qoi = d_qoi + delta_isigtr/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
-    %d_qoi = d_qoi + delta_isigtr/Jac*dot(phi_unpert(:,iel),(mdd*Eloc.*phia(:,iel))+(dEdx*md*phia(:,iel)));
+    d_qoi = d_qoi - delta_isigtr/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
 end
 
 if IO_opts.show_dqoi_pre_bc

@@ -27,11 +27,13 @@ porder= npar.porder;
 % store shapeset
 [b,dbdx] =feshpln(xq,porder);
 % compute elementary mass matrix
+m=zeros(porder+1,porder+1);
 md=zeros(porder+1,porder+1);
 k=zeros(porder+1,porder+1);
 stif=zeros(porder+1,porder+1);
 for i=1:porder+1
     for j=1:porder+1
+        m(i,j)= dot(wq.*b(:,i), b(:,j));
         md(i,j)= dot(wq.*dbdx(:,i), b(:,j));
         stif(i,j)= dot(wq.*dbdx(:,i), dbdx(:,j));
     end

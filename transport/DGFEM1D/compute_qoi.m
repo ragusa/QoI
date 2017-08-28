@@ -6,8 +6,10 @@ global npar dat snq
 if use_forward_flux
     % this is q^\dagger(x,mu) = function given as input in load input. no need to tweak
     qv  = dat.qv_adjoint;
+    psi_to_use=psi;
 else
     qv  = dat.qv_forward;
+    psi_to_use=psia;
     % qv is the space-dependent src rate density -SRD- [part/cm^3-s]
     % in the Sn equation, it is  made into an (isotropic) angular-dependent
     % SRD [part/cm^3-s-unit_cosine] by dividing by the sum of the angular
@@ -21,10 +23,9 @@ else
     %
     % hence below, we need to do the division by 2 (sw)
     if is_sn
-        qv = qv / snq.sw;
+        qv = qv/snq.sw;
     end
 end
-
 
 % type of solution data passed in
 [n1,n2]=size(phi);
@@ -61,6 +62,15 @@ for iel=1:npar.nel
     % compute local matrices + load vector
     % assemble
     qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
+    %if is_sn
+    %    for idir=1:snq.n_dir
+    %        qext=qext/snq.sw;
+    %        backDir = snq.n_dir+1-idir; 
+    %        qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*psi_to_use(:,iel,idir));
+    %    end
+    %else
+    %    qoi = qoi + Jac*qext*dot(ones(porder+1,1),m*phi(:,iel));
+    %end
 end
 
 if ~use_forward_flux

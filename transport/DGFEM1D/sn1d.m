@@ -20,6 +20,7 @@ n_moments=1; logi_galerkin=false;
 [M,D,omega,weights] = gauss_legendre_1d(sn,n_moments,logi_galerkin);
 snq.D = D; snq.M = M; snq.n_dir = sn;
 snq.mu = omega; snq.w = weights;
+snq.mu = [-1,1];
 % sum of the weights
 snq.sw = sum(snq.w);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,7 +78,7 @@ end
 
 fprintf('\n-----BEGIN UNPERTURBED QOI DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-qoi_sn_f = compute_qoi(forward_flux,phi,sn,[],[]);
+qoi_sn_f = compute_qoi(forward_flux,phi,sn,psi,psia);
 fprintf('qoi using sn forward: \t %g \n',qoi_sn_f);
 %
 qoi_sn_a = compute_qoi(adjoint_flux,phia,sn,psi,psia);

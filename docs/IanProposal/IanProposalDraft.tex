@@ -252,41 +252,55 @@ Now consider perturbations to our system. Specifically perturbations of $\delta 
 Any quantity with a subscript $p$ is to be understood as the perturbed value, that is, as 
 the sum of the unperturbed value and the perturbation amount: $a_p = a + \delta a$.
 
-This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Retaining the unperturbed adjoint equation given in Eq.~\eqref{snAdj} and using a first order approximation of Eq.~\eqref{snFwdPert}, the perturbed \qoi can be represented as an inner product not dependent on the perturbed forward solution.
-
+This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Using the unperturbed adjoint equation given in Eq.~\eqref{snAdj},
+the perturbed \qoi can be expressed as:
 \begin{equation}
 \label{snSensPart}
 \begin{split}
 QoI_p &=\bra \psi_p , \angResp \ket \\
 &=\bra \psi_p , - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  \ket \\
-&= \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
+%&= \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
 \end{split}
 \end{equation}
-
-Using a $\delta$ notation for the perturbed system variables ($\sigma_{s,p} = \sigs + \delta \sigs$ for example), the first order approximation previously mentioned is shown below in Eq.~\eqref{snFwdPertDelta}. A rearrangement of this formulation and be used to substitute in for the $\psi_p$ terms of Eq.~\eqref{snSensPart} to yield the useful perturbed $\qoi$ formulation shown in Eq.~\eqref{snSens}.
-
+Next, we perform an integration by parts and obtain:
 \begin{equation}
-\label{snFwdPertDelta}
-\vO \cdot \grad \psi_p + \sigma_{t} \psi_p + \delta \sigma_{t} \psi = \frac{\sigma_{s}}{4 \pi} \phi_p +\frac{\delta \sigma_{s}}{4 \pi} \phi + q_p + \delta q_p,  \quad \forall \vr \in V
+\label{snSensPart2}
+QoI_p = \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket
 \end{equation}
+Note that the cross sections are unperturbed in Eq.~\eqref{snSensPart2}.
+Using a $\delta$ notation for the perturbed system variables ($\sigma_{s,p} = \sigs + \delta \sigs$ for example), we
+can introduced the perturbed quantities:
 \begin{equation}
-\psi_p^{\text{in}}(\vr) = \psi^{\text{in}}(\vr) +\delta \psi^{\text{in}}(\vr), \quad \forall \vr \in \partial V^{-}
+\label{snSensPart3}
+\begin{split}
+QoI_p &= \bra  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p - \frac{\sigma_{s,p}}{4 \pi} \phi_p
++\frac{\delta \sigs}{4 \pi} \phi_p
+ , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket \\
+ &= \bra  q_p - \delta\sigt\psi_p + \frac{\delta \sigs}{4 \pi} \phi_p
+ , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket
+\end{split}
 \end{equation}
-
+Next, note that some terms have double perturbations, such as $\delta \sigt \delta \psi$ once it is observed
+that $\psi_p=\psi+\delta\psi$. 
+In a first order approximation, these doubly perturbed terms are ignore, yielding:
 \begin{equation}
-\label{snSens}
-QoI_p = \bra  \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
-\end{equation}
+\label{snAdjQoI}
+QoI_p \approx \bra  q + \delta q - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
+ , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\end{equation}
 
-Subtraction of the unperturbed $QoI$ expression in Eq.~\eqref{snAdjQoI} supplies a final equation for computing the change in $QoI$ using only the system perturbations and the unperturbed forward and adjoint solutions, removing the need to solve the perturbed forward equation. Furthermore the boundary terms and be split into incoming and outgoing, with the boundary condition of the adjoint eliminating the outgoing portion since $\sbra \delta \psi, \psi^{\dag,\text{out}} \sket_+=0$.
-
+Subtraction of the unperturbed \qoi expression in Eq.~\eqref{snAdjQoI} supplies a final equation for computing the change in \qoi using only the system perturbations and the unperturbed forward solution $\psi$ and the adjoint unperturbed
+solution $\psi^\dag$, removing the need to solve the perturbed forward equation. 
+Furthermore the boundary terms can be split into incoming and outgoing contributions.
+Using a zero-outcoming  boundary condition for the adjoint flux
+(thus $\sbra \delta \psi, \psi^{\dag,\text{out}} \sket_+=0$), one obtains the final 
+form of the perturbation in the \qoi.
 \begin{equation}
 \begin{split}
-\delta QoI &= \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \delta \psi, \psi^\dag \sket \\
-&= \bra - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi + \delta \scalSource , \psi^\dag  \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_-
+\delta QoI &= \bra \delta \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ket - \sbra \delta \psi, \psi^\dag \sket \\
+&= \bra \delta \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_- \,.
 \end{split}
 \end{equation}
-\jcr{not quite correct. check it}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VET formulation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

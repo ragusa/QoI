@@ -43,8 +43,24 @@
 
 
 \newcommand{\comment}[2]{\marginpar{\textcolor{#2}{$\star$}}\textcolor{#2}{#1}\newline}
+
+%-----------------------------------------------------------
+%-----------------------------------------------------------
+\usepackage{ifthen}
+\newboolean{draftversion}
+\setboolean{draftversion}{true}
+%-----------------------------------------------------------
+%----------------------------------------------------------
+
+\ifthenelse{\boolean{draftversion}}
+{
 \newcommand{\iwh}[1]{\comment{#1}{red}}
 \newcommand{\jcr}[1]{\comment{#1}{blue}}
+}
+{
+\newcommand{\iwh}[1]{\phantom{a}}
+\newcommand{\jcr}[1]{\phantom{a}}
+}
 
 \begin{document}
 \begin{center}

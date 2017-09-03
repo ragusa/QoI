@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath, amsthm, amssymb, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption, xspace}
+\usepackage{amsmath, amsthm, amssymb, amsfonts, mathbbol, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption, xspace}
 \setlength{\abovedisplayskip}{0pt}
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
@@ -7,6 +7,7 @@
 
 \newcommand{\vr}{\vec{r}}
 \newcommand{\vOmega}{\vec{\Omega}}
+\newcommand{\vJ}{\vec{J}}
 \newcommand{\vO}{\vec{\Omega}}
 \newcommand{\bra}{\left\langle}
 \newcommand{\ket}{\right\rangle}
@@ -26,6 +27,7 @@
 \newcommand{\dBdp}{\partial_p B \,}
 \newcommand{\adj}{\phi^\dag}
 \newcommand{\surf}{\int_{\partial V}}
+\newcommand{\domain}{V}
 \newcommand{\bound}{\partial V}
 \newcommand{\vn}{\vec{n}}
 \newcommand{\Edd}{\mathbb{E}}
@@ -61,8 +63,12 @@
 \newcommand{\iwh}[1]{\phantom{a}}
 \newcommand{\jcr}[1]{\phantom{a}}
 }
+\newcommand{\tcr}[1]{\comment{#1}{red}}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+
 \begin{center}
 {\large Thesis Proposal~:\\
 {\it Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation}}\\
@@ -132,6 +138,7 @@ This paper will focus on a relatively simple transport equation form, the one-gr
 \vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO), \quad \forall \vr \in V
 \end{equation}
 \begin{equation}
+\label{SS1GTE_bc}
 \psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
 \end{equation}
 The possibly uncertain parameters in this system are: the total and scattering cross sections $\sigt$ and $\sigs$, the volumetric source term $q$, and the incident angular flux on the system given by $\psi^{\text{inc}}$. The unknowns (dependent variables) are the angular flux $\psi(\vr,\vO)$ and the scalar flux $\phi(\vr)$ given by
@@ -246,7 +253,7 @@ the forward scalar flux definition. It is worth noting that the Sn adjoint equat
 QoI = \bra \psi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket
 \end{equation}
 %
-The surface interval in \ref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. 
+The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. 
 %
 \begin{equation}
 \label{snAdjQoIBCsplit}
@@ -325,14 +332,21 @@ form of the perturbation in the \qoi.
 \subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
 
-While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only a single forward and adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. For a spatially 3-dimensional system, this translates to storing discretized data across 5-dimensions.
+While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one  forward transport solve and one adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time-independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. 
+\jcr{not true, for time-independent problems, as Hayes did, storing the converged
+scatttering source is enough to recompute quickly the full angular flux. this is not the case for transient problems}
+For a spatially 3-dimensional system, this translates to storing the angular
+flux data across 6-dimensions (space/energy/angle).
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The Variable Eddington Tensor (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity. To begin the formulation, the steady state transport equation is expanded to the scalar and first angular moment by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
+The Variable Eddington Tensor (VET) formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity evaluations. To present the VET formulation, the zero-th and first angular moments of steady-state transport equation are computed by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
+\jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire
+gist of the VET idea was to simplify sensitivity calculations for TD transport, so you need
+to demonstrate/explain that the ideas you applied in SS were actually going to be useful as well for TD}
 
 \begin{equation}
 \phi(\vr)=\int d\Omega \, \psi( \vr,\vO )
@@ -340,49 +354,91 @@ The Variable Eddington Tensor (VET) formulation shows promise of reducing the me
 \vec{J}(\vr)= \int d\Omega \, \vO \psi( \vr,\vO )
 \end{equation}
 the zero-th and first angular moment transport equations are
+\begin{subequations}
 \begin{equation}
 \label{0am}
-\div \vec{J} + \sigt \phi = \sigs \phi + \scalSource
+\div \vec{J} + (\sigt-\sigs) \phi = \scalSource \,,
 \end{equation}
+\end{subequations}
+\begin{subequations}
 \begin{equation}
 \label{1am}
-\div \left(  \int d\Omega \vO \vO \psi \right) + \sigt \vec{J} =0 
+\div \left(  \int d\Omega \vO \vO \psi \right) + \sigt \vec{J} = 0 \,.
 \end{equation}
-The Eddington Tensor $\Edd$ is then introduced as a simplifying approximation relating the second angular moment term in equation \ref{1am} to the scalar flux. 
+\end{subequations}
+The Eddington Tensor $\Edd$ is then introduced as a simplifying approximation relating the second angular moment term in equation \eqref{1am} to the scalar flux. 
+\jcr{no, VET is not an approximation. However, to get the correct VET, you need to solve for $\psi$, so it is a chicken and egg problem, but the VET formulation is rigorously exact. What is hard to obtain without solving the TE is the exact tensor! So you should rephrase this a bit}
 \begin{equation}
 \label{EddDef}
 \Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
 \end{equation}
 The inclusion of the Eddington tensor allows Eq.~\eqref{1am} to be expressed as 
 \[
-\vec{J} = - \frac{1}{\sigt} \div \Edd \phi.
+\vec{J} = - \frac{1}{\sigt} \div \Edd \phi \,.
 \]
-If $\psi(\vr,\vO)$ is a linear function in angle, then $\Edd(\vr)=\tfrac{1}{3}\mathbb{I}$ and one recovers Fick's law for the neutron diffusion current, $\vec{J} = - \frac{1}{3\sigt} \grad \phi$ (note the change from $\div$ to $\grad$). Using this as a definition of $\vec{J}$ allows us to convert Eq.~\eqref{0am} to the form shown in \ref{VEFForm}, which only has the scalar flux as an unknown. The substitution $\siga = \sigt-\sigs$ was used.
+If $\psi(\vr,\vO)$ is a linear function in angle, then $\Edd(\vr)=\tfrac{1}{3}\mathbb{I}$ and one recovers Fick's law for the neutron diffusion current, $\vec{J} = - \frac{1}{3\sigt} \grad \phi$ (note the change from $\div$ to $\grad$). Using this as a definition of $\vec{J}$ allows us to convert Eq.~\eqref{0am} to the form shown in \eqref{VEFForm}, which only has the scalar flux as an unknown. The substitution $\siga = \sigt-\sigs$ was used.
 \begin{equation}
 \label{VEFForm}
-- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource
+- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \,.
 \end{equation}
-The known incident flux can be used to generate a suitable boundary condition using a "Boundary Eddington Factor" $\BEdd$, constructed elementwise as shown below. \cite{Miften}.
+The known incident angular flux can be used to generate a suitable boundary conditions using a 
+``Boundary Eddington Factor'' $\BEdd$ \cite{Miften}. Multiplying the transport boundary condition,
+Eq.~\eqref{SS1GTE_bc} by $2 | \vO \cdot \vn |$, we obtain, for $\vr \in \bound$,
+\begin{equation}
+2 J^{\text{inc}}(\vr) \equiv  2 \int_{\vO \cdot \vn <0 }  | \vO \cdot \vec{n} | \psi^{\text{inc}}(\vr,\vO) 
+= 2\int_{\vO \cdot \vn <0 }  | \vO \cdot \vn |  \psi(\vr,\vO) \,.
+\end{equation}
+$J^{\text{inc}}$ is the partial incoming current. 
+Manipulating the second half-range integral yields:
+\begin{equation}
+2 J^{\text{inc}}(\vr) = \int_{4\pi} \left( | \vO \cdot \vn |- \vO\cdot\vn\right)  \psi(\vr,\vO) 
+= \BEdd(\vr) \phi(\vr) - \vn \cdot \vJ 
+\end{equation}
+with $\vJ$ the net current and
+\begin{equation}
+\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound \,.
+\end{equation}
+\jcr{not sure what $\BEdd$ is bold. It is really only a scalar.}
+Finally, using \eqref{1am}, we get:
+\begin{equation}
+2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,.
+\end{equation}
+Note that we recover the Robin boundary conditions for diffusion when $\Edd = \tfrac{1}{3} \mathbb{I}$:
+\[
+2 J^{\text{inc}}(\vr) = \frac{\phi(\vr)}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
+\]
+
+
+
+\jcr{I have left your equations below. Clearly, there are some sign issues. Can you look into that?
+In addition, the boundary equation is scalar. You do not have scalar terms in each of your terms so check that too.}
 \begin{equation}
 \frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - \BEdd \phi \quad \vr \in \bound
 \end{equation}
 \begin{equation}
 B_i= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \bound , \, \, i=x,y,z 
 \end{equation}
-\jcr{explain subscript i}
+\jcr{explain subscript i.}
+\jcr{when I see i, I feel that B is a vector but it is not, is it?}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint VET formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The VET formulation necessitates a reformulation of our adjoint. As shown in Eq.~\eqref{adjForm}, the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation.
+The VET formulation necessitates a reformulation of our adjoint.
+\jcr{what is ``our'' adjoint?} As shown in Eq.~\eqref{adjForm}, the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation.
+\jcr{isn't it a double gradient in the equation below?}
 
 \begin{equation}
 \label{adjForm}
 - \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
 \end{equation}
-\jcr{in thesis, you must demonstrate this}
-For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \ref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
+\jcr{in thesis, you must demonstrate this equation fully}
+We used the following notation: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
+and $\mathbb{f} : \mathbb{g} = \sum_i \sum_j f_{ij}g_{ij}$.
+For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
+\jcr{here, I understand it as the VET forward solver cannot be re-used to compute the VET adjoint,
+as was possible in the Sn world. If this is what you meant, please make it more obvious}
 
 For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
 
@@ -390,11 +446,31 @@ For reasons that will become apparent during sensitivity calculations, the bound
 \label{adjVETBC}
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag  = - 2J^{\dag +} - B \phi^\dag \quad \vr \in \Gamma
 \end{equation}
-To obtain the QoI using this formulation, begin with the typical QoI definition, relocate operators to the forward to substitute the forward source, and apply boundary conditions.
+\jcr{what is $\Gamma$?}
+\jcr{\eqref{adjVETBC} should be a scalar equation. its terms are not. inc was used for incoming before, starting from transport, here you like + and -. there should be some consistency throughout. fix this.}
+
+\jcr{This is how I write things: I have changed the BC to the following: again the sign in front of the known value, here Jout, looks very fishy in your equation. 
+\begin{equation}
+\label{adjVETBC}
+2J^{\dag,\text{out}} = B \phi^\dag + 
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
+\end{equation}
+Note that we recover the Robin boundary conditions for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$:
+\[
+2 J^{\dag,\text{out}}(\vr) = \frac{\phi^\dag(\vr)}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi^\dag \,.
+\]
+(for the outgoing partial current of the forward diffusion problem, one should recover
+\[
+2 J^{\text{out}}(\vr) = \frac{\phi(\vr)}{2} \boxed{-} \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
+\]
+}
+
+To obtain the \qoi using this formulation, begin with the typical \qoi definition, relocate operators to the forward to substitute the forward source, and apply boundary conditions.
+For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
 \begin{equation}
 \label{VETQoIAdjUnpDeriv}
 \begin{split}
-QoI=&\bra \phi , \scalResp \ket \\
+\qoi=&\bra \phi , \scalResp \ket \\
 =&\bra \phi , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
 =& \bra - \div \isigt \div \left( \Edd \phi \right) + \siga \phi, \phi^\dag \ket 
 - \sbra \phi, \Edd \cdot \isigt \grad \phi^\dag \sket  
@@ -403,44 +479,95 @@ QoI=&\bra \phi , \scalResp \ket \\
 - \sbra \phi , - 2J^{\dag +} - B \phi^\dag \sket + \sbra \phi^\dag, - 2J^- - B \phi  \sket
 \end{split}
 \end{equation}
-The boundary Eddington terms negate and yield a relatively compact form for the QoI
+
+\jcr{ since my BC expressions are different, I get
+\begin{equation}
+\label{VETQoIAdjUnpDeriv}
+\begin{split}
+\qoi=&\bra \phi , \scalResp \ket \\
+=&\bra \phi , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
+=& \bra - \div \isigt \div \left( \Edd \phi \right) + \siga \phi, \phi^\dag \ket 
+- \sbra \phi, \Edd \cdot \isigt \grad \phi^\dag \sket  
++ \sbra \phi^\dag, \isigt \grad \Edd \phi \sket \\
+=&\bra \scalSource , \phi^\dag \ket 
+- \sbra \phi     , 2J^{\dag,\text{out}} - B \phi^\dag \sket 
++ \sbra \phi^\dag, 2J^{\text{inc}}      - B \phi      \sket
+\end{split}
+\end{equation}
+}
+
+The boundary Eddington terms negate and yield a relatively compact form for the \qoi
 \begin{equation}
 \label{VETQoIAdj}
-QoI=\bra \scalSource , \phi^\dag \ket 
-+ \sbra 2\phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, J^- \sket
+\qoi=\bra \scalSource , \phi^\dag \ket 
+- \sbra \phi, 2J^{\dag,\text{out}} \sket  + \sbra \phi^\dag, 2J^{\text{inc}} \sket
 \end{equation}
+In order to have a \qoi that can be expressed entirely in terms of the adjoint solution, it is advantageous to 
+set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition.
+\jcr{in the end, we have almost the same expression but there is something fishy about your J+ J- signs. please check.}
+
+\jcr{finally, can you complete this section by adding a discussion of "`what if we started with the Sn adjoint equation to obtain the VET adjoint equations..."'}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-As was done in the Sn transport formulation, once again consider perturbations to the system parameters. However, in contrast to the Sn case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
+As was done in the Sn transport formulation, once again consider perturbations to the system parameters. However, in contrast to the Sn case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. This is an assumption because, in the general case, changing the system's parameters should change the angular flux solution, and hence
+the Eddington tensor may be altered as well. We address the effects of perturbations on $\Edd$ in the next section.
+
+The perturbed VET forward problem is:
+\begin{subequations}
 \begin{equation}
 \label{VEFPert}
-- \div \left((\isigt + \delta \isigt)\div \Edd \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
+- \div \left((\isigt + \delta \isigt)\div \Edd \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource  \quad \vr \in \domain
 \end{equation}
+\end{subequations}
+\begin{subequations}
 \begin{equation}
-(\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  = - 2J_p^- - B \phi_p \quad \vr \in \bound
+ 2J_p^- = B \phi_p  + \vn \cdot  (\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  \quad \vr \in \bound
 \end{equation}
-The usual adjoint process is performed, starting with the QoI definition using the perturbed solution and response. 
+\end{subequations}
+The usual adjoint process is performed, starting with the \qoi definition using the response function (adjoint source) and the perturbed forward solution. 
 \begin{equation}
 \label{VETSensDeriv}
 \begin{split}
-\qoi=&\bra \phi_p , \scalResp \ket \\
-=&\bra \phi_p , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
-=& \bra - \div \isigt \div \left( \Edd \phi_p \right) + \siga \phi_p, \phi^\dag \ket 
-- \int_\Gamma d^2 r \, \phi_p \left( \Edd \cdot \isigt \grad \phi^\dag \right) \cdot \vec{n}  \\ 
-&+ \int_\Gamma d^2 r \, \phi^\dag \left(  \isigt \grad \Edd \phi_p \right) \cdot \vec{n} \\
+\qoi_p = &\bra \phi_p , \scalResp \ket \\
+       = &\bra \phi_p , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
+       = & \bra - \div \isigt \div \left( \Edd \phi_p \right) + \siga \phi_p, \phi^\dag \ket 
+ - \int_\bound d^2 r \, \phi_p \left( \Edd \cdot \isigt \grad \phi^\dag \right) \cdot \vec{n}  \\ 
+&+ \int_\bound d^2 r \, \phi^\dag \left(  \isigt \grad \Edd \phi_p \right) \cdot \vec{n} \\
 \end{split}
 \end{equation}
-A first order perturbation approximation of Eq.~\eqref{VEFPert} can be used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution.
+A first-order perturbation approximation of Eq.~\eqref{VEFPert} can be used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution.
 \begin{equation}
 \label{QoIVETAdjNoBC}
 \begin{split}
-\qoi =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
+\qoi_p =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket \\
+=& \bra q, \phi^\dag \ket  + \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \phi^\dag \ket \\
+& - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
 \end{split}
 \end{equation}
 The first surface term can be dealt with readily using the adjoint boundary condition. For the second surface term, a first order approximation of the perturbed forward boundary condition is used for substitution.
+\begin{equation}
+\begin{split}
+ - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket  + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
+=&- \sbra \phi_p, 2J^{\dag,\text{out}} - B \phi^\dag \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} - B \phi_p \sket \\
+=&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} \sket 
+\end{split}
+\end{equation}
+Finally, we have
+\begin{equation}
+\label{QoIVETAdj}
+\begin{split}
+\delta \qoi =& \qoi_p - \qoi \\ 
+=& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \phi^\dag \ket 
+- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 \delta J_p^{\text{inc}} \sket 
+\end{split}
+\end{equation}
+Again, it is advantageous to use $J^{\dag,\text{out}}=0$ in the adjoint boundary condition to remove a dependency on the 
+perturbed forward VET solution.
+
+\jcr{I am leaving your equations here but look at mine first and see what you think
 \begin{equation}
 \label{QoIVETAdj}
 \begin{split}
@@ -456,11 +583,12 @@ Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the
 \\ &- \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
 \end{split}
 \end{equation}
-
+}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Error from unperturbed Eddington assumption}
 %%%%%%%----------------------------------------------------------------------------------------------
+\jcr{ once we agree on all of the mods, I will review this section}
 
 Beyond the first order approximation common to adjoint formulations, the VET sensitivity formulation also made the assumption that the Eddington tensor remained unperturbed under perturbations of the other parameters. To observe the terms that were dropped in this approximation, consider a reformulation of the perturbed forward equation, this time introducing $\delta \Edd$ and $\delta  B$ terms. 
 \begin{equation}
@@ -503,41 +631,44 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 \section{Preliminary results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-At this point, four separate methods for \qoi calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
+At this point, four separate methods for \qoi calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
 
-At this point, four separate methods for $\qoi$ calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first order approximation, however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
-
-The four methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% QoI response is plotted against the \% change in a given parameter $p$, which are defined as
+The four methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
+\begin{subequations}
 \begin{equation}
-\text{\% QoI response}=\frac{\delta QoI}{QoI}
+\text{\% \qoi response}=\frac{\delta \qoi}{\qoi} \,,
 \end{equation}
+\end{subequations}
+\begin{subequations}
 \begin{equation}
-\text{p \% change}=\frac{\delta p}{p}.
+\text{$p$ \% change}=\frac{\delta p}{p} \,.
 \end{equation}    
+\end{subequations}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Homogeneous initial system, Uniform Perturbations}
+\subsection{Homogeneous System, Uniform Perturbations}
 %%%%%%%----------------------------------------------------------------------------------------------
 The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired \qoi is the total flux in the middle fifth of the system.
 
 \begin{figure}[H]
 \label{HomoPertt}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.49\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/19sigtSens.png}
+  \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
   \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$. }
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\hfill
+\begin{subfigure}{.49\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/20sigtSens.png}
+  \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
   \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$. }
   \label{fig:sfig2}
 \end{subfigure}
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/21sigtSens.png}
+  \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
   \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$.}
   \label{fig:sfig3}
 \end{subfigure}

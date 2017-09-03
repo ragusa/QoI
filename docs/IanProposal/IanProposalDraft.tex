@@ -653,28 +653,31 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{figure}[H]
 \label{HomoPertt}
 \centering
-\begin{subfigure}{.49\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$. }
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$. }
   \label{fig:sfig1}
 \end{subfigure}%
-\hfill
-\begin{subfigure}{.49\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$. }
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$. }
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$.}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
   \label{fig:sfig3}
 \end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity for uniformly perturbed system.}
+\caption{Plots of $\sigt$ perturbation sensitivity for a uniform perturbation in a homogeneous system.}
 \label{fig:fig}
 \end{figure}
+
+\jcr{change the other figures/caption in the same manner}
 
 \begin{figure}[H]
 \label{HomoPerts}
@@ -726,11 +729,17 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \label{fig:fig}
 \end{figure}
 
+\jcr{comment the results!}
+
+\jcr{why no examples with changing the incident flux value?}
+
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous initial system, Non-Uniform Perturbations}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 The next test case has the same initial conditions as the previous homogeneous case. however the system is perturbed into a inhomogeneous system. The system is split into 5 equal widths. The first, third, and fifth sections (corresponding to the center and the end sections) have the relevant variable perturbed in one direction, while the other two segments are perturbed in the opposite direction. The result is a system that is inhomogeneous, but with regular variations and symmetric about the midpoint. The \qoi is also retained from the previous case.
+
+\jcr{change the other figures/caption in the same manner as before}
 
 \begin{figure}[H]
 \label{InHomoPertt}
@@ -807,10 +816,19 @@ The next test case has the same initial conditions as the previous homogeneous c
 \label{fig:fig}
 \end{figure}
 
+
+\jcr{comment the results!}
+
+\jcr{why no examples with changing the incident flux value?}
+
+
+
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Streaming system}
 %%%%%%%----------------------------------------------------------------------------------------------
 To generate a streaming system, we retain the 5 equal width sectioning of the previous inhomogeneous example, but the second and fourth sections are converted to streaming regions ($\sigt \approx 0 $). Leaving three neutron producing sections separated by two streaming gaps. The \qoi remains as the total neutron count in the center fifth section.
+
+\jcr{same comments as above}
 
 \begin{figure}[H]
 \label{InHomoPertt}
@@ -887,7 +905,6 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \label{fig:fig}
 \end{figure}
 
-\jcr{generally speaking, your figure captions should be more descriptive than they currently are. And it should be clear to which test case they below to}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Goals of the Research}

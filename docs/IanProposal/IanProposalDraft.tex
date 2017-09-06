@@ -402,8 +402,6 @@ with $\vJ$ the net current and
 \begin{equation}
 \BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound \,.
 \end{equation}
-\jcr{not sure what $\BEdd$ is bold. It is really only a scalar.}
-\iwh{Fixed.}
 Finally, using \eqref{1am}, we get:
 \begin{equation}
 2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,.
@@ -417,7 +415,7 @@ Note that we recover the Robin boundary conditions for diffusion when $\Edd = \t
 
 \jcr{I have left your equations below. Clearly, there are some sign issues. Can you look into that?
 In addition, the boundary equation is scalar. You do not have scalar terms in each of your terms so check that too.}
-\iwh{ok, sign was wrong. I ended up missing a "$\cdot n$'' somewhere which made me think the value was a vec} 
+\iwh{ok, sign was wrong. I ended up missing a ''$\cdot n$'' somewhere which made me think the value was a vec} 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint VET formulation}
@@ -610,7 +608,7 @@ Beyond the first order approximation common to adjoint formulations, the VET sen
 - \div \left((\isigt + \delta \isigt)\div (\Edd + \delta \Edd) \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
 \end{equation}
 \begin{equation}
-(\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  = - 2J_p^- - (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \Gamma
+(\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  = - 2J_p^{\text{inc}} - (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \partial V
 \end{equation}
 The above can be substituted into Eq.~\eqref{VETSensDeriv} to yield an expanded $\qoi$ equation, including the Eddington perturbation terms
 \begin{equation}
@@ -626,7 +624,7 @@ The boundary condition for the perturbed forward solution takes on a slightly mo
 \label{QoIVETAdjEdd}
 \begin{split}
 \delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&+ \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
+&+ \sbra 2\delta \phi, J^{\dag, \text{out}} \sket  - \sbra 2\phi^\dag, \delta J^{\text{inc}} \sket
 - \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
 \\
 &- \sbra  \phi^\dag ,\isigt \div \delta \Edd \phi \sket

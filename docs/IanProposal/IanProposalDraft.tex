@@ -1,5 +1,6 @@
 \documentclass{article}
-\usepackage{amsmath, amsthm, amssymb, amsfonts, mathbbol, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption, xspace}
+\usepackage{amsmath, amsthm, amssymb, amsfonts, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption, xspace}
+% mathbbol, causing errors
 \setlength{\abovedisplayskip}{0pt}
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
@@ -21,17 +22,17 @@
 \newcommand{\pdz}{\frac{\partial}{\partial z}}
 \newcommand{\intrrr}{\int d^3 r \,}
 \newcommand{\intrr}{\int d^2 r \,}
-\newcommand{\dEdphi}{\partial_\phi E \,}
-\newcommand{\dEdp}{\partial_p E \,}
-\newcommand{\dBdphi}{\partial_\phi B \,}
-\newcommand{\dBdp}{\partial_p B \,}
+\newcommand{\dEdphi}{\partial_\phi E }
+\newcommand{\dEdp}{\partial_p E }
+\newcommand{\dBdphi}{\partial_\phi B }
+\newcommand{\dBdp}{B }
 \newcommand{\adj}{\phi^\dag}
 \newcommand{\surf}{\int_{\partial V}}
 \newcommand{\domain}{V}
 \newcommand{\bound}{\partial V}
 \newcommand{\vn}{\vec{n}}
 \newcommand{\Edd}{\mathbb{E}}
-\newcommand{\BEdd}{\mathbf{B}}
+\newcommand{\BEdd}{B}
 \newcommand{\sigt}{\sigma_t}
 \newcommand{\sigs}{\sigma_s}
 \newcommand{\siga}{\sigma_a}
@@ -175,12 +176,13 @@ For later use, two additional inner products are also defined as surface integra
 \sbra \psi , g \sket_{\bound \times \mathcal{S}_2}  = \int_{\bound} dS \int_{4 \pi} d \Omega \, \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \begin{equation}
-\sbra \phi , g \sket_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \phi(\vr, \vO)g(\vr, \vO)
+\sbra \psi , g \sket_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \end{subequations}
 \jcr{I do not know where the first surface inner product is used. I have always used the second one. Please show me an equation where the first one is needed!}
 \iwh{I sort of use the first one as a "general" form when doing integration by parts. The second one is used moreso when the actual boundary conditions are applied (since the first can be expressed as a sum of the + and - versions of the second). Its the difference/step between Eq.~\eqref{snAdjQoI} and Eq.~\eqref{snAdjQoIBCsplit}}
 \jcr{I do not understand why you use phi and not psi in the second one}
+\iwh{My mistake for the psi}
 
 The inner product subscripts will frequently be dropped when it is unambiguous which one being used, typically indicated by the presence of an angular-dependent variable, e.g., $\psi$ or an angular-independent variable, e.g., $\phi$. Therefore, with this notation, the quantity of interest can be compactly expressed as shown below.
 \begin{equation}
@@ -200,7 +202,6 @@ A hurdle in utilizing the transport equation numerically to make real world pred
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
-\jcr{If you prefer to use $\mathbf{A}$ as opposed to $A$, do this from the very beginning as well}
 
 Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product notation $\bra \bullet , \bullet \ket$, consider the system of interest $\mathbf{A} \psi = q$. Call this this the forward system, with forward operator $\mathbf{A}$. Consider a test function $\psi^\dag$, the adjoint operator $\mathbf{A^\dag}$ is defined such that $\bra \mathbf{A} \psi, \psi^\dag \ket = \bra \psi, \mathbf{A^\dag} \psi^\dag \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on application of the divergence theorem (integration by parts), typically resulting in boundary terms ($BC$). Using the response function of the desired \qoi, the adjoint system can be constructed as $\mathbf{A^\dag} \psi^\dag = q^\dag$, leading to an alternate expression of the \qoi using the adjoint solution $\psi^\dag $.
 \begin{equation}
@@ -332,11 +333,11 @@ form of the perturbation in the \qoi.
 \subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
 
-While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one  forward transport solve and one adjoint transport solve, it can quickly run into technical limitations. Specifically for even a one-group time-independent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later. 
+While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one  forward transport solve and one adjoint transport solve, it can quickly run into technical limitations. Specifically for a time dependent system, all solutions to the forward and adjoint system in space and angle must be stored for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a spatially 3-dimensional system, this translates to storing the angular
+flux data across 6-dimensions (space/energy/angle). For time independent systems, a converged scattering source can be stored to reconstruct the forward solution for use on the fly. 
 \jcr{not true, for time-independent problems, as Hayes did, storing the converged
-scatttering source is enough to recompute quickly the full angular flux. this is not the case for transient problems}
-For a spatially 3-dimensional system, this translates to storing the angular
-flux data across 6-dimensions (space/energy/angle).
+scattering source is enough to recompute quickly the full angular flux. this is not the case for transient problems}
+\iwh{I'm sort of trying to figure out the best/least awkward way to word this. Should I even mention time independent problems?}
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -349,6 +350,7 @@ gist of the VET idea was to simplify sensitivity calculations for TD transport, 
 to demonstrate/explain that the ideas you applied in SS were actually going to be useful as well for TD}
 
 \begin{equation}
+\label{VETFormStart}
 \phi(\vr)=\int d\Omega \, \psi( \vr,\vO )
 ,\quad
 \vec{J}(\vr)= \int d\Omega \, \vO \psi( \vr,\vO )
@@ -366,8 +368,9 @@ the zero-th and first angular moment transport equations are
 \div \left(  \int d\Omega \vO \vO \psi \right) + \sigt \vec{J} = 0 \,.
 \end{equation}
 \end{subequations}
-The Eddington Tensor $\Edd$ is then introduced as a simplifying approximation relating the second angular moment term in equation \eqref{1am} to the scalar flux. 
+The Eddington Tensor $\Edd$ is then introduced as a simplifying term relating the second angular moment term in equation \eqref{1am} to the scalar flux. The caveat to the Eddington Tensor is that it requires the angular flux be known.
 \jcr{no, VET is not an approximation. However, to get the correct VET, you need to solve for $\psi$, so it is a chicken and egg problem, but the VET formulation is rigorously exact. What is hard to obtain without solving the TE is the exact tensor! So you should rephrase this a bit}
+\iwh{Not sure if I should mention this here, or at the end of this section after the Eddington formulation has been worked through.}
 \begin{equation}
 \label{EddDef}
 \Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
@@ -388,6 +391,7 @@ Eq.~\eqref{SS1GTE_bc} by $2 | \vO \cdot \vn |$, we obtain, for $\vr \in \bound$,
 2 J^{\text{inc}}(\vr) \equiv  2 \int_{\vO \cdot \vn <0 }  | \vO \cdot \vec{n} | \psi^{\text{inc}}(\vr,\vO) 
 = 2\int_{\vO \cdot \vn <0 }  | \vO \cdot \vn |  \psi(\vr,\vO) \,.
 \end{equation}
+\iwh{Should I drop the $d \vO$ from all the angle integrals?} 
 $J^{\text{inc}}$ is the partial incoming current. 
 Manipulating the second half-range integral yields:
 \begin{equation}
@@ -399,6 +403,7 @@ with $\vJ$ the net current and
 \BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound \,.
 \end{equation}
 \jcr{not sure what $\BEdd$ is bold. It is really only a scalar.}
+\iwh{Fixed.}
 Finally, using \eqref{1am}, we get:
 \begin{equation}
 2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,.
@@ -412,22 +417,15 @@ Note that we recover the Robin boundary conditions for diffusion when $\Edd = \t
 
 \jcr{I have left your equations below. Clearly, there are some sign issues. Can you look into that?
 In addition, the boundary equation is scalar. You do not have scalar terms in each of your terms so check that too.}
-\begin{equation}
-\frac{1}{\sigma_{t} } \vec{\nabla} \cdot \left(\Edd \phi \right)  = - 2J^- - \BEdd \phi \quad \vr \in \bound
-\end{equation}
-\begin{equation}
-B_i= \frac{\int_{4 \pi} d\Omega \, \left| \Omega_i n_i \right | \psi}{\int_{4\pi} d\Omega \, \psi} \quad \vr \in \bound , \, \, i=x,y,z 
-\end{equation}
-\jcr{explain subscript i.}
-\jcr{when I see i, I feel that B is a vector but it is not, is it?}
+\iwh{ok, sign was wrong. I ended up missing a "$\cdot n$'' somewhere which made me think the value was a vec} 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint VET formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The VET formulation necessitates a reformulation of our adjoint.
-\jcr{what is ``our'' adjoint?} As shown in Eq.~\eqref{adjForm}, the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation.
+Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to q.~\eqref{VEFForm} must also be formulated. The adjoint equation of the forward VET equation is given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below.
 \jcr{isn't it a double gradient in the equation below?}
+\iwh{yes, the above sentence states that the double gradient (below) comes from the double div shown in Eq.~\eqref{adjForm}. I think my wording is a bit confusing, so I have modified it a bit.}
 
 \begin{equation}
 \label{adjForm}
@@ -435,23 +433,19 @@ The VET formulation necessitates a reformulation of our adjoint.
 \end{equation}
 \jcr{in thesis, you must demonstrate this equation fully}
 We used the following notation: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
-and $\mathbb{f} : \mathbb{g} = \sum_i \sum_j f_{ij}g_{ij}$.
-For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
-\jcr{here, I understand it as the VET forward solver cannot be re-used to compute the VET adjoint,
-as was possible in the Sn world. If this is what you meant, please make it more obvious}
-
-For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. Unlike for Sn formulation, the VET adjoint equation does not take the form of a VET transport equation.
+and $\mathbb{f} : \mathbb{g} = \sum_i \sum_j f_{ij}g_{ij}$. 
+For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}.
 
 \begin{equation}
 \label{adjVETBC}
-\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag  = - 2J^{\dag +} - B \phi^\dag \quad \vr \in \Gamma
+2J^{\dag,\text{out}} = B \phi^\dag + 
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
 \end{equation}
-\jcr{what is $\Gamma$?}
+
 \jcr{\eqref{adjVETBC} should be a scalar equation. its terms are not. inc was used for incoming before, starting from transport, here you like + and -. there should be some consistency throughout. fix this.}
 
 \jcr{This is how I write things: I have changed the BC to the following: again the sign in front of the known value, here Jout, looks very fishy in your equation. 
 \begin{equation}
-\label{adjVETBC}
 2J^{\dag,\text{out}} = B \phi^\dag + 
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
 \end{equation}
@@ -464,6 +458,13 @@ Note that we recover the Robin boundary conditions for the adjoint diffusion pro
 2 J^{\text{out}}(\vr) = \frac{\phi(\vr)}{2} \boxed{-} \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
 \]
 }
+\iwh{Sign issue resolved. going with your form for consistency}
+
+In contrast to the adjoint Sn formulation, the VET adjoint equation does not take the form of a VET transport equation, therefore the forward VET solver cannot necessarily be re-used to solve the adjoint equation. 
+
+\jcr{here, I understand it as the VET forward solver cannot be re-used to compute the VET adjoint,
+as was possible in the Sn world. If this is what you meant, please make it more obvious}
+\iwh{Tried to make it a bit more explicit. Thoughts? Should I move this somewhere after the new "VEF of the adjoint'' section later?} 
 
 To obtain the \qoi using this formulation, begin with the typical \qoi definition, relocate operators to the forward to substitute the forward source, and apply boundary conditions.
 For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
@@ -476,27 +477,11 @@ For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
 - \sbra \phi, \Edd \cdot \isigt \grad \phi^\dag \sket  
 + \sbra \phi^\dag, \isigt \grad \Edd \phi \sket \\
 =&\bra \scalSource , \phi^\dag \ket 
-- \sbra \phi , - 2J^{\dag +} - B \phi^\dag \sket + \sbra \phi^\dag, - 2J^- - B \phi  \sket
+- \sbra \phi , 2J^{\dag,\text{out}} - B \phi^\dag \sket + \sbra \phi^\dag, 2J^{\text{inc}} - B \phi  \sket
 \end{split}
 \end{equation}
 
-\jcr{ since my BC expressions are different, I get
-\begin{equation}
-\label{VETQoIAdjUnpDeriv}
-\begin{split}
-\qoi=&\bra \phi , \scalResp \ket \\
-=&\bra \phi , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
-=& \bra - \div \isigt \div \left( \Edd \phi \right) + \siga \phi, \phi^\dag \ket 
-- \sbra \phi, \Edd \cdot \isigt \grad \phi^\dag \sket  
-+ \sbra \phi^\dag, \isigt \grad \Edd \phi \sket \\
-=&\bra \scalSource , \phi^\dag \ket 
-- \sbra \phi     , 2J^{\dag,\text{out}} - B \phi^\dag \sket 
-+ \sbra \phi^\dag, 2J^{\text{inc}}      - B \phi      \sket
-\end{split}
-\end{equation}
-}
-
-The boundary Eddington terms negate and yield a relatively compact form for the \qoi
+The $B$ terms negate and yield a relatively compact form for the \qoi
 \begin{equation}
 \label{VETQoIAdj}
 \qoi=\bra \scalSource , \phi^\dag \ket 
@@ -505,9 +490,35 @@ The boundary Eddington terms negate and yield a relatively compact form for the 
 In order to have a \qoi that can be expressed entirely in terms of the adjoint solution, it is advantageous to 
 set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition.
 \jcr{in the end, we have almost the same expression but there is something fishy about your J+ J- signs. please check.}
+\iwh{yeah, I messed up the signs once in the derivation, but apparently just accidentally corrected it in the final expression above.}
 
 \jcr{finally, can you complete this section by adding a discussion of "`what if we started with the Sn adjoint equation to obtain the VET adjoint equations..."'}
 
+
+\iwh{I'll get something down for now, but I actually want to take another crack at this before it is fully dismissed. Our forward Eddington is essentially a non-linear term $E(\sigt,\sigs,q,\psi^{\text{inc}})$. Symmetry seems to imply that an "adjoint Eddington" would be a non-linear term in $E^\dag(\sigt,\sigs,q^\dag,\psi^{\dag,\text{out}})$. Importantly this drops the dependence on $q$ and $\psi^{\text{inc}}$ which are things we expect to be perturbed, and replaces it with a dependence on $q^\dag$ and $\psi^{\dag,\text{out}})$ which are things we don't really expect to be perturbed. If I can formulate a $\delta \qoi$ using an $E^\dag$ instead, this may solve the problem of VET not being exact in source perturbation cases. (while having an unknown effect on the sigma perturbation cases).}
+
+
+\iwh{Put another way, looking at normal angular transport adjoint methods, cross-section perturbation terms always involve an inner product of $\psi$ and $\psi^\dag$, but source terms only involve $\psi^\dag$. By storing $E$ we allow for us to get more information about $\psi$ from $\phi$, which is only helpful in the cross-section perturbation cases. Storing $E^\dag$ allows for more information about $\psi^\dag$ from $\phi^\dag$ which IS useful in the source cases.}
+
+
+The method by which the VET adjoint equation was formulation involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It's worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the angular dependent adjoint flux (which is still in a transport-like equation form) then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at   Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
+
+\begin{equation}
+\label{TranAdjVEFForm}
+- \div \left( \frac{1}{\sigt}\div \Edd^\dag \phi^\dag  \right) + \siga \phi^\dag  = \scalSource^\dag  \,.
+\end{equation}
+\begin{equation}
+2 J^{^\dag,\text{out}}(\vr) = \BEdd(\vr)^\dag \phi(\vr)^\dag  + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \phi^\dag  \,.
+\end{equation}
+
+In the above, an "Adjoint Eddington Tensor'' and an "Adjoint Boundary Eddington Factor'' terms are required, and defined as
+\begin{equation}
+\label{AdjEddDef}
+\Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} \, .
+\end{equation} 
+\begin{equation}
+\BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
+\end{equation}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -551,17 +562,19 @@ The first surface term can be dealt with readily using the adjoint boundary cond
 \begin{equation}
 \begin{split}
  - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket  + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
-=&- \sbra \phi_p, 2J^{\dag,\text{out}} - B \phi^\dag \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} - B \phi_p \sket \\
-=&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} \sket 
+=&- \sbra \phi_p, 2J^{\dag,\text{out}} - B \phi^\dag \sket \\ &+ \sbra \phi^\dag, 2 J_p^{\text{inc}} - B \phi_p - \delta \isigt \div \Edd \phi_p \sket \\
+\approx&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} - \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
+\iwh{Note to self: In thesis, reorder the above a bit. Save the 1st order approximation for the end. Before that, place the delta c terms in the FEM form where a $\nabla$ is acting on the adjoint. This should cancel out a surface delta c term before we have to make any approximations.}
 Finally, we have
 \begin{equation}
 \label{QoIVETAdj}
 \begin{split}
 \delta \qoi =& \qoi_p - \qoi \\ 
 =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \phi^\dag \ket 
-- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 \delta J_p^{\text{inc}} \sket 
+- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 \delta J_p^{\text{inc}} \sket \\
+& - \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
 Again, it is advantageous to use $J^{\dag,\text{out}}=0$ in the adjoint boundary condition to remove a dependency on the 
@@ -584,6 +597,7 @@ Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the
 \end{split}
 \end{equation}
 }
+\iwh{We discussed this in your office. The extra delta c term comes from the perturbed forward boundary conditions, which includes a delta c. In the thesis I will slightly rework the above section to make it a bit more explicit.}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Error from unperturbed Eddington assumption}
@@ -682,22 +696,24 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{figure}[H]
 \label{HomoPerts}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/19sigsSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$.}
+  \includegraphics[width=.98\linewidth]{figures/19sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/20sigsSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$.}
+  \includegraphics[width=.98\linewidth]{figures/20sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/21sigsSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$.}
+  \includegraphics[width=.98\linewidth]{figures/21sigsSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of $\sigs$ perturbation sensitivity for uniformly perturbed system.}
@@ -707,22 +723,24 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{figure}[H]
 \label{HomoPertq}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/19qSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/19qSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/20qSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/20qSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/21qSens.png}
-  \caption{Uniform perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/21qSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of source perturbation sensitivity for uniformly perturbed system.}
@@ -744,22 +762,24 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/39sigtSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/39sigtSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/40sigtSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/40sigtSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/41sigtSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/41sigtSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of $\sigt$ perturbation sensitivity for non-uniformly perturbed system.}
@@ -769,22 +789,24 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPerts}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/39sigsSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/39sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/40sigsSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/40sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/41sigsSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/41sigsSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of $\sigs$ perturbation sensitivity for non-uniformly perturbed system.}
@@ -794,22 +816,24 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPertq}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/39qSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/39qSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/40qSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/40qSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/41qSens.png}
-  \caption{Inhomogeneous perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/41qSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of source perturbation sensitivity for non-uniformly perturbed system.}
@@ -833,22 +857,24 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/49sigtSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/49sigtSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/50sigtSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/50sigtSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/51sigtSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/51sigtSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of $\sigt$ perturbation sensitivity for perturbed streaming system.}
@@ -858,22 +884,24 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \begin{figure}[H]
 \label{InHomoPerts}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/49sigsSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/49sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/50sigsSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/50sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/51sigsSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/51sigsSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of $\sigs$ perturbation sensitivity for perturbed streaming system.}
@@ -883,22 +911,24 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \begin{figure}[H]
 \label{InHomoPertq}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/49qSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=2$, $\sigs=1$}
+  \includegraphics[width=.98\linewidth]{figures/49qSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/50qSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=1$, $\sigs=0.5$}
+  \includegraphics[width=.98\linewidth]{figures/50qSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
-\begin{subfigure}{.5\textwidth}
+\\
+\begin{subfigure}{.65\textwidth}
   \centering
-  \includegraphics[width=.8\linewidth]{figures/51qSens.png}
-  \caption{Streaming perturbation system with initial $\sigt=0.5$, $\sigs=0.25$}
+  \includegraphics[width=.98\linewidth]{figures/51qSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
 \end{subfigure}
 \caption{Plots of source perturbation sensitivity for perturbed streaming system.}

@@ -15,19 +15,19 @@ IO_opts.show_dqoi_from_bc=true;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select angular approx (must be an even number)
-sn=2;
+sn=8;
 n_moments=1; logi_galerkin=false;
 [M,D,omega,weights] = gauss_legendre_1d(sn,n_moments,logi_galerkin);
 snq.D = D; snq.M = M; snq.n_dir = sn;
 snq.mu = omega; snq.w = weights;
-snq.mu = [-1,1];
+%snq.mu = [-1,1];
 % sum of the weights
 snq.sw = sum(snq.w);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=53;
+pb_ID=21;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -103,11 +103,11 @@ end
 fprintf('\n-----BEGIN PERTURBATION SENSITIVITY DATA OUTPUT----- \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.1+dat.sigtPertRegion.*0;
+dat.sigtPert = dat.sigtPertRegion.*dat.sigt*0.0+dat.sigtPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0+dat.sigsPertRegion.*0;
 dat.sigaPert = dat.sigtPert - dat.sigsPert;
 dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
-dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0.0+dat.incPertRegion*0;
+dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0.0+dat.incPertRegion*0.1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % perturbations

@@ -24,7 +24,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=51;
+pb_ID=21;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -42,10 +42,11 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
+% linspace(-0.1,0.1,21);
 sigtPertFactor=[0];
-sigsPertFactor=linspace(-0.1,0.1,21);
+sigsPertFactor=[0];
 sourcePertFactor=[0];
-incPertFactor=[0];
+incPertFactor=linspace(0,0.1,11);;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -104,7 +105,9 @@ for ii=1:numel(sigtPertFactor)
                     dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFactor(jj);
                     dat.sigaPert = dat.sigtPert - dat.sigsPert;
                     dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*sourcePertFactor(kk);
-                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*incPertFactor(ll);
+                    %relative and absolute pert for incident flux
+                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0;
+                    dat.psiIncPert = dat.psiIncPert+dat.incPertRegion*incPertFactor(ll);
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % perturbations

@@ -51,7 +51,7 @@
 %-----------------------------------------------------------
 \usepackage{ifthen}
 \newboolean{draftversion}
-\setboolean{draftversion}{true}
+\setboolean{draftversion}{false}
 %-----------------------------------------------------------
 %----------------------------------------------------------
 
@@ -255,7 +255,7 @@ The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing
 \qoi = \bra \psi^\dag , q \ket - \sbra \psi^{\dag \text{out}},  \psi \sket_+ - \sbra \psi^\dag,  \psi^{\text{inc}} \sket_- \,.
 \end{equation}
 
-\jcr{in the thesis, remember to explain that the adjoint source is not to be divided by 2 even when the response is siotropic in agle}
+\jcr{in the thesis, remember to explain that the adjoint source is not to be divided by 2 even when the response is isotropic in angle}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Sn Transport Adjoint Sensitivity}
@@ -315,6 +315,7 @@ Using a zero-outcoming  boundary condition for the adjoint flux
 (thus $\sbra \delta \psi, \psi^{\dag,\text{out}} \sket_+=0$), one obtains the final 
 form of the perturbation in the \qoi.
 \begin{equation}
+\label{snSens}
 \begin{split}
 \delta QoI &= \bra \delta \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ket - \sbra \delta \psi, \psi^\dag \sket \\
 &= \bra \delta \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_- \,.
@@ -328,7 +329,6 @@ form of the perturbation in the \qoi.
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
-\jcr{fix equation number}
 While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
 flux data across 6-dimensions (space/energy/angle). For time independent systems, Hayes \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
 the forward steady-state SN transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a VET approach (which only requires
@@ -423,6 +423,7 @@ and $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$.
 For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}.
 
 \begin{equation}
+\label{adjVETBC}
 2J^{\dag,\text{out}} = B \phi^\dag + 
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
 \end{equation}
@@ -430,10 +431,10 @@ Note that we recover the Robin boundary conditions for the adjoint diffusion pro
 \[
 2 J^{\dag,\text{out}}(\vr) = \frac{\phi^\dag(\vr)}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi^\dag \,.
 \]
-(for the outgoing partial current of the forward diffusion problem, one should recover
+\iwh{ (I changed this to a note, it didn't seem relevant here.) For the outgoing partial current of the forward diffusion problem, one should recover
 \[
 2 J^{\text{out}}(\vr) = \frac{\phi(\vr)}{2} \boxed{-} \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
-\]
+\]}
 
 In contrast to the adjoint Sn formulation, the VET adjoint equation does not take the form of a VET transport equation, therefore the forward VET solver 
 cannot necessarily be re-used to solve the adjoint equation. 
@@ -488,8 +489,7 @@ The method by which the VET adjoint equation was formulation involved first conv
 \begin{equation}
 2 J^{^\dag,\text{out}}(\vr) = \BEdd(\vr)^\dag \phi(\vr)^\dag  + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \phi^\dag  \,.
 \end{equation}
-
-In the above, an "Adjoint Eddington Tensor'' and an "Adjoint Boundary Eddington Factor'' terms are required, and defined as
+In the above, an ``Adjoint Eddington Tensor'' and an ``Adjoint Boundary Eddington Factor'' terms are required, and defined as
 \begin{equation}
 \label{AdjEddDef}
 \Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} \, .
@@ -497,6 +497,8 @@ In the above, an "Adjoint Eddington Tensor'' and an "Adjoint Boundary Eddington 
 \begin{equation}
 \BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
 \end{equation}
+From the above, it should be clear that that the $\phi^\dag$ is not necessarily the same as the one that results from solving Eq.~\eqref{adjForm}.
+\iwh{This is the only part I am on the fence about what to do with. As discussed last week, I think the above formulation may have some uses, but I haven't really worked through it enough to do anything with in this section. So I don't really know how to end this without just leaving this dangling there}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -513,7 +515,7 @@ The perturbed VET forward problem is:
 \end{subequations}
 \begin{subequations}
 \begin{equation}
- 2J_p^- = B \phi_p  + \vn \cdot  (\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  \quad \vr \in \bound
+ 2J_p^\text{inc} = B \phi_p  + \vn \cdot  (\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  \quad \vr \in \bound
 \end{equation}
 \end{subequations}
 The usual adjoint process is performed, starting with the \qoi definition using the response function (adjoint source) and the perturbed forward solution. 
@@ -560,7 +562,6 @@ perturbed forward VET solution.
 
 \jcr{I am leaving your equations here but look at mine first and see what you think
 \begin{equation}
-\label{QoIVETAdj}
 \begin{split}
 \qoi =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} 
 \\ &+ \int_\Gamma d^2 r \, \phi^\dag \left( - 2J_p^- - B \phi_p - \delta \isigt \div \Edd \phi \right) \cdot \vec{n} 
@@ -568,7 +569,6 @@ perturbed forward VET solution.
 \end{equation}
 Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the sensitivity expression for the adjoint VET formulation.
 \begin{equation}
-\label{SensVETAdjNoBC}
 \begin{split}
 \delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
 \\ &- \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
@@ -588,9 +588,9 @@ Beyond the first order approximation common to adjoint formulations, the VET sen
 - \div \left((\isigt + \delta \isigt)\div (\Edd + \delta \Edd) \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource
 \end{equation}
 \begin{equation}
-(\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  = - 2J_p^{\text{inc}} - (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \partial V
+2J_p^{\text{inc}} =
+(\isigt + \delta \isigt) \vec{\nabla} \cdot \left((\Edd + \delta \Edd) \phi_p \right)  + (\BEdd +\delta \BEdd) \phi_p \quad \vr \in \partial V
 \end{equation}
-\jcr{sign issue I think in front of Jinc}
 \end{subequations}
 The above can be substituted into Eq.~\eqref{VETSensDeriv} to yield an expanded $\qoi$ equation, including the Eddington perturbation terms
 \begin{equation}
@@ -606,7 +606,7 @@ The boundary condition for the perturbed forward solution takes on a slightly mo
 \label{QoIVETAdjEdd}
 \begin{split}
 \delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&+ \sbra 2\delta \phi, J^{\dag, \text{out}} \sket  - \sbra 2\phi^\dag, \delta J^{\text{inc}} \sket
+&- \sbra 2\delta \phi, J^{\dag, \text{out}} \sket  + \sbra 2\phi^\dag, \delta J^{\text{inc}} \sket
 - \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
 \\
 &- \sbra  \phi^\dag ,\isigt \div \delta \Edd \phi \sket
@@ -621,6 +621,7 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 - \sbra \phi^\dag, \phi \delta \BEdd \sket.
 \end{equation} 
 \jcr{check that the sign issue didn't propagate here}
+\iwh{checked. Sign issues only propagated to the J terms in above (fixed) rest canceled out regardless}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Preliminary results}

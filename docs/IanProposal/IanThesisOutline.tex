@@ -1,6 +1,50 @@
-\documentclass{article}
-\usepackage{amsmath, amsthm, amssymb, amsfonts, booktabs, hyperref, graphicx, float, esint, xcolor, subcaption, xspace}
-% mathbbol, causing errors
+\documentclass[12pt]{report}
+
+\usepackage{tamuconfig}
+
+% Most of the packages that set the default settings
+% for the document have moved to the style file
+% tamuconfig.sty.
+
+%These next lines change the font. Fixes for certain
+%fonts will be implemented in a future release.
+
+%Comment this line if you do not wish to use Times
+%New Roman. The font used will then be the LaTeX
+%default of Computer Modern.
+\usepackage{times}
+%\usepackage{cmbright}
+\usepackage[T1]{fontenc}
+
+%This package allows for the use of graphics in the
+%document.
+\usepackage{amsmath, amsthm, amssymb, amsfonts, booktabs, graphicx, float, esint, subcaption, xspace, xcolor}
+
+%If you have JPEG format images, add .jpg as an
+%allowed file extension below. Same for Bitmaps (.bmp).
+\DeclareGraphicsExtensions{.png}
+
+%It is best practice to keep all your pictures in
+%one folder inside the main directory in which your
+%TeX file is kept. Here the folder is named "graphic."
+%Replace the name here with your folder's name, if needed.
+%The period is needed due to relative referencing.
+\graphicspath{ {./graphic/} }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Please place all your personal packages here. Check to
+%see if the packages you wish to use are not already
+%declared above. Placing all your personal packages
+%here allows me to determine if there are any package
+%issues in compilation, as well as any conflicts
+%that may arise by the order of loading.
+%--Sean Zachary Roberson
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Begin student defined packages.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \setlength{\abovedisplayskip}{0pt}
 \setlength{\belowdisplayskip}{0pt}
 \setlength{\abovedisplayshortskip}{0pt}
@@ -51,7 +95,7 @@
 %-----------------------------------------------------------
 \usepackage{ifthen}
 \newboolean{draftversion}
-\setboolean{draftversion}{false}
+\setboolean{draftversion}{true}
 %-----------------------------------------------------------
 %----------------------------------------------------------
 
@@ -59,26 +103,72 @@
 {
 \newcommand{\iwh}[1]{\comment{#1}{red}}
 \newcommand{\jcr}[1]{\comment{#1}{blue}}
+\newcommand{\todo}[1]{\comment{#1}{purple}}
 }
 {
 \newcommand{\iwh}[1]{\phantom{a}}
 \newcommand{\jcr}[1]{\phantom{a}}
+\newcommand{\todo}[1]{\phantom{a}}
 }
 \newcommand{\tcr}[1]{\comment{#1}{red}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%End student defined packages.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% End preamble. Document begins below.
+
 \begin{document}
 
-\begin{center}
-{\large Thesis Proposal~:\\
-{\it Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation}}\\
-\vspace{2mm}
-Ian Halvic, Texas A\&M University, NUEN
-\end{center}
+%The title of your document goes here.
+%Spacing may need to be adjusted if your title is long
+%and pushes the copyright off the page.
+\renewcommand{\tamumanuscripttitle}{Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation}
 
-\tableofcontents
-\newpage
+%Type only Thesis, Dissertation, or Record of Study.
+\renewcommand{\tamupapertype}{Thesis}
+
+%Your full name goes here, as it is in university records. Check your student record on Howdy if there is any mismatch.
+\renewcommand{\tamufullname}{Ian Halvic}
+
+%The degree title goes here. See the OGAPS site for more info.
+\renewcommand{\tamudegree}{Master of Science}
+\renewcommand{\tamuchairone}{Professor Jean Ragusa}
+
+
+% Uncomment out the next line if you have co-chairs.  You will also need to edit the titlepage.tex file.
+%\newcommand{\tamuchairtwo}{Additional Chair Name}
+\renewcommand{\tamumemberone}{Professor Marvin Adams}
+\newcommand{\tamumembertwo}{Professor Bojan Popov}
+\renewcommand{\tamudepthead}{Professor Yassin Hassan}
+
+%Type only May, August, or December.
+\renewcommand{\tamugradmonth}{XXXXX}
+\renewcommand{\tamugradyear}{2017}
+%Your department name goes here.
+\renewcommand{\tamudepartment}{Nuclear Engineering}
+
+
+\include{data/titlepage} % This is simply a file that formats and adds your titlepage, please do not edit this unless you have a specific need. .
+\include{data/abstract}
+\include{data/dedication}
+\include{data/acknowledgements}
+\include{data/contributors}
+\include{data/nomenclature}
+
+\include{data/lists}  % This is simply a file that formats and adds your toc, lof, and lot, please do not edit this unless you have a specific need.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                           SECTION I
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\pagestyle{plain} % No headers, just page numbers
+\pagenumbering{arabic} % Arabic numerals
+\setcounter{page}{1}
+
+
+\chapter{\uppercase {Introduction and Literature Review}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -209,6 +299,23 @@ The advantage of the above expression for $\delta \qoi$ is that two solves, one 
 \jcr{in the thesis, you need to go through the algebra for the transport and the VET equations. not here, this is only the proposal}
 \iwh{Will do}
  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  New template code for TAMU Theses and Dissertations starting Fall 2016.  
+%
+%
+%  Author: Sean Zachary Roberson
+%  Version 3.17.06
+%  Last Updated: 6/15/2017
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                           SECTION II
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\chapter{Derivations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrete Ordinates (Sn) Transport}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -231,6 +338,9 @@ where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is the angular quadrature weigh
 %%%%%%%----------------------------------------------------------------------------------------------
 In a fairly straightforward application of the adjoint method previously shown, the adjoint equation which corresponds to the Sn transport formulation with adjoint source (response function)
 $\angResp$ is
+
+\todo{Lay out the application of the adjoint process applied to the Sn Transport equation. More integration by parts.}
+
 \begin{equation}
 \label{snAdj}
 - \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \angResp_d
@@ -254,7 +364,7 @@ The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing
 \end{equation}
 
 \jcr{in the thesis, remember to explain that the adjoint source is not to be divided by 2 even when the response is isotropic in angle}
-
+\todo{Go into detail about which source to use, angular vs scalar source. Looking forward, I think this has an impact when considering the different adjoint forms: VET of the adjoint vs adjoint of the VET.}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Sn Transport Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -336,10 +446,10 @@ we investigate this question in the simpler setting a steady-state simulations.
 gist of the VET idea was to simplify sensitivity calculations for TD transport, so you need
 to demonstrate/explain that the ideas you applied in SS were actually going to be useful as well for TD}
 
-
+\todo{Add in more detail about time dependence. The ideal scenario would be to add in the Eddington equation with time derivatives, however that wouldn't make sense at this exact point in the thesis, as we haven't even derived the steady-state Eddington formulation yet. After a qualitative discussion here, consider looping back towards the end of thesis, presenting the time-dependent VET formulation.}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{VET Formulation}
+\subsection{Forward VET formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 The VET formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity evaluations. To present the VET formulation, the zero-th and first angular moments of steady-state transport equation are computed by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
@@ -412,11 +522,12 @@ Note that we recover the Robin boundary conditions for diffusion when $\Edd = \t
 
 Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to q.~\eqref{VEFForm} must also be formulated. The adjoint equation of the forward VET equation is given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
 and $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$. 
+
+\todo{Fully demonstrate the derivation of the below. This will make the appearance of the double-dot product more apparent also}
 \begin{equation}
 \label{adjForm}
 - \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
 \end{equation}
-\jcr{in thesis, you must demonstrate this equation fully}
 For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}.
 
 \begin{equation}
@@ -467,34 +578,7 @@ set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition.
 \jcr{in the end, we have almost the same expression but there is something fishy about your J+ J- signs. please check.}
 \iwh{yeah, I messed up the signs once in the derivation, but apparently just accidentally corrected it in the final expression above.}
 
-\jcr{finally, can you complete this section by adding a discussion of "`what if we started with the Sn adjoint equation to obtain the VET adjoint equations..."'}
 
-
-\iwh{I'll get something down for now, but I actually want to take another crack at this before it is fully dismissed. Our forward Eddington is essentially a non-linear term $E(\sigt,\sigs,q,\psi^{\text{inc}})$. Symmetry seems to imply that an "adjoint Eddington" would be a non-linear term in $E^\dag(\sigt,\sigs,q^\dag,\psi^{\dag,\text{out}})$. Importantly this drops the dependence on $q$ and $\psi^{\text{inc}}$ which are things we expect to be perturbed, and replaces it with a dependence on $q^\dag$ and $\psi^{\dag,\text{out}})$ which are things we don't really expect to be perturbed. If I can formulate a $\delta \qoi$ using an $E^\dag$ instead, this may solve the problem of VET not being exact in source perturbation cases. (while having an unknown effect on the sigma perturbation cases).}
-
-
-\iwh{Put another way, looking at normal angular transport adjoint methods, cross-section perturbation terms always involve an inner product of $\psi$ and $\psi^\dag$, but source terms only involve $\psi^\dag$. By storing $E$ we allow for us to get more information about $\psi$ from $\phi$, which is only helpful in the cross-section perturbation cases. Storing $E^\dag$ allows for more information about $\psi^\dag$ from $\phi^\dag$ which IS useful in the source cases.}
-
-
-The method by which the VET adjoint equation was formulation involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It's worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the angular dependent adjoint flux (which is still in a transport-like equation form) then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at   Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
-
-\begin{equation}
-\label{TranAdjVEFForm}
-- \div \left( \frac{1}{\sigt}\div \Edd^\dag \phi^\dag  \right) + \siga \phi^\dag  = \scalSource^\dag  \,.
-\end{equation}
-\begin{equation}
-2 J^{^\dag,\text{out}}(\vr) = \BEdd(\vr)^\dag \phi(\vr)^\dag  + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \phi^\dag  \,.
-\end{equation}
-In the above, an ``Adjoint Eddington Tensor'' and an ``Adjoint Boundary Eddington Factor'' terms are required, and defined as
-\begin{equation}
-\label{AdjEddDef}
-\Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} \, .
-\end{equation} 
-\begin{equation}
-\BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
-\end{equation}
-From the above, it should be clear that that the $\phi^\dag$ is not necessarily the same as the one that results from solving Eq.~\eqref{adjForm}.
-\iwh{This is the only part I am on the fence about what to do with. As discussed last week, I think the above formulation may have some uses, but I haven't really worked through it enough to do anything with in this section. So I don't really know how to end this without just leaving this dangling there}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -542,7 +626,7 @@ The first surface term can be dealt with readily using the adjoint boundary cond
 \approx&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} - \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
-\iwh{Note to self: In thesis, reorder the above a bit. Save the 1st order approximation for the end. Before that, place the delta c terms in the FEM form where a $\nabla$ is acting on the adjoint. This should cancel out a surface delta c term before we have to make any approximations.}
+\todo{Reorder the above a bit. Save the 1st order approximation for the end. Before that, place the delta c terms in the FEM form where a $\nabla$ is acting on the adjoint. This should cancel out a surface delta c term before we have to make any approximations.}
 Finally, we have
 \begin{equation}
 \label{QoIVETAdj}
@@ -572,6 +656,9 @@ Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the
 \end{equation}
 }
 \iwh{We discussed this in your office. The extra delta c term comes from the perturbed forward boundary conditions, which includes a delta c. In the thesis I will slightly rework the above section to make it a bit more explicit.}
+
+\subsection{Alternate boundary conditions}
+\todo{Consider an alternate form of the boundary conditions (for both forward and adjoint). Derive appropriate sensitivity. May need a slight reording of the section to mention the alternate boundary conditions a bit earlier}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Error from unperturbed Eddington assumption}
@@ -616,8 +703,48 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 - \sbra  \phi^\dag ,\isigt \div \delta \Edd \phi \sket
 - \sbra \phi^\dag, \phi \delta \BEdd \sket.
 \end{equation} 
-\jcr{check that the sign issue didn't propagate here}
-\iwh{checked. Sign issues only propagated to the J terms in above (fixed) rest canceled out regardless}
+
+
+\section{Alternate VET method}
+\todo{This is the "VET of the adjoint" as opposed to the above "adjoint of the VET". Rework section name. Explore this concept a bit more in-depth. I believe the angular vs scalar source choices end up playing a role in the difference in these two "adjoints".}
+
+
+\jcr{finally, can you complete this section by adding a discussion of "`what if we started with the Sn adjoint equation to obtain the VET adjoint equations..."'}
+
+
+\iwh{I'll get something down for now, but I actually want to take another crack at this before it is fully dismissed. Our forward Eddington is essentially a non-linear term $E(\sigt,\sigs,q,\psi^{\text{inc}})$. Symmetry seems to imply that an "adjoint Eddington" would be a non-linear term in $E^\dag(\sigt,\sigs,q^\dag,\psi^{\dag,\text{out}})$. Importantly this drops the dependence on $q$ and $\psi^{\text{inc}}$ which are things we expect to be perturbed, and replaces it with a dependence on $q^\dag$ and $\psi^{\dag,\text{out}})$ which are things we don't really expect to be perturbed. If I can formulate a $\delta \qoi$ using an $E^\dag$ instead, this may solve the problem of VET not being exact in source perturbation cases. (while having an unknown effect on the sigma perturbation cases).}
+
+
+\iwh{Put another way, looking at normal angular transport adjoint methods, cross-section perturbation terms always involve an inner product of $\psi$ and $\psi^\dag$, but source terms only involve $\psi^\dag$. By storing $E$ we allow for us to get more information about $\psi$ from $\phi$, which is only helpful in the cross-section perturbation cases. Storing $E^\dag$ allows for more information about $\psi^\dag$ from $\phi^\dag$ which IS useful in the source cases.}
+
+The method by which the VET adjoint equation was formulation involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It's worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the angular dependent adjoint flux (which is still in a transport-like equation form) then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at   Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
+
+\begin{equation}
+\label{TranAdjVEFForm}
+- \div \left( \frac{1}{\sigt}\div \Edd^\dag \phi^\dag  \right) + \siga \phi^\dag  = \scalSource^\dag  \,.
+\end{equation}
+\begin{equation}
+2 J^{^\dag,\text{out}}(\vr) = \BEdd(\vr)^\dag \phi(\vr)^\dag  + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \phi^\dag  \,.
+\end{equation}
+In the above, an ``Adjoint Eddington Tensor'' and an ``Adjoint Boundary Eddington Factor'' terms are required, and defined as
+\begin{equation}
+\label{AdjEddDef}
+\Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} \, .
+\end{equation} 
+\begin{equation}
+\BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
+\end{equation}
+From the above, it should be clear that that the $\phi^\dag$ is not necessarily the same as the one that results from solving Eq.~\eqref{adjForm}.
+\iwh{This is the only part I am on the fence about what to do with. As discussed last week, I think the above formulation may have some uses, but I haven't really worked through it enough to do anything with in this section. So I don't really know how to end this without just leaving this dangling there}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                           SECTION III
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\chapter{Results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Preliminary results}
@@ -640,24 +767,26 @@ The four methods were implemented in a MATLAB finite element method (FEM) solver
 %%%%%%%----------------------------------------------------------------------------------------------
 The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired \qoi is the total flux in the middle fifth of the system.
 
+\todo{Add in incident flux perturbations. In the unperturbed state, the incident flux is 0, so we cant use a \% perturbation and will instead have to opt for an absolute perturbation}
+
 \begin{figure}[H]
 \label{HomoPertt}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$. }
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$. }
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
@@ -672,21 +801,21 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{figure}[H]
 \label{HomoPerts}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/19sigsSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/20sigsSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21sigsSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
@@ -699,21 +828,21 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \begin{figure}[H]
 \label{HomoPertq}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/19qSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/20qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -738,21 +867,21 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/39sigtSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/40sigtSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/41sigtSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -765,21 +894,21 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPerts}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/39sigsSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/40sigsSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/41sigsSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -792,21 +921,21 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{figure}[H]
 \label{InHomoPertq}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/39qSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/40qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/41qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -829,25 +958,26 @@ The next test case has the same initial conditions as the previous homogeneous c
 To generate a streaming system, we retain the 5 equal width sectioning of the previous inhomogeneous example, but the second and fourth sections are converted to streaming regions ($\sigt \approx 0 $). Leaving three neutron producing sections separated by two streaming gaps. The \qoi remains as the total neutron count in the center fifth section.
 
 \jcr{same comments as above}
+\todo{Add in incident flux perturbation cases, similar to the homogeneous case.}
 
 \begin{figure}[H]
 \label{InHomoPertt}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/49sigtSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/50sigtSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/51sigtSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -860,21 +990,21 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \begin{figure}[H]
 \label{InHomoPerts}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/49sigsSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/50sigsSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/51sigsSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -887,21 +1017,21 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \begin{figure}[H]
 \label{InHomoPertq}
 \centering
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/49qSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/50qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
 \end{subfigure}
 \\
-\begin{subfigure}{.65\textwidth}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/51qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
@@ -911,39 +1041,55 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \label{fig:fig}
 \end{figure}
 
+\subsection{Shielding system, boundary source}
+\todo{Simple slab shield between detector and an incident flux source. Begin with a pure absorber shield which has a simple analytical solution, then introduce scattering both directly and through perturbation. This is a convenient test for the incident flux sensitivity.}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Goals of the Research}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Shielding system, volumetic source}
+\todo{Create a system that is analogous to the boundary source shielding system above, but instead uses a volumetric source on the hot side of the slab, but with the same incident flux on the shielded side. In Sn both of these should yield the same result for source perturbation, since both are ``exact'' for source perturbations. But in VET there is error in source perturbation due to the Eddington/Boundary Eddington perturbation I want to compare this to the boundary source case to see if the error is better/worse/same depending on the form the source takes (volumetric or incident)}
 
-\begin{itemize}
-\item Formulate an adjoint equation based on the VET transport formulation, including derivation of appropriate BC for the adjoint unknown.
-\item Define the inner products required for first-order sensitivity calculations using the VET formulation for perturbations in cross sections, sources, and incident flux, assuming an unperturbed Eddington Tensor
-\item Derive terms that were lost in the first-order adjoint sensitivity formulation due to the assumption that the Eddington remains unperturbed. 
-\item Implement the Sn and VET adjoint methods in a 1D FEM solver. 
-\item Using 1D test cases, compare the sensitivity values yielded by the VET adjoint method to those obtained by the standard Sn adjoint, as well as sensitivity obtained directly by multiple forward system solves in both Sn and VET.
-%\item Consider the alternate boundary conditions presented in Wieselquest. If promise is shown, derive the sensitivity inner products using this boundary condition. Repeat select test cases of the 1D implementation.
-\end{itemize}
+\subsection{No absorption system}
+\todo{Manufactured solution. Create a system bounded by two QoI regions on each side. In the center of the region, have an arbitrary system of sources and pure scattering only. The bounding QoI regions should detect all of the neutrons produced by the sources in the system, since they are just scattered about and change direction. However, the Eddington perturbation may cause errors in the sensitivity.}
 
-\newpage
 
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
 
-\newpage
+%The next line is the format for inserting new sections.
+%Replace the name "newsection"  with the name of your
+%new section file.
+%\include{data/newsection}
 
-%%%%%%
-%%%%%%%----------------------------------------------------------------------------------------------
-
-\bibliography{IanProp} 
+%fix spacing in bibliography, if any...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\let\oldbibitem\bibitem
+\renewcommand{\bibitem}{\setlength{\itemsep}{0pt}\oldbibitem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%The bibliography style declared is the IEEE format. If
+%you require a different style, see the document
+%bibstyles.pdf included in this package. This file,
+%hosted by the University of Vienna, shows several
+%bibliography styles and examples of in-text citation
+%and a references page.
 \bibliographystyle{ieeetr}
 
-%%%%%%%----------------------------------------------------------------------------------------------
+\phantomsection
+\addcontentsline{toc}{chapter}{REFERENCES}
+
+\renewcommand{\bibname}{{\normalsize\rm REFERENCES}}
+
+%This file is a .bib database that contains the sources.
+%This removes the dependency on the previous file
+%bibliography.tex.
+\bibliography{data/IanRefs}
+
+
+
+
+%This next line includes appendices. The file
+%appendix.tex contains commands pointing to
+%the appendix files; be sure to change these
+%pointers if you end up changing the filenames.
+%Leave this commented if you will not need
+%appendix material.
+%\include{data/appendices}
+
+
 \end{document}

@@ -1,4 +1,4 @@
-function [q]=ext_scatter_src(phi,forward)
+function [q]=ext_scatter_src(phi,forward,altMethod)
 % compute the total source (ext+scattering) 
 
 global dat npar snq
@@ -11,7 +11,7 @@ if forward
 else
     % we want q^\dagger(x,mu) = response function(x) given in load_input so
     % no change here
-    qv   = dat.qv_adjoint;%  / snq.sw; 
+    qv   = dat.qv_adjoint;
 end
 
 % initialize

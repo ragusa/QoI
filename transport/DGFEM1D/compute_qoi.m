@@ -22,7 +22,7 @@ else
     % brevity. it plays no role in the demonstration
     %
     % hence below, we need to do the division by 2 (sw)
-    if is_sn
+    if is_sn 
         qv = qv/snq.sw;
     end
 end

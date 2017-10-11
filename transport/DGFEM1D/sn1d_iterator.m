@@ -13,7 +13,7 @@ IO_opts.show_dqoi_from_bc=false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select angular approx (must be an even number)
-sn=8;
+sn=2;
 n_moments=1; logi_galerkin=false;
 [M,D,omega,weights] = gauss_legendre_1d(sn,n_moments,logi_galerkin);
 snq.D = D; snq.M = M; snq.n_dir = sn;
@@ -24,7 +24,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-pb_ID=21;
+pb_ID=57;
 load_input(pb_ID);
 console_io = false;
 do_dsa = true;
@@ -43,10 +43,10 @@ filename=fullfile('C:\Users\Ian\checkout','output',file);
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
 % linspace(-0.1,0.1,21);
-sigtPertFactor=[0];
-sigsPertFactor=[0];
+sigaPertFactor=[0];
+sigsPertFactor=linspace(-0.1,0.1,21);
 sourcePertFactor=[0];
-incPertFactor=linspace(0,0.1,11);;
+incPertFactor=[0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -95,19 +95,19 @@ fprintf('qoi using VEF math adj: \t %g \n',qoi_vef_a);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('-----BEGIN PERTURBED DATA OUTPUT----- \n')
-for ii=1:numel(sigtPertFactor)
+for ii=1:numel(sigaPertFactor)
     for jj=1:numel(sigsPertFactor)
         for kk=1:numel(sourcePertFactor)
             for ll=1:numel(incPertFactor)
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % Load Perturbations. Used in adjoint sensitivity
-                    dat.sigtPert = dat.sigtPertRegion.*dat.sigt*sigtPertFactor(ii);
+                    dat.sigaPert = dat.sigaPertRegion.*dat.siga*sigaPertFactor(ii);
                     dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFactor(jj);
-                    dat.sigaPert = dat.sigtPert - dat.sigsPert;
+                    dat.sigtPert = dat.sigaPert + dat.sigsPert;
                     dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*sourcePertFactor(kk);
                     %relative and absolute pert for incident flux
-                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0;
-                    dat.psiIncPert = dat.psiIncPert+dat.incPertRegion*incPertFactor(ll);
+                    dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*incPertFactor(ll);
+                    dat.psiIncPert = dat.psiIncPert+dat.incPertRegion*0;
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     % perturbations
@@ -161,7 +161,7 @@ for ii=1:numel(sigtPertFactor)
                     total_deltaE_term=deltaE_term+deltaB_L+deltaB_R;
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     outputLine=[pb_ID qoi_sn_f qoi_sn_a qoi_vef_f qoi_vef_a];
-                    outputLine=[outputLine sigtPertFactor(ii) sigsPertFactor(jj) sourcePertFactor(kk) incPertFactor(ll) ];
+                    outputLine=[outputLine sigaPertFactor(ii) sigsPertFactor(jj) sourcePertFactor(kk) incPertFactor(ll) ];
                     outputLine=[outputLine  delta_qoi_sn_f  delta_qoi_VEF_f  delta_qoi_sn_a  delta_qoi_VEF_math_a Rel_L1_diff];
                     outputLine=[outputLine  total_deltaE_term];
                     outputMatrix = [outputMatrix; outputLine];

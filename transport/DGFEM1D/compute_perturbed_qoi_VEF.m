@@ -51,7 +51,7 @@ for iel=1:npar.nel
     E1=E(2,iel);
     Eloc = (E1+E0)/2+xq*(E1-E0)/2;
     dEdx = (E1-E0)/2;
-    delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
+    delta_qext = dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
     d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;

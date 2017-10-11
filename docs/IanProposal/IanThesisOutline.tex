@@ -720,6 +720,31 @@ Comparing the above formulation with the unperturbed Eddington case shows that t
 The method by which the VET adjoint equation was formulation involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It's worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the angular dependent adjoint flux (which is still in a transport-like equation form) then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at   Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
 
 \begin{equation}
+\label{snAdjAlt}
+- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \angResp_d
+\end{equation}
+%
+\begin{equation}
+\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
+\end{equation}
+
+\begin{equation}
+\label{snAdjQoIAlt}
+QoI = \bra \psi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket
+\end{equation}
+
+\begin{equation}
+\label{0am}
+\div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = \scalSource^\dag  \,,
+\end{equation}
+%
+\begin{equation}
+\label{1am}
+\div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0 \,.
+\end{equation}
+%
+
+\begin{equation}
 \label{TranAdjVEFForm}
 - \div \left( \frac{1}{\sigt}\div \Edd^\dag \phi^\dag  \right) + \siga \phi^\dag  = \scalSource^\dag  \,.
 \end{equation}
@@ -734,7 +759,29 @@ In the above, an ``Adjoint Eddington Tensor'' and an ``Adjoint Boundary Eddingto
 \begin{equation}
 \BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
 \end{equation}
-From the above, it should be clear that that the $\phi^\dag$ is not necessarily the same as the one that results from solving Eq.~\eqref{adjForm}.
+From the above, it should be clear that that the $\phi^\dag$ is not necessarily the same as the one that results from solving Eq.~\eqref{adjForm}. To avoid confusion, this alternate formulation will use $\varphi^\dag$ as the solution. Do the alternate system to focus on is 
+\begin{equation}
+\label{TranAdjVEFForm}
+- \div \left( \frac{1}{\sigt}\div \Edd^\dag \varphi^\dag  \right) + \siga \varphi^\dag  = \scalSource^\dag  \,.
+\end{equation}
+\begin{equation}
+2 J^{\dag,\text{out}}(\vr) = \BEdd^\dag(\vr) \varphi^\dag(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \varphi^\dag  \,.
+\end{equation}
+Of important note is that since the above was directly derived from the Sn-transport adjoint equations, the QoI definition  still holds.
+\begin{equation}
+\label{AdjQoIAlt}
+QoI = \bra \psi , \angSource^\dag \ket = \bra \psi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket = \bra \varphi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket
+\end{equation}
+\todo{There is a boundary term here we DID NOT have to deal with in the normal VEF formulation, so I will need to loop back and resolve this a bit more}
+The above formulation also has a corresponding forward equation,
+\begin{equation}
+\label{ForwardVEFAlt}
+- \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi  = \scalSource  \,.
+\end{equation}
+\begin{equation}
+2 J^{\text{in}}(\vr) = \BEdd^\dag(\vr) \varphi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd^\dag  \varphi  \, ???????.
+\end{equation} 
+
 \iwh{This is the only part I am on the fence about what to do with. As discussed last week, I think the above formulation may have some uses, but I haven't really worked through it enough to do anything with in this section. So I don't really know how to end this without just leaving this dangling there}
 
 
@@ -763,38 +810,121 @@ The four methods were implemented in a MATLAB finite element method (FEM) solver
 \end{subequations}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Homogeneous System, Uniform Perturbations}
+\subsection{Manufactured Solutions}
 %%%%%%%----------------------------------------------------------------------------------------------
-The first test case consisted of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired \qoi is the total flux in the middle fifth of the system.
-
-\todo{Add in incident flux perturbations. In the unperturbed state, the incident flux is 0, so we cant use a \% perturbation and will instead have to opt for an absolute perturbation}
+\subsubsection{Pure Absorber}
+\begin{equation}
+\phi=\frac{q}{\sigma_a}
+\end{equation}
 
 \begin{figure}[H]
-\label{HomoPertt}
+\label{Absorber}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$. }
+  \includegraphics[width=.98\linewidth]{figures/22qSens.png}
+  \caption{Unperturbed state: $\siga=4$, $\sigs=0$. }
   \label{fig:sfig1}
 \end{subfigure}%
-\\
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$. }
+  \includegraphics[width=.98\linewidth]{figures/22sigaSens.png}
+  \caption{Unperturbed state: $\sigt=4$, $\sigs=0$. }
   \label{fig:sfig2}
 \end{subfigure}
-\\
+\end{figure}
+
+\subsubsection{Incident Flux Through A Shield}
+\begin{equation}
+\phi = \phi_0 e^{\sigma_a \mu \Delta x}
+\end{equation}
+\begin{figure}[H]
+\label{Absorber}
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig3}
+  \includegraphics[width=.98\linewidth]{figures/23incSens.png}
+  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/23sigaSens.png}
+  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
+  \label{fig:sfig2}
 \end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity for a uniform perturbation in a homogeneous system.}
-\label{fig:fig}
 \end{figure}
+
+\subsubsection{Source Through A Shield}
+\begin{equation}
+\phi = \phi_0 e^{\sigma_a \mu \Delta x}
+\end{equation}
+
+\begin{figure}[H]
+\label{Absorber}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/24qSens.png}
+  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/24sigaSens.png}
+  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
+  \label{fig:sfig2}
+\end{subfigure}
+\end{figure}
+
+
+\subsubsection{Incident Flux Through A Scatterer}
+
+\begin{figure}[H]
+\label{Scatterer}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/56incSens.png}
+  \caption{Unperturbed shield: $\siga=0$, $\sigs=1$. }
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/56sigsSens.png}
+  \caption{Unperturbed shield: $\siga=0$, $\sigs=1$. }
+  \label{fig:sfig2}
+\end{subfigure}
+\end{figure}
+
+\subsubsection{Incident Flux Through A Scatterer into Absorber}
+
+\begin{figure}[H]
+\label{Scatterer}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/57incSens.png}
+  \caption{Unperturbed shield: $\siga=0.1$, $\sigs=1$. }
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/57sigsSens.png}
+  \caption{Unperturbed shield: $\siga=0.1$, $\sigs=1$. }
+  \label{fig:sfig2}
+\end{subfigure}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simple Cases}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%----------------------------------------------------------------------------------------------
+\subsubsection{Homogeneous System, Uniform Perturbations}
+%%%%%%%----------------------------------------------------------------------------------------------
+Test case consisting of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired \qoi is the total flux in the middle fifth of the system.
+
+\todo{Add in incident flux perturbations. In the unperturbed state, the incident flux is 0, so we cant use a \% perturbation and will instead have to opt for an absolute perturbation}
 
 \jcr{change the other figures/caption in the same manner}
 
@@ -803,25 +933,43 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/19sigsSens.png}
+  \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/19sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
+  \label{fig:sfig4}
 \end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/20sigsSens.png}
+  \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
-\end{subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/20sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
+  \label{fig:sfig5}
+\end{subfigure}%
 \\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
+  \label{fig:sfig3}
+\end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21sigsSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity for uniformly perturbed system.}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of $\sigt$ and $\sigs$ perturbation sensitivity for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -834,27 +982,93 @@ The first test case consisted of a 1D homogeneous system, with a volumetric sour
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/19incSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \label{fig:sfig4}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/20qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
-\end{subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/20incSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig5}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/21qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of source perturbation sensitivity for uniformly perturbed system.}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/21incSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of source and incident flux perturbation sensitivities for uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
 \jcr{comment the results!}
 
 \jcr{why no examples with changing the incident flux value?}
+
+
+
+\subsubsection{Region boundary perturbation}
+\begin{figure}[H]
+\label{Boundaries}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/43sigaSens.png}
+  \caption{QoI outside}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/43sigsSens.png}
+  \caption{QoI outside}
+  \label{fig:sfig4}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/44sigaSens.png}
+  \caption{centered QoI}
+  \label{fig:sfig2}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/44sigsSens.png}
+  \caption{centered QoI}
+  \label{fig:sfig5}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/45sigaSens.png}
+  \caption{QoI inside Pert}
+  \label{fig:sfig3}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/45sigsSens.png}
+  \caption{QoI inside pert}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of various qoi to layer perturbation system. Initial is homogeneous $\siga=1$ and $sigs=1$.}
+\label{fig:fig}
+\end{figure}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous initial system, Non-Uniform Perturbations}
@@ -870,51 +1084,42 @@ The next test case has the same initial conditions as the previous homogeneous c
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/39sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/39sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
+  \label{fig:sfig4}
 \end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/40sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
-\end{subfigure}
-\\
+\end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/41sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity for non-uniformly perturbed system.}
-\label{fig:fig}
-\end{figure}
-
-\begin{figure}[H]
-\label{InHomoPerts}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/39sigsSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures/40sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
+  \label{fig:sfig5}
 \end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/40sigsSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}
-\\
+  \includegraphics[width=.98\linewidth]{figures/41sigtSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
+  \label{fig:sfig3}
+\end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/41sigsSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity for non-uniformly perturbed system.}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of $\siga$ and $\sigs$ perturbation sensitivity for non-uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -927,21 +1132,39 @@ The next test case has the same initial conditions as the previous homogeneous c
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \label{fig:sfig4}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/40qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
-\end{subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig5}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/41qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of source perturbation sensitivity for non-uniformly perturbed system.}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of source ans incident perturbation sensitivities for non-uniformly perturbed system.}
 \label{fig:fig}
 \end{figure}
 
@@ -950,10 +1173,8 @@ The next test case has the same initial conditions as the previous homogeneous c
 
 \jcr{why no examples with changing the incident flux value?}
 
-
-
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Streaming system}
+\subsubsection{Streaming system}
 %%%%%%%----------------------------------------------------------------------------------------------
 To generate a streaming system, we retain the 5 equal width sectioning of the previous inhomogeneous example, but the second and fourth sections are converted to streaming regions ($\sigt \approx 0 $). Leaving three neutron producing sections separated by two streaming gaps. The \qoi remains as the total neutron count in the center fifth section.
 
@@ -961,58 +1182,50 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \todo{Add in incident flux perturbation cases, similar to the homogeneous case.}
 
 \begin{figure}[H]
-\label{InHomoPertt}
+\label{Streaming}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/49sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
   \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/49sigsSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
+  \label{fig:sfig4}
 \end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/50sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
   \label{fig:sfig2}
-\end{subfigure}
-\\
+\end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/51sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of $\sigt$ perturbation sensitivity for perturbed streaming system.}
-\label{fig:fig}
-\end{figure}
-
-\begin{figure}[H]
-\label{InHomoPerts}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/49sigsSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures/50sigsSens.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
+  \label{fig:sfig5}
 \end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/50sigsSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}
-\\
+  \includegraphics[width=.98\linewidth]{figures/51sigtSens.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
+  \label{fig:sfig3}
+\end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/51sigsSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}
-\caption{Plots of $\sigs$ perturbation sensitivity for perturbed streaming system.}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of $\sigt$ perturbation sensitivity for perturbed streaming system.}
 \label{fig:fig}
 \end{figure}
+
 
 \begin{figure}[H]
 \label{InHomoPertq}
@@ -1023,31 +1236,141 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
   \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
   \label{fig:sfig1}
 \end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \label{fig:sfig4}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/50qSens.png}
   \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
   \label{fig:sfig2}
-\end{subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig5}
+\end{subfigure}%
 \\
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures/51qSens.png}
   \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
   \label{fig:sfig3}
-\end{subfigure}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig6}
+\end{subfigure}%
 \caption{Plots of source perturbation sensitivity for perturbed streaming system.}
 \label{fig:fig}
 \end{figure}
 
-\subsection{Shielding system, boundary source}
-\todo{Simple slab shield between detector and an incident flux source. Begin with a pure absorber shield which has a simple analytical solution, then introduce scattering both directly and through perturbation. This is a convenient test for the incident flux sensitivity.}
 
-\subsection{Shielding system, volumetic source}
-\todo{Create a system that is analogous to the boundary source shielding system above, but instead uses a volumetric source on the hot side of the slab, but with the same incident flux on the shielded side. In Sn both of these should yield the same result for source perturbation, since both are ``exact'' for source perturbations. But in VET there is error in source perturbation due to the Eddington/Boundary Eddington perturbation I want to compare this to the boundary source case to see if the error is better/worse/same depending on the form the source takes (volumetric or incident)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Complex systems}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Reed Problem}
 
-\subsection{No absorption system}
+\begin{figure}[H]
+\label{Streaming}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/7sigaSens.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/7sigsSens.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig4}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig2}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig5}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig3}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state:}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Sigma perturbations Reed problem}
+\label{fig:fig}
+\end{figure}
+
+
+\begin{figure}[H]
+\label{InHomoPertq}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/7qSens.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
+  \label{fig:sfig4}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig2}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
+  \label{fig:sfig5}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig3}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures/holder.png}
+  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
+  \label{fig:sfig6}
+\end{subfigure}%
+\caption{Plots of source perturbation sensitivity for perturbed streaming system.}
+\label{fig:fig}
+\end{figure}
+
+
+\subsubsection{No absorption system}
 \todo{Manufactured solution. Create a system bounded by two QoI regions on each side. In the center of the region, have an arbitrary system of sources and pure scattering only. The bounding QoI regions should detect all of the neutrons produced by the sources in the system, since they are just scattered about and change direction. However, the Eddington perturbation may cause errors in the sensitivity.}
 
 

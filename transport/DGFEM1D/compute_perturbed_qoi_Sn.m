@@ -55,7 +55,10 @@ for iel=1:npar.nel
     my_zone=npar.iel2zon(iel);
     delta_sigs= dat.sigsPert(my_zone);
     delta_sigt= dat.sigtPert(my_zone);
-    delta_qext = qv(my_zone)*dat.sourcePert(my_zone);
+    delta_qext = dat.sourcePert(my_zone);
+    if is_sn,~use_forward_flux;
+        delta_qext = delta_qext / snq.sw;
+    end
     Jac   = npar.dx(iel)/2;
     % assemble
     d_qoi = d_qoi + Jac*dot(m*ones(2,1)*delta_qext,phia(:,iel)) ;

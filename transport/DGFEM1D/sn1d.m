@@ -29,7 +29,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-dat.pb_ID=68;
+dat.pb_ID=83;
 load_input(dat.pb_ID);
 IO_opts.console_io = false;
 dat.do_dsa = true;
@@ -98,7 +98,7 @@ today=datestr(now,'mmddyyHHMM');
 %[pathstr,name,ext] = fileparts(pwd); 
 file=['DGFEM1D_prob',int2str(dat.pb_ID),'_',today,'.csv'];
 filename=fullfile('C:\Users\Ian\checkout','output',file);
-figurePath='C:\Users\Ian\checkout\QoI\docs\IanProposal';
+figurePath='C:\Users\Ian\checkout\QoI\docs\IanProposal\figures2';
 figureFolder='figures2';
 %filename=fullfile('E:\Storage\git_checkout','output',file);
 % outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
@@ -147,7 +147,6 @@ for ii=1:numel(sigaPertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    sigaPertValues=[sigaPertValues sigaPertFactor(ii)];
     sigaSensValues=[sigaSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
 end
 dat=datStart;
@@ -173,7 +172,6 @@ for ii=1:numel(sigsPertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    sigsPertValues=[sigsPertValues sigaPertFactor(ii)];
     sigsSensValues=[sigsSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
 end
 dat=datStart;
@@ -196,7 +194,6 @@ for ii=1:numel(sourcePertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    qPertValues=[qPertValues sigaPertFactor(ii)];
     qSensValues=[qSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
 end
 dat=datStart;
@@ -220,78 +217,89 @@ for ii=1:numel(incPertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    incPertValues=[incPertValues sigaPertFactor(ii)];
     incSensValues=[incSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
 end
 
 figure(600)
 hold on
-title(file,'interpreter','none')
 xlabel('\sigma_a % change')
 ylabel('QoI % response')
-plot(sigaPertValues,sigaSensValues(:,1)./(results.qoi_sn_f),'-+r')
-plot(sigaPertValues,sigaSensValues(:,2)./(results.qoi_sn_f),'--+g')
-plot(sigaPertValues,sigaSensValues(:,3)./(results.qoi_sn_f),'-+m')
-plot(sigaPertValues,sigaSensValues(:,4)./(results.qoi_sn_f),'--+b')
+plot(sigaPertFactor,sigaSensValues(:,1)./(results.qoi_sn_f),'-+r')
+plot(sigaPertFactor,sigaSensValues(:,2)./(results.qoi_sn_f),'--+g')
+plot(sigaPertFactor,sigaSensValues(:,3)./(results.qoi_sn_f),'-+m')
+plot(sigaPertFactor,sigaSensValues(:,4)./(results.qoi_sn_f),'--+b')
 legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
-print(figureName,'-dpng');
+dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
+fullPath=fullfile(figurePath,{figureFile,dataFile});
+outputMatrix = [sigaPertFactor'  sigaSensValues];
+csvwrite(fullPath{2},outputMatrix)
+title(dataFile,'interpreter','none')
+print(fullPath{1},'-dpng');
 
 figure(601)
 hold on
-title(file,'interpreter','none')
 xlabel('\sigma_s % change')
 ylabel('QoI % response')
-plot(sigsPertValues,sigsSensValues(:,1)./(results.qoi_sn_f),'-+r')
-plot(sigsPertValues,sigsSensValues(:,2)./(results.qoi_sn_f),'--+g')
-plot(sigsPertValues,sigsSensValues(:,3)./(results.qoi_sn_f),'-+m')
-plot(sigsPertValues,sigsSensValues(:,4)./(results.qoi_sn_f),'--+b')
+plot(sigsPertFactor,sigsSensValues(:,1)./(results.qoi_sn_f),'-+r')
+plot(sigsPertFactor,sigsSensValues(:,2)./(results.qoi_sn_f),'--+g')
+plot(sigsPertFactor,sigsSensValues(:,3)./(results.qoi_sn_f),'-+m')
+plot(sigsPertFactor,sigsSensValues(:,4)./(results.qoi_sn_f),'--+b')
 legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
-print(figureName,'-dpng');
+dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
+fullPath=fullfile(figurePath,{figureFile,dataFile});
+outputMatrix = [sigsPertFactor'  sigsSensValues];
+csvwrite(fullPath{2},outputMatrix)
+title(dataFile,'interpreter','none')
+print(fullPath{1},'-dpng');
 
 figure(602)
 hold on
-title(file,'interpreter','none')
 xlabel('q % change')
 ylabel('QoI % response')
-plot(qPertValues,qSensValues(:,1)./(results.qoi_sn_f),'-+r')
-plot(qPertValues,qSensValues(:,2)./(results.qoi_sn_f),'--+g')
-plot(qPertValues,qSensValues(:,3)./(results.qoi_sn_f),'-+m')
-plot(qPertValues,qSensValues(:,4)./(results.qoi_sn_f),'--+b')
+plot(sourcePertFactor,qSensValues(:,1)./(results.qoi_sn_f),'-+r')
+plot(sourcePertFactor,qSensValues(:,2)./(results.qoi_sn_f),'--+g')
+plot(sourcePertFactor,qSensValues(:,3)./(results.qoi_sn_f),'-+m')
+plot(sourcePertFactor,qSensValues(:,4)./(results.qoi_sn_f),'--+b')
 legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
-print(figureName,'-dpng');
+dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
+fullPath=fullfile(figurePath,{figureFile,dataFile});
+outputMatrix = [sourcePertFactor'  qSensValues];
+csvwrite(fullPath{2},outputMatrix)
+title(dataFile,'interpreter','none')
+print(fullPath{1},'-dpng');
 
 figure(603)
 hold on
-title(file,'interpreter','none')
 xlabel('\Psi^- % change')
 ylabel('QoI % response')
-plot(incPertValues,incSensValues(:,1)./(results.qoi_sn_f),'-+r')
-plot(incPertValues,incSensValues(:,2)./(results.qoi_sn_f),'--+g')
-plot(incPertValues,incSensValues(:,3)./(results.qoi_sn_f),'-+m')
-plot(incPertValues,incSensValues(:,4)./(results.qoi_sn_f),'--+b')
+plot(incPertFactor,incSensValues(:,1)./(results.qoi_sn_f),'-+r')
+plot(incPertFactor,incSensValues(:,2)./(results.qoi_sn_f),'--+g')
+plot(incPertFactor,incSensValues(:,3)./(results.qoi_sn_f),'-+m')
+plot(incPertFactor,incSensValues(:,4)./(results.qoi_sn_f),'--+b')
 legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incSens'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
-print(figureName,'-dpng');
+dataFile=['data\',int2str(dat.pb_ID),'inc.csv'];
+fullPath=fullfile(figurePath,{figureFile,dataFile});
+outputMatrix = [incPertFactor'  incSensValues];
+csvwrite(fullPath{2},outputMatrix)
+title(dataFile,'interpreter','none')
+print(fullPath{1},'-dpng');
 
 do_plot(results.phi,'Sn',610,dat.forward_flux)
 do_plot(results.phiVEF,'VEF',610,dat.forward_flux)
 figure(611)
 figureFile=[int2str(dat.pb_ID),'phi'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
+figureName=fullfile(figurePath,figureFile);
 print(figureName,'-dpng');
 
 do_plot(results.phia,'Sn',611,dat.adjoint_flux)
 do_plot(results.phiVEFa,'VEF',611,dat.adjoint_flux)
 figure(612)
 figureFile=[int2str(dat.pb_ID),'phia'];
-figureName=fullfile(figurePath,figureFolder,figureFile);
+figureName=fullfile(figurePath,figureFile);
 print(figureName,'-dpng');
 
 end

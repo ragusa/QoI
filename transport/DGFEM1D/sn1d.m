@@ -29,7 +29,7 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-dat.pb_ID=83;
+dat.pb_ID=108;
 load_input(dat.pb_ID);
 IO_opts.console_io = false;
 dat.do_dsa = true;
@@ -53,18 +53,18 @@ displayUnpertQOI
 % [phiVEFa_alt]=solve_VEF(dat.adjoint_flux,Ea,Ebda);
 % do_plot(phiVEFa_alt,'VEF-alt',100,dat.adjoint_flux)
 
-%singleSolve
-multiSolve
+singleSolve
+%multiSolve
 
 end
 
 function singleSolve
 global npar dat snq IO_opts results
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigaPert = dat.sigaPertRegion.*dat.siga*-0.1+dat.sigaPertRegion.*0;
+dat.sigaPert = dat.sigaPertRegion.*dat.siga*-0.0+dat.sigaPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0.0+dat.sigsPertRegion.*0;
 dat.sigtPert = dat.sigaPert + dat.sigsPert;
-dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.1;
 dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0.0+dat.incPertRegion*0.0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

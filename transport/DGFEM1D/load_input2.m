@@ -566,7 +566,8 @@ case 83 %Vac to Scat
 
         
     otherwise
-        error('problem ID %g is unknown',pb_ID);
+        [nel_zone,width_zone,sigt,sigs,qvf,incf,qva,inca]=load_input3(pb_ID);
+        %error('problem ID %g is unknown',pb_ID);
 end
 return
 end

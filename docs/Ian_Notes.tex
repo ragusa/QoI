@@ -155,6 +155,178 @@ Manipulate this a bit using product rule
 \end{split}
 \end{equation}
 
+\subsection{quick look at sources}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{108. Vac to scat}
+\begin{verbatim}
+case 108 %
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [1 1 1 1 1 1];
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1 1];
+        sigs=[1 1 1 0 0 0];
+        % volumetric source value, per zone
+        qvf=[1 1 1 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        incf((sn/2)+1:sn) = 0;
+        % volumetric response value, per zone
+        qva=[0 0 1 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[0 0 0 1 1 1];
+        dat.sigsPertRegion=[1 1 1 0 0 0];
+        dat.sourcePertRegion=[1 1 1 1 1 1];
+        dat.incPertRegion(1:sn) = 1; 
+        
+-----BEGIN UNPERTURBED QOI DATA OUTPUT----- 
+qoi using sn forward: 	 6.39286 
+qoi using sn adjoint: 	 6.39286 
+qoi using VEF forward: 	 6.3924 
+qoi using VEF adjoint: 	 6.3924 
+\end{verbatim}
+
+\begin{figure}[H]
+\label{Case108Flux}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108phi.png}
+  \caption{Forward flux}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108phia.png}
+  \caption{Response flux}
+  \label{fig:sfig4}
+\end{subfigure}%
+\end{figure}
+
+
+\begin{figure}[H]
+\label{Case108Sens}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108qSens.png}
+  \caption{Source sensitivity}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108incSens.png}
+  \caption{Incident flux sensitivity}
+  \label{fig:sfig4}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108sigsSens.png}
+  \caption{Scattering cross-section sensitivity}
+  \label{fig:sfig2}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/108sigaSens.png}
+  \caption{Absorption cross-section sensitivity}
+  \label{fig:sfig5}
+\end{subfigure}%
+\caption{}
+\label{fig:fig}
+\end{figure}
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{109. Vac to scat}
+\begin{verbatim}
+case 109 %
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10 10]*4;
+        % width of each zone
+        width_zone = [1 1 1 1 1 1];
+        % sigt/sigs per zone
+        sigt=[1 1 1 1 1 1];
+        sigs=[1 1 1 0 0 0];
+        % volumetric source value, per zone
+        qvf=[1 1 1 0 0 0];
+        % incoming flux values
+        incf(1:sn) = 0;
+        incf((sn/2)+1:sn) = 1;
+        % volumetric response value, per zone
+        qva=[0 0 1 1 0 0];
+        % incoming adj flux values
+        inca(1:sn) = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[0 0 0 1 1 1];
+        dat.sigsPertRegion=[1 1 1 0 0 0];
+        dat.sourcePertRegion=[1 1 1 1 1 1];
+        dat.incPertRegion(1:sn) = 1; 
+        
+-----BEGIN UNPERTURBED QOI DATA OUTPUT----- 
+qoi using sn forward: 	 7.03606 
+qoi using sn adjoint: 	 7.03606 
+qoi using VEF forward: 	 7.03561 
+qoi using VEF adjoint: 	 7.03561 
+\end{verbatim}
+
+\begin{figure}[H]
+\label{Case109Flux}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109phi.png}
+  \caption{Forward flux}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109phia.png}
+  \caption{Response flux}
+  \label{fig:sfig4}
+\end{subfigure}%
+\end{figure}
+
+
+\begin{figure}[H]
+\label{Case109Sens}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109qSens.png}
+  \caption{Source sensitivity}
+  \label{fig:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109incSens.png}
+  \caption{Incident flux sensitivity}
+  \label{fig:sfig4}
+\end{subfigure}%
+\\
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109sigsSens.png}
+  \caption{Scattering cross-section sensitivity}
+  \label{fig:sfig2}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{IanProposal/figures2/109sigaSens.png}
+  \caption{Absorption cross-section sensitivity}
+  \label{fig:sfig5}
+\end{subfigure}%
+\caption{}
+\label{fig:fig}
+\end{figure}
+
 \section{Some results}
 \newgeometry{left=0.5cm,,right=0.1cm,bottom=0.5cm}
 \newpage

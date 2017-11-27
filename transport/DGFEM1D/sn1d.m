@@ -6,6 +6,7 @@ close all; clc; clear variables; clear global;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global npar dat snq IO_opts results
 % set variable once for all
+dat.pb_ID=110;
 dat.forward_flux = true;
 dat.adjoint_flux = ~dat.forward_flux;
 do_transport_adjoint=false;
@@ -29,7 +30,6 @@ snq.sw = sum(snq.w);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % select data problem
-dat.pb_ID=108;
 load_input(dat.pb_ID);
 IO_opts.console_io = false;
 dat.do_dsa = true;
@@ -60,11 +60,17 @@ end
 
 function singleSolve
 global npar dat snq IO_opts results
+
+[dEdq, dEdsa, dEdss]=getEslopes;
+
+qPertFac=0.15;
+sigaPertFac=0.0;
+sigsPertFac=0.0;
 % Load Perturbations. Used in adjoint sensitivity
-dat.sigaPert = dat.sigaPertRegion.*dat.siga*-0.0+dat.sigaPertRegion.*0;
-dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0.0+dat.sigsPertRegion.*0;
+dat.sigaPert = dat.sigaPertRegion.*dat.siga*sigaPertFac+dat.sigaPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFac+dat.sigsPertRegion.*0;
 dat.sigtPert = dat.sigaPert + dat.sigsPert;
-dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.1;
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*qPertFac;
 dat.psiIncPert = dat.incPertRegion.*dat.inc_forward*0.0+dat.incPertRegion*0.0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,18 +86,33 @@ dat.inc_forward = dat.inc_forward + dat.psiIncPert;
 % solve perturbed forward transport problem using sweeps
 [results.phi_pert,results.E_pert,results.Ebd_pert,results.psi_pert]=solveForwardSn;
 [results.phiVEF_pert]=solveForwardVEF;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 calcForwardSensitivity
-dat = dat_saved;
+dat=dat_saved;
+E_interp=results.E+(dEdq.*qPertFac+dEdsa.*sigaPertFac+dEdss.*sigsPertFac);
 calcAdjointSensitivity
+
+% delta_qoi_VEF_interp = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,E_interp);
+% fprintf('delta qoi using VEF math adjoint E Interp: \t\t %g \n',delta_qoi_VEF_interp);
+% delta_qoi_VEF_Epert = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E_pert);
+% fprintf('delta qoi using VEF math adjoint E Interp: \t\t %g \n',delta_qoi_VEF_Epert);
+[results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
+%fprintf('E Interp Correction: \t\t %g \n',deltaE_term);
+
 displaySensitivity
 generatePlots
 displaySensitivityError
+eddingtonTerms
+do_plot(E_interp,'Einterp',150,dat.forward_flux,1)
+do_plot(E_interp-results.E,'\delta E estimate',152,dat.forward_flux,1)
+do_plot(results.E_pert-results.E,'\delta E real',152,dat.forward_flux,1)
 end
 
 function multiSolve
 global npar dat snq IO_opts results
 fprintf('\n-----BEGIN MULTIPLE SENSITIVITY SOLVE----- \n')
+
+[dEdq, dEdsa, dEdss]=getEslopes;
+
 %Specify Output File Path
 outputMatrix=[];
 today=datestr(now,'mmddyyHHMM');
@@ -144,10 +165,13 @@ for ii=1:numel(sigaPertFactor)
     [results.phiVEF_pert]=solveForwardVEF;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     calcForwardSensitivity
-    dat = dat_saved;
+    dat = dat_saved;    
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    sigaSensValues=[sigaSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
+    E_interp=results.E+(dEdsa.*sigaPertFactor(ii));
+    [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
+    delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp;
+    sigaSensValues=[sigaSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a delta_qoi_VEF_a_Eint]];   
 end
 dat=datStart;
 for ii=1:numel(sigsPertFactor)
@@ -172,7 +196,10 @@ for ii=1:numel(sigsPertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    sigsSensValues=[sigsSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
+    E_interp=results.E+(dEdss.*sigsPertFactor(ii));
+    [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
+    delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp;
+    sigsSensValues=[sigsSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a delta_qoi_VEF_a_Eint]];
 end
 dat=datStart;
 for ii=1:numel(sourcePertFactor)
@@ -194,7 +221,10 @@ for ii=1:numel(sourcePertFactor)
     dat = dat_saved;
     calcAdjointSensitivity
     Rel_L1_diff=find_Eddington_diff(results.E,results.E_pert);
-    qSensValues=[qSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a]];
+    E_interp=results.E+(dEdq.*sourcePertFactor(ii));
+    [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
+    delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp;
+    qSensValues=[qSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a delta_qoi_VEF_a_Eint]];
 end
 dat=datStart;
 for ii=1:numel(incPertFactor)
@@ -228,7 +258,8 @@ plot(sigaPertFactor,sigaSensValues(:,1)./(results.qoi_sn_f),'-+r')
 plot(sigaPertFactor,sigaSensValues(:,2)./(results.qoi_sn_f),'--+g')
 plot(sigaPertFactor,sigaSensValues(:,3)./(results.qoi_sn_f),'-+m')
 plot(sigaPertFactor,sigaSensValues(:,4)./(results.qoi_sn_f),'--+b')
-legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
+plot(sigaPertFactor,sigaSensValues(:,5)./(results.qoi_sn_f),'--+c')
+legend({'sn forward','VEF forward','sn adjoint','VEF adjoint','VEF adjoint Einterp'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -245,7 +276,8 @@ plot(sigsPertFactor,sigsSensValues(:,1)./(results.qoi_sn_f),'-+r')
 plot(sigsPertFactor,sigsSensValues(:,2)./(results.qoi_sn_f),'--+g')
 plot(sigsPertFactor,sigsSensValues(:,3)./(results.qoi_sn_f),'-+m')
 plot(sigsPertFactor,sigsSensValues(:,4)./(results.qoi_sn_f),'--+b')
-legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
+plot(sigsPertFactor,sigsSensValues(:,5)./(results.qoi_sn_f),'--+c')
+legend({'sn forward','VEF forward','sn adjoint','VEF adjoint','VEF adjoint Einterp'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -262,7 +294,8 @@ plot(sourcePertFactor,qSensValues(:,1)./(results.qoi_sn_f),'-+r')
 plot(sourcePertFactor,qSensValues(:,2)./(results.qoi_sn_f),'--+g')
 plot(sourcePertFactor,qSensValues(:,3)./(results.qoi_sn_f),'-+m')
 plot(sourcePertFactor,qSensValues(:,4)./(results.qoi_sn_f),'--+b')
-legend({'sn forward','VEF forward','sn adjoint','VEF adjoint'},'Position',[0.5 0.80 0.01 0.01])
+plot(sourcePertFactor,qSensValues(:,5)./(results.qoi_sn_f),'--+c')
+legend({'sn forward','VEF forward','sn adjoint','VEF adjoint','VEF adjoint Einterp'},'Position',[0.5 0.80 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
 dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -356,6 +389,7 @@ sn=snq.n_dir;
 %Basic Adjoint sensitivities
 results.delta_qoi_sn_a = compute_perturbed_qoi_Sn(dat.adjoint_flux,results.phia,results.phi,results.psi,results.psia,sn);
 results.delta_qoi_VEF_a = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E);
+results.delta_qoi_blend_a = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E,results.phia);
 results.delta_qoi_VEF_SNphi = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phi,results.E);
 %Some other unrealistic methods (using values we wouldnt expect to have)
 results.delta_qoi_VEF_a_pert = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF_pert,results.E_pert);
@@ -385,9 +419,13 @@ fprintf('\n-----BEGIN PERTURBATION SENSITIVITY DATA OUTPUT----- \n')
 fprintf('delta qoi using 2 sn forward runs: \t \t %g \n',results.delta_qoi_sn_f);
 fprintf('delta qoi using 2 VEF forward runs: \t %g \n',results.delta_qoi_VEF_f);
 fprintf('delta qoi using sn adjoint: \t\t\t %g \n',results.delta_qoi_sn_a);
+fprintf('delta qoi using VEF adjoint: \t\t %g \n',results.delta_qoi_VEF_a);
+fprintf('delta qoi using VEF adjoint (E interp): \t\t %g \n',results.delta_qoi_VEF_a+results.deltaE_interp);
+fprintf('delta qoi using VEF-blend adjoint: \t\t %g \n',results.delta_qoi_blend_a);
+fprintf('delta qoi using VEF-blend adjoint (E interp): \t\t %g \n',results.delta_qoi_blend_a+results.deltaE_interp);
+fprintf('\n-----BEGIN PERTURBATION SENSITIVITY DATA OUTPUT (2nd set)----- \n')
 fprintf('delta qoi using sn adjoint (pert phi): \t\t\t %g \n',results.delta_qoi_sn_a_pert);
-fprintf('delta qoi using VEF math adjoint: \t\t %g \n',results.delta_qoi_VEF_a);
-fprintf('delta qoi using VEF math adjoint (phi pert): \t\t %g \n',results.delta_qoi_VEF_a_pert);
+fprintf('delta qoi using VEF adjoint (phi pert): \t\t %g \n',results.delta_qoi_VEF_a_pert);
 fprintf('delta qoi using VEF adj w Sn fwd: \t\t %g \n',results.delta_qoi_VEF_SNphi);
 %fprintf('delta qoi using VEF math adjoint alt: \t\t %g \n',results.delta_qoi_VEF_a_alt);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -404,9 +442,9 @@ do_plot(results.phiVEF_pert,'VEF-pert',0,dat.forward_flux)
 do_plot(results.phia,'Sn',100,dat.adjoint_flux)
 do_plot(results.phiVEFa,'VEF',100,dat.adjoint_flux)
 
-do_plot(results.E,'E',50,dat.forward_flux,1)
-do_plot(results.E_pert,'Epert',50,dat.forward_flux,1)
-do_plot(results.E_pert-results.E,'Epert-E',51,dat.forward_flux,2)
+do_plot(results.E,'E',150,dat.forward_flux,1)
+do_plot(results.E_pert,'Epert',150,dat.forward_flux,1)
+do_plot(results.E_pert-results.E,'Epert-E',151,dat.forward_flux,2)
 end
 
 
@@ -425,13 +463,14 @@ fprintf('VEF adjoint error from SN adjoint: \t\t %g \n',results.delta_qoi_sn_a-r
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
-function otherStuff
+function eddingtonTerms
+global npar dat snq IO_opts results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('\n-----BEGIN DATA ON EDDINGTON PERTURBATION----- \n')
 fprintf('This section contains data on the terms resulting from the \n')
 fprintf('perturbed Eddington and boundary Eddington. \n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[deltaE_term,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(phiVEFa,phiVEF,phiVEF_pert,E,E_pert,Ebd,Ebd_pert);
+[deltaE_term,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,results.E_pert,results.Ebd,results.Ebd_pert);
 fprintf('Total delta E+B term: \t %g \n',deltaE_term+deltaB_L+deltaB_R);
 fprintf('-deltaE term: \t\t\t %g \n',deltaE_term);
 fprintf('-deltaB term: \t\t\t %g \n',deltaB_L+deltaB_R);
@@ -441,7 +480,9 @@ fprintf('--deltaB_R term: \t\t %g \n',deltaB_R);
 %Crude plot, needs refined.
 figure(70)
 plot(volValues)
+end
 
+function otherStuff
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('\n-----BEGIN DATA ON OTHER/under development METRICS---- \n')
 fprintf('This section contains data on other metrics. \n')
@@ -459,4 +500,56 @@ fprintf('Diff from using Epert: \t\t %g \n',delta_qoi_VEF_a-delta_qoi_VEF_math_a
 fprintf('relative L1 difference in E: \t\t %g \n',Rel_L1_diff);
 %adjDiff = compute_qoi(dat.adjoint_flux,phiVEFa_Epert,~sn,[],[])-compute_qoi(dat.adjoint_flux,phiVEFa,~sn,[],[]);
 %fprintf('NEED TO USE PERT FIX SOURCE USELESS. Diff from using two VEF adjoints: \t\t %g \n',adjDiff);
+end
+
+function [dEdq, dEdsa, dEdss]=getEslopes
+global dat results
+dat_saved=dat;
+factor=0.1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Try to estimate Ep
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*factor;
+dat.sigaPert = dat.sigaPertRegion.*dat.siga*0.0+dat.sigaPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0.0+dat.sigsPertRegion.*0;
+dat.sigtPert = dat.sigaPert + dat.sigsPert;
+dat.qv_forward = dat.qv_forward + dat.sourcePert;
+dat.sigs = dat.sigs + dat.sigsPert;
+dat.sigt = dat.sigt + dat.sigtPert;
+dat.siga = dat.siga + dat.sigaPert;
+% solve perturbed forward transport problem using sweeps
+[Dummyphi_pert,E_pert1,Ebd_pert1,Dummypsi_pert]=solveForwardSn;
+dEdq=((E_pert1-results.E)./factor);
+dat=dat_saved;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Try to estimate Ep
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
+dat.sigaPert = dat.sigaPertRegion.*dat.siga*factor+dat.sigaPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*0.0+dat.sigsPertRegion.*0;
+dat.sigtPert = dat.sigaPert + dat.sigsPert;
+dat.qv_forward = dat.qv_forward + dat.sourcePert;
+dat.sigs = dat.sigs + dat.sigsPert;
+dat.sigt = dat.sigt + dat.sigtPert;
+dat.siga = dat.siga + dat.sigaPert;
+% solve perturbed forward transport problem using sweeps
+[Dummyphi_pert,E_pert1,Ebd_pert1,Dummypsi_pert]=solveForwardSn;
+dEdsa=((E_pert1-results.E)./factor);
+dat=dat_saved;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Try to estimate Ep
+dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*0.0;
+dat.sigaPert = dat.sigaPertRegion.*dat.siga*0.0+dat.sigaPertRegion.*0;
+dat.sigsPert = dat.sigsPertRegion.*dat.sigs*factor+dat.sigsPertRegion.*0;
+dat.sigtPert = dat.sigaPert + dat.sigsPert;
+dat.qv_forward = dat.qv_forward + dat.sourcePert;
+dat.sigs = dat.sigs + dat.sigsPert;
+dat.sigt = dat.sigt + dat.sigtPert;
+dat.siga = dat.siga + dat.sigaPert;
+% solve perturbed forward transport problem using sweeps
+[Dummyphi_pert,E_pert1,Ebd_pert1,Dummypsi_pert]=solveForwardSn;
+dEdss=((E_pert1-results.E)./factor);
+dat=dat_saved;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+return 
 end

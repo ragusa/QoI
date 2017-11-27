@@ -329,7 +329,7 @@ form of the perturbation in the \qoi.
 %%%%%%%----------------------------------------------------------------------------------------------
 While the Sn adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
 flux data across 6-dimensions (space/energy/angle). For time independent systems, Hayes \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
-the forward steady-state SN transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a The Variable Eddington Tensor (VET) approach (which only requires
+the forward steady-state SN transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a Variable Eddington Tensor (VET) approach (which only requires
 storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this MS work,
 we investigate this question in the simpler setting a steady-state simulations.
 \jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire

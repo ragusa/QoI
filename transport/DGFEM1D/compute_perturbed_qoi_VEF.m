@@ -1,6 +1,11 @@
-function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E)
+function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E,snphia)
 
 global npar dat snq IO_opts
+
+blended=0;
+if nargin>4
+    blended=1;
+end
 
 % source data (volumetric)
 if use_forward_flux
@@ -15,6 +20,9 @@ end
 [n1,n2]=size(phia);
 if n2==1
     phia=reshape(phia,npar.porder+1,npar.nel);
+    if blended==1
+        snphia=reshape(snphia,npar.porder+1,npar.nel);
+    end
 end
 [n1,n2]=size(phi_unpert);
 if n2==1
@@ -54,7 +62,11 @@ for iel=1:npar.nel
     delta_qext = dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
-    d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
+    if blended==1
+        d_qoi = d_qoi + Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/snq.sw) ;
+    else
+        d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
+    end
     d_qoi = d_qoi - Jac*delta_siga*dot(phia(:,iel), m*phi_unpert(:,iel));
     %%Think I need to redo the below, once I figure out the
     for i=1:porder+1

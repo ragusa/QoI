@@ -57,12 +57,12 @@ for iel=1:npar.nel
     end
     %segment= - isigtr/Jac*dot(phi_pert(:,iel), (stif*Eloc.*phia(:,iel)+dDEdx*md*phia(:,iel)));
     %segment= - isigtr/Jac*dot(phi_pert(:,iel), (stif*(Eloc.*phia(:,iel))));
-    segment= - isigtrp/Jac*dot(phia(:,iel), k*phi_pert(:,iel));
+    segment= - isigtrp/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
     volValues=[volValues segment];
     d_qoi = d_qoi +segment;
 end
 
-BCdqoiLeft=-phia(1,1)*phi_pert(1,1)*deltaB(2);
-BCdqoiRite=-phia(npar.porder+1,npar.nel)*phi_pert(npar.porder+1,npar.nel)*deltaB(1);
+BCdqoiLeft=-phia(1,1)*phi_unpert(1,1)*deltaB(2);
+BCdqoiRite=-phia(npar.porder+1,npar.nel)*phi_unpert(npar.porder+1,npar.nel)*deltaB(1);
 
 return

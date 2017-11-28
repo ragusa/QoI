@@ -44,6 +44,7 @@
 \newcommand{\scalResp}{q^\dag}
 \newcommand{\qoi}{{\it QoI}\xspace}
 
+\newcommand{\tcr}[1]{\textcolor{red}{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -70,27 +71,43 @@
 
 			    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			    \begin{block}{Motivation}
-			    While the Sn adjoint sensitivity formulations a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only two transport solves, it can quickly run into limitations for time-dependent systems, where forward and adjoint solutions in space, energy, and angle must be stored at multiple time moments for retrieval later. For time-dependent problems, one possibility to circumvent the storage issues is to employ a Variable Eddington Tensor (VET) approach, which only requires
-storing solutions in space and energy.
+					Predictive scientific computing requires Quantities of Interest (QoI) and sensitivities to uncertain parameters ($\delta$QoI) 
+					\begin{itemize}
+					\item \tcr{QoI}$=\langle r, \psi \rangle$ (inner product over whole phase-space);\\ $r=$response function; $\psi$ is the forward angular flux, obtained from solving the neutron transport equation $L \psi = H\psi +q$.
+					\item \tcr{$\delta$QoI}$=\langle r, \psi^{\text{pert}}-\psi \rangle$, with $\psi^{\text{pert}}$ the {\bf perturbed} angular flux due to a perturbation in $L$ (e.g., $\sigma_t$), in $H$ (e.g., $\sigma_s$), $q$, or boundary conditions.
+					\item \tcr{Issue}: solving the transport equation is cost-prohibitive.
+					\end{itemize}
+					\vspace{1cm}
+{\bf Proposed approach:}
+\begin{itemize}
+  \item Use \tcr{first-order-accurate adjoint-based formulation} (Sn adjoint transport).\\
+	Only requires \tcr{2} full transport solve (one forward, one adjoint) to obtain QoI and $\delta$QoI.
+	\item This is still cost-prohibitive for time-dependent transport problems: forward and adjoint solutions in space, energy, and angle must be stored at multiple time moments for subsequent retrieval.
+	\item \tcr{This study}: to circumvent the storage issues by employing a Variable Eddington Tensor (\tcr{VET}) approach, which only requires storing scalar fluxes.
+	\item \tcr{Analysis carried out}: Whether VET is a reasonable substitute for Sn adjoint transport.
+\end{itemize}
+
 			    \end{block}
 			    \vfill
 
 
 			    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-			    \begin{block}{Sn Sensitivity}
-A discrete ordinates (Sn) method can be used to solve the one group steady state transport equation. The adjoint of each $\psi_d$ is found in a straightforward manner as a solution to the adjoint system.			    
+			    \begin{block}{First-order Sensitivity using Sn Transport}
+Sn adjoint solve for {\bf nominal} (i.e., unperturbed) parameter values 			    
 \begin{equation}
 \label{snAdj}
-\begin{split}
-&- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \angResp_d \\
-&\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
-\end{split}
+%\begin{split}
+%&- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \angResp_d \\
+%&\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
+%\end{split}
+L^\dag \psi^\dag = H^\dag \psi^\dag + \tcr{r}
 \end{equation}
-Solving the Sn adjoint and storing the $\psi_d$ and $\psi^\dag_d$ for all directions $\Omega_d$ allows the first order perturbation sensitivity to be calculated using the product
+First-order perturbation sensitivity to be calculated as follows:
 \begin{equation}
 \label{snSens}
 \delta QoI = \bra \delta \scalSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_- \,
 \end{equation}
+\tcr{Only} requires unperturbed forward and adjoint angular fluxes.
 			    \end{block}
 			    \vfill
 			    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,21 +117,22 @@ Solving the Sn adjoint and storing the $\psi_d$ and $\psi^\dag_d$ for all direct
 
 			    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{block}{Eddington Formulation}
-In an effort to remove the angular dependence of the system completely, an Eddington Tensor $\Edd$ is introduced, along with a Boundary Eddington Factor $\BEdd$. These two values are the primary tools of the VET formulation.
+In an effort to remove the angular dependence of the system completely, an Eddington Tensor $\Edd$ is introduced:
+%, along with a Boundary Eddington Factor $\BEdd$. These two values are the primary tools of the VET formulation.
 \begin{equation}
 \label{EddDef}
 \Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
 \end{equation}
-\begin{equation}
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound 
-\end{equation}
-With the Eddington values in hand, the Sn transport equation can be converted to the form shown below. 
+%\begin{equation}
+%\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound 
+%\end{equation}
+With the \tcr{nominal} (i.e., unperturbed) Eddington values in hand, the Sn transport equation can be converted to the form shown below. 
 \begin{equation}
 \label{VEFForm}
-\begin{split}
-&- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \, \\
-&2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi  \quad , \vr \in \bound \,\
-\end{split}
+%\begin{split}
+- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \quad + \text{B.C.} %\\
+%&2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi  \quad , \vr \in \bound \,\
+%\end{split}
 \end{equation}
 
 \end{block}
@@ -137,18 +155,20 @@ With the Eddington values in hand, the Sn transport equation can be converted to
 
 			    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 			    \begin{block}{VET Sensitivity}
-Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. 
+Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} can be obtained. 
 \begin{equation}
 \label{adjForm}
-\begin{split}
-&- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \varphi^\dag \right) \right) + \siga \varphi^\dag = \scalResp\\
-&2J^{\dag,\text{out}} = B \phi^\dag + 
-\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
-\end{split}
+%\begin{split}
+%&
+- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \varphi^\dag \right) \right) + \siga \varphi^\dag = \scalResp %\\
+%&2J^{\dag,\text{out}} = B \phi^\dag + 
+%\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
+%\end{split}
 \end{equation}
-The adjoint flux in this formulation is denoted by $\varphi^\dag$ to avoid confusion with $\phi^\dag$, the adjoint scalar flux resulting from the Sn formulation.
-
-If the assumption is made that the Eddington factor remains unperturbed under perturbation to the parameters, then a sensitivity inner product can be derived.
+The adjoint flux in this formulation is denoted by $\varphi^\dag$.\\
+{\bf Note}:  This adjoint scalar flux is not the adjoint one would obtain from the Sn adjoint equation (the latter is denoted by $\phi^\dag$).
+\vspace{1cm}
+If the assumption is made that the Eddington factor remains unchanged under perturbation of the parameters, then a sensitivity inner product can be derived.
 
 
 \begin{equation}

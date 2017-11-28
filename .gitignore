@@ -43,3 +43,5 @@ Plots
 # allow this file to be synch-ed
 !/matlab/hc_ss_discrete/ReadMe.txt
 !\matlab\hc_ss_discrete\ReadMe.txt
+!\docs\IWH_poster\cert_poster\style\cert_banner.pdf
+!/docs/IWH_poster/cert_poster/style/cert_banner.pdf

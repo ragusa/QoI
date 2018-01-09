@@ -50,8 +50,8 @@
 
 \mode<presentation>{\usetheme{TAMU}}
 
-\title[<short>]{Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation}
-\author[<short>]{Ian Halvic, Jean Ragusa}
+\title[<short>]{Adjoint-based Sensitivity for Radiation Transport Using an Eddington Tensor Formulation}
+\author[<short>]{Ian Halvic and Jean Ragusa}
 \institute{Department of Nuclear Engineering, Texas A\&M University, College Station, TX, USA 77843}
 
 \newlength{\columnheight}
@@ -129,10 +129,7 @@ In an effort to remove the angular dependence of the system completely, an Eddin
 With the \tcr{nominal} (i.e., unperturbed) Eddington values in hand, the Sn transport equation can be converted to the form shown below. 
 \begin{equation}
 \label{VEFForm}
-%\begin{split}
-- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \quad + \text{B.C.} %\\
-%&2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt} \div \Edd \phi  \quad , \vr \in \bound \,\
-%\end{split}
+- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \quad + \text{B.C.}
 \end{equation}
 
 \end{block}
@@ -167,6 +164,7 @@ Since VET formulation generates a new forward equation to describe the system, a
 \end{equation}
 The adjoint flux in this formulation is denoted by $\varphi^\dag$.\\
 {\bf Note}:  This adjoint scalar flux is not the adjoint one would obtain from the Sn adjoint equation (the latter is denoted by $\phi^\dag$).
+
 \vspace{1cm}
 If the assumption is made that the Eddington factor remains unchanged under perturbation of the parameters, then a sensitivity inner product can be derived.
 
@@ -178,7 +176,7 @@ If the assumption is made that the Eddington factor remains unchanged under pert
 \end{split}
 \end{equation}
 
-The Sn-adjoint method is exact for perturbations in $q$ and $\psi^\text{inc}$ and does not require storing $\psi$ through the volume. This leads to a ``blended'' sensitivity expression which also uses Sn-adjoint solution $\phi^\dag$
+The Sn-adjoint method is exact for perturbations in $q$ and $\psi^\text{inc}$ and does not require storing $\psi$ through the volume. This leads to a ``blended'' sensitivity expression which also uses Sn-adjoint solution $\phi^\dag$.
 
 \begin{equation}
 \label{SensIP2}
@@ -197,27 +195,27 @@ The Sn-adjoint method is exact for perturbations in $q$ and $\psi^\text{inc}$ an
 	\delta \Edd \approx \frac{\partial \Edd}{\partial p} \delta p \approx \frac{\Edd(p_1) - \Edd(p_0)}{p_1 - p_0} \delta p	     
 \end{equation}
 
-A simple linear approximation scheme is considered. The method requires one additional forward Sn solve per perturbed variable $p$ to obtain $E(p_1)$.	
+A simple linear approximation scheme is considered. The method requires one additional forward Sn solve per perturbed variable $p$ to obtain $\Edd(p_1)$.	
 The approximation was applied to a test system in which a homogeneous system is regularly perturbed to an inhomogeneous one.
 
 \begin{figure}[H]
-\label{Case110syst}
+\label{Case113syst}
 \centering
 \begin{subfigure}{.33\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110phi.png}
+  \includegraphics[width=.98\linewidth]{113phi.png}
   \caption{$\phi$ unperturbed and perturbed due to $+15\%$ $\siga$.}
   \label{fig:sfig1}
 \end{subfigure}
 \begin{subfigure}{.33\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110phia.png}
+  \includegraphics[width=.98\linewidth]{113phia.png}
     \caption{Both Sn and VET adjoints, $\phi^\dag$ and $\varphi^\dag$ respectively.}
   \label{fig:sfig2}
 \end{subfigure}%
 \begin{subfigure}{.33\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110deltaE.png}
+  \includegraphics[width=.98\linewidth]{113deltaE.png}
     \caption{Estimation of $\delta \Edd$. Extrapolation point used was $+10\%$ $\siga$.}
   \label{fig:sfig5}
 \end{subfigure}%
@@ -249,38 +247,38 @@ The full sensitivity expression using the estimated $\delta \Edd$ is then
 \label{SensIP3}
 \begin{split}
 \delta \qoi =&  \bra \delta q , \varphi^\dag \ket - \bra \delta \isigt \div (\Edd \phi), \grad \varphi^\dag \ket + \bra \delta \sigma_a \phi, \varphi^\dag \ket + \sbra \varphi^\dag, 2 \delta J^{\text{inc}} \sket \\
-& - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \varphi^\dag \ket
-- \sbra \varphi^\dag, \phi \delta \BEdd \sket.
+& \tcr{ - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \varphi^\dag \ket
+- \sbra \varphi^\dag, \phi \delta \BEdd \sket}.
 \end{split}
 \end{equation}			    
 			    
 Sensitivity for the earlier presented system due to regular perturbations in the source, $\sigs$, and $\siga$. The Sensitivity inner products laid out in Eqs.~\eqref{SensIP1}, ~\eqref{SensIP2}, ~\eqref{SensIP3} are tested against two individual forward solves.
  
 \begin{figure}[H]
-\label{Case110Sens}
+\label{Case113Sens}
 \centering
 \begin{subfigure}{.4\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110qSens.png}  \caption{Source sensitivity}
+  \includegraphics[width=.98\linewidth]{113qSens.png}  \caption{Source sensitivity}
   \label{fig:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.4\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110sigsSens.png}
-  \caption{Scattering cross-section sensitivity}
+  \includegraphics[width=.98\linewidth]{113incSens.png}
+  \caption{Incident flux sensitivity}
   \label{fig:sfig2}
 \end{subfigure}
 
 \begin{subfigure}{.4\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110sigaSens.png}
+  \includegraphics[width=.98\linewidth]{113sigaSens.png}
   \caption{Absorption cross-section sensitivity}
   \label{fig:sfig5}
 \end{subfigure}%
 \begin{subfigure}{.4\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{110incSens.png}
-  \caption{Incident flux sensitivity}
+  \includegraphics[width=.98\linewidth]{113sigsSens.png}
+  \caption{Scattering cross-section sensitivity}
   \label{fig:sfig4}
 \end{subfigure}
 \label{fig:fig}

@@ -62,7 +62,7 @@ for iel=1:npar.nel
     d_qoi = d_qoi +segment;
 end
 
-BCdqoiLeft=-phia(1,1)*phi_unpert(1,1)*deltaB(2);
-BCdqoiRite=-phia(npar.porder+1,npar.nel)*phi_unpert(npar.porder+1,npar.nel)*deltaB(1);
+BCdqoiLeft=-1*phia(1,1)*phi_unpert(1,1)*deltaB(1);
+BCdqoiRite=-1*phia(npar.porder+1,npar.nel)*phi_unpert(npar.porder+1,npar.nel)*deltaB(2);
 
 return

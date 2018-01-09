@@ -1,10 +1,13 @@
-function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E,snphia)
+function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E,snphia,snpsia)
 
 global npar dat snq IO_opts
 
 blended=0;
 if nargin>4
     blended=1;
+end
+if nargin>5
+    blended=2;
 end
 
 % source data (volumetric)
@@ -20,7 +23,10 @@ end
 [n1,n2]=size(phia);
 if n2==1
     phia=reshape(phia,npar.porder+1,npar.nel);
-    if blended==1
+    if blended>0
+        snphia=reshape(snphia,npar.porder+1,npar.nel);
+    end
+    if blended==2
         snphia=reshape(snphia,npar.porder+1,npar.nel);
     end
 end
@@ -62,7 +68,7 @@ for iel=1:npar.nel
     delta_qext = dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
-    if blended==1
+    if blended>0
         d_qoi = d_qoi + Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/snq.sw) ;
     else
         d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
@@ -81,28 +87,63 @@ if IO_opts.show_dqoi_pre_bc
     fprintf('dqoi before bc %g (forward=%g) \n',d_qoi,use_forward_flux);
 end
 
-%%% Boundary Condition Stuff
-% Build forward J values (mainly copied from establish_bc_for_VEF)
-inc=dat.psiIncPert;
-ndir = snq.n_dir;
-ii = find (inc(1:ndir/2)~=0);
-if isempty(ii) % vacuum
-    JForwardRite = 0;
+if blended==2
+    % Add boundary terms if using the adjoint to compute the QoI
+    neg_dir = 1:snq.n_dir/2; % the first half of the directions are <0
+    pos_dir = snq.n_dir/2+1:snq.n_dir; % the second half of the directions are >0
+
+    % Set ang. flux at right extremity
+    % in the dQoI, we do not want to have to know the perturbed outgoing
+    % forward flux, so we need to ensure that the adjoitn boundary src is 0
+    psi_rite = zeros(1,snq.n_dir); %%% shiftdim(psi(npar.porder+1,npar.nel,:),1);
+    % overwrite with BC values
+    psi_rite(neg_dir) =  dat.psiIncPert(neg_dir);
+
+    % Set angular flux at left extremity
+    psi_left = zeros(1,snq.n_dir); %%% shiftdim(psi(1,1,:),1);
+    % overwrite with BC values
+    psi_left(pos_dir) =  dat.psiIncPert(pos_dir);
+
+    % the reason for using the "opposite" direction for the adjoint flux is that
+    % psia(mu) = psi(-mu), or equivalently psia(-mu)=psi(mu) and remember we
+    % faked a "forward" solve for the adjoint
+    reverse_dir = snq.n_dir:-1:1;
+    psia_rite = shiftdim(snpsia(npar.porder+1,npar.nel,reverse_dir),1);
+    psia_left = shiftdim(snpsia(1,1,reverse_dir),1);
+    % overwrite with BC values
+    psia_left(neg_dir) = dat.inc_adjoint(neg_dir);
+    psia_rite(pos_dir) = dat.inc_adjoint(pos_dir);
+    if sum(abs(psia_left(neg_dir)))>eps || sum(abs(psia_rite(pos_dir)))>0
+        error('in %s, angular adjoint boundary src must be zero',mfilename);
+    end
+    % right extremity: vo.vn = vo.ex
+    d_qoi = d_qoi - dot(snq.w'.*snq.mu.*psi_rite,psia_rite);
+    % left extremity: vo.vn = -vo.ex
+    d_qoi = d_qoi + dot(snq.w'.*snq.mu.*psi_left,psia_left);
 else
-    Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
-    JForwardRite = -Jinc;
+    %%% Boundary Condition Stuff
+    % Build forward J values (mainly copied from establish_bc_for_VEF)
+    inc=dat.psiIncPert;
+    ndir = snq.n_dir;
+    ii = find (inc(1:ndir/2)~=0);
+    if isempty(ii) % vacuum
+        JForwardRite = 0;
+    else
+        Jinc = dot (snq.w(1:ndir/2)'.*snq.mu(1:ndir/2), inc(1:ndir/2) );
+        JForwardRite = -Jinc;
+    end
+    ii = find (inc(ndir/2+1:end)~=0);
+    if isempty(ii) % vacuum
+        JForwardLeft = 0;
+    else
+        Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
+        JForwardLeft = Jinc;
+    end
+    BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
+    BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
+    if IO_opts.show_dqoi_from_bc
+        fprintf('BCqoiRite value %g  \n',BCqoiRite);
+        fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
+    end
+    d_qoi = d_qoi + BCqoiLeft + BCqoiRite;
 end
-ii = find (inc(ndir/2+1:end)~=0);
-if isempty(ii) % vacuum
-    JForwardLeft = 0;
-else
-    Jinc = dot (snq.w(ndir/2+1:end)'.*snq.mu(ndir/2+1:end), inc(ndir/2+1:end) );
-    JForwardLeft = Jinc;
-end
-BCqoiRite=2*JForwardRite*phia(npar.porder+1,npar.nel);%+2*JAdjointRite*phi_unpert(npar.porder+1,npar.nel);
-BCqoiLeft=2*JForwardLeft*phia(1,1);%-2*JAdjointLeft*phi_unpert(1,1);
-if IO_opts.show_dqoi_from_bc
-    fprintf('BCqoiRite value %g  \n',BCqoiRite);
-    fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
-end
-d_qoi = d_qoi + BCqoiLeft + BCqoiRite;

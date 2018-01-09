@@ -10,7 +10,10 @@
 \pagenumbering{roman} % Roman numerals
 \setcounter{page}{2}
 
-\todo{Add Abstract}
+\todo{I need to loop back to this}
+Adjoint methods can provide a first-order approximation of the response a physical system due to a perturbation in the system's parameters. However, when applying the method to a time dependent Sn-transport, memory costs can quickly become a concern, and a fully angular dependent flux must be stored at each timestep. Here, a lower-order Variable Eddington Tensor formulation of the transport equation is considered to remove the angular dependence of the stored solution and reduce memory costs. Indeed, given the Eddington tensor, the Eddington tensor approach yields the same answer as the full transport solution.
+
+In the case of perturbations, one may make some simplifying assumption regarding the Eddington tensor: for instance, keep it unperturbed or assuming a functional variation of the Eddington tensor over the input parameter space. An unperturbed Eddington assumption tends to introduce errors at material boundaries. A simple linear interpolation scheme for the Eddington over the uncertain parameter range is devised for use in certain scenarios, at the cost of requiring a few additional forward Sn-solves to parameterize the Eddington tensor. Results highlighting the approach are presented.
 
 
  

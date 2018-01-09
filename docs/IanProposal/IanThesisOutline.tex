@@ -51,6 +51,7 @@
 \setlength{\belowdisplayshortskip}{0pt}
 
 \newcommand{\vr}{\vec{r}}
+\newcommand{\vp}{\vec{p}}
 \newcommand{\vOmega}{\vec{\Omega}}
 \newcommand{\vJ}{\vec{J}}
 \newcommand{\vO}{\vec{\Omega}}
@@ -71,6 +72,7 @@
 \newcommand{\dBdphi}{\partial_\phi B }
 \newcommand{\dBdp}{B }
 \newcommand{\adj}{\phi^\dag}
+\newcommand{\vefadj}{\varphi^\dag}
 \newcommand{\surf}{\int_{\partial V}}
 \newcommand{\domain}{V}
 \newcommand{\bound}{\partial V}
@@ -80,7 +82,8 @@
 \newcommand{\sigt}{\sigma_t}
 \newcommand{\sigs}{\sigma_s}
 \newcommand{\siga}{\sigma_a}
-\newcommand{\isigt}{c}
+\newcommand{\isigt}{\sigma_t^{-1}}
+\newcommand{\isigtp}{\sigma_{t,p}^{-1}}
 % why \newcommand{\angSource}{q_\Omega}
 \newcommand{\angSource}{q}
 \newcommand{\scalSource}{q}
@@ -168,7 +171,7 @@
 \setcounter{page}{1}
 
 
-\chapter{\uppercase {Introduction and Literature Review}}
+\chapter{\uppercase {Introduction}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -297,7 +300,7 @@ From the above, it follows that a first order approximation to the change in the
 \end{equation}
 The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
 \jcr{in the thesis, you need to go through the algebra for the transport and the VET equations. not here, this is only the proposal}
-\iwh{Will do}
+\iwh{Ok, I think most of the derivation is covered in sufficient detail in the latter sections.}
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -338,8 +341,6 @@ where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is the angular quadrature weigh
 %%%%%%%----------------------------------------------------------------------------------------------
 In a fairly straightforward application of the adjoint method previously shown, the adjoint equation which corresponds to the Sn transport formulation with adjoint source (response function)
 $\angResp$ is
-
-\todo{Lay out the application of the adjoint process applied to the Sn Transport equation. More integration by parts.}
 
 \begin{equation}
 \label{snAdj}
@@ -520,24 +521,34 @@ Note that we recover the Robin boundary conditions for diffusion when $\Edd = \t
 \subsection{Adjoint VET formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to q.~\eqref{VEFForm} must also be formulated. The adjoint equation of the forward VET equation is given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
-and $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$. 
+Since VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. The typical adjoint process is followed in which the forward equation i multiplied by a test function and all operators are transferred to the test function using integration by parts. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
+and a tensor dot product $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$.
 
-\todo{Fully demonstrate the derivation of the below. This will make the appearance of the double-dot product more apparent also}
+\begin{equation}
+\label{VEFadjFormDeriv}
+\begin{split}
+\bra \scalSource , \vefadj \ket &= - \bra \div \left( \frac{1}{\sigt}\div \Edd \phi \right), \vefadj \ket +  \bra \siga \phi, \vefadj \ket   \\
+ \bra \scalSource , \vefadj \ket &= \bra \frac{1}{\sigt}\div \Edd \phi, \grad \vefadj \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket   \\
+ \bra \scalSource , \vefadj \ket &=  - \bra \phi, \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
+\end{split}
+\end{equation}
+
+This leads to the adjoint equation of the VET formulation, given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The VET adjoint solution is represented by $\vefadj$ to avoid confusion with $\phi^\dag$, which is the adjoint scalar flux from the Sn method. 
+
 \begin{equation}
 \label{adjForm}
-- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \phi^\dag \right) \right) + \siga \phi^\dag = \scalResp
+- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) + \siga \vefadj = \scalResp
 \end{equation}
-For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in \eqref{adjVETBC}.
+For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. This boundary condition can be somewhat inferred by considering the forward VET adjoint boundary condition and observing the form of the boundary terms in the adjoint \qoi definition in Eq.~\eqref{VEFadjFormDeriv}.
 
 \begin{equation}
 \label{adjVETBC}
-2J^{\dag,\text{out}} = B \phi^\dag + 
-\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \phi^\dag   \quad \vr \in \bound
+2J^{\dag,\text{out}} = B \vefadj+ 
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj   \quad \vr \in \bound
 \end{equation}
-Note that we recover the Robin boundary conditions for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$:
+Note that the Robin boundary conditions are recovered for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$:
 \[
-2 J^{\dag,\text{out}}(\vr) = \frac{\phi^\dag(\vr)}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi^\dag \,.
+2 J^{\dag,\text{out}} = \frac{\vefadj}{2} + \vn \cdot \frac{1}{3\sigt} \grad \vefadj \,.
 \]
 \iwh{ (I changed this to a note, it didn't seem relevant here.) For the outgoing partial current of the forward diffusion problem, one should recover
 \[
@@ -552,41 +563,31 @@ as was possible in the Sn world. If this is what you meant, please make it more 
 \jcr{what I am going for here is a discussion -to be expanded in the thesis- that Sn+adjoint+VET is not the same things as Sn+VET+adjoint, that is the equations obtained at the end
 of these 2 processes are not the same but I see you discuss this a bit later}
 
-To obtain the \qoi using this formulation, begin with the typical \qoi definition, relocate operators to the forward to substitute the forward source, and apply boundary conditions.
-For brevity, the substitution of $\isigt = \sigt^{-1}$ was also made.
+To obtain the \qoi using this formulation substitute in the adjoint equation definition into Eq.~\eqref{VEFadjFormDeriv} and apply boundary conditions of both the forward and adjoint.
 \begin{equation}
 \label{VETQoIAdjUnpDeriv}
 \begin{split}
-\qoi=&\bra \phi , \scalResp \ket \\
-=&\bra \phi , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
-=& \bra - \div \isigt \div \left( \Edd \phi \right) + \siga \phi, \phi^\dag \ket 
-- \sbra \phi, \Edd \cdot \isigt \grad \phi^\dag \sket  
-+ \sbra \phi^\dag, \isigt \grad \Edd \phi \sket \\
-=&\bra \scalSource , \phi^\dag \ket 
-- \sbra \phi , 2J^{\dag,\text{out}} - B \phi^\dag \sket + \sbra \phi^\dag, 2J^{\text{inc}} - B \phi  \sket
+ \bra \scalSource , \vefadj \ket &=   \bra \phi, \scalResp \ket - \sbra \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
+\bra \scalSource , \vefadj \ket &=   \qoi - \sbra 2J^{\text{inc}} - B \phi, \vefadj \sket + \sbra \phi, 2J^{\dag,\text{out}} - B \vefadj \sket \\
 \end{split}
 \end{equation}
-
 The $B$ terms negate and yield a relatively compact form for the \qoi
 \begin{equation}
 \label{VETQoIAdj}
-\qoi=\bra \scalSource , \phi^\dag \ket 
+\qoi=\bra \scalSource , \vefadj \ket 
 - \sbra \phi, 2J^{\dag,\text{out}} \sket  + \sbra \phi^\dag, 2J^{\text{inc}} \sket
 \end{equation}
 In order to have a \qoi that can be expressed entirely in terms of the adjoint solution, it is advantageous to 
 set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition.
-\jcr{in the end, we have almost the same expression but there is something fishy about your J+ J- signs. please check.}
-\iwh{yeah, I messed up the signs once in the derivation, but apparently just accidentally corrected it in the final expression above.}
-
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{VET adjoint sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-As was done in the Sn transport formulation, once again consider perturbations to the system parameters. However, in contrast to the Sn case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. This is an assumption because, in the general case, changing the system's parameters should change the angular flux solution, and hence
-the Eddington tensor may be altered as well. We address the effects of perturbations on $\Edd$ in the next section.
+As was done in the Sn transport formulation, once again consider perturbations to the system parameters. However, in contrast to the Sn case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. This is an approximation because, in the general case, changing the system's parameters should change the angular flux solution, and hence
+the Eddington tensor may be altered as well. The effects of perturbations on $\Edd$ are considered later.
 
-The perturbed VET forward problem is:
+The perturbed VET forward problem is given below. Note the notation $\delta \isigt = \isigtp - \isigt$.
 \begin{subequations}
 \begin{equation}
 \label{VEFPert}
@@ -603,62 +604,52 @@ The usual adjoint process is performed, starting with the \qoi definition using 
 \label{VETSensDeriv}
 \begin{split}
 \qoi_p = &\bra \phi_p , \scalResp \ket \\
-       = &\bra \phi_p , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \phi^\dag \ket \\
-       = & \bra - \div \isigt \div \left( \Edd \phi_p \right) + \siga \phi_p, \phi^\dag \ket 
- - \int_\bound d^2 r \, \phi_p \left( \Edd \cdot \isigt \grad \phi^\dag \right) \cdot \vec{n}  \\ 
-&+ \int_\bound d^2 r \, \phi^\dag \left(  \isigt \grad \Edd \phi_p \right) \cdot \vec{n} \\
+       = &\bra \phi_p , - \Edd : \left( \grad \isigt \grad \phi^\dag \right) + \siga \vefadj \ket \\
+       = & \bra - \div \isigt \div \left( \Edd \phi_p \right) + \siga \phi_p, \vefadj \ket 
+ - \sbra \phi_p , \left( \Edd \cdot \isigt \grad \vefadj\right) \sket  \\ 
+&+ \sbra \vefadj , \left(  \isigt \grad \Edd \phi_p \right) \sket \\
 \end{split}
 \end{equation}
 A first-order perturbation approximation of Eq.~\eqref{VEFPert} can be used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution.
 \begin{equation}
 \label{QoIVETAdjNoBC}
 \begin{split}
-\qoi_p =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket \\
-=& \bra q, \phi^\dag \ket  + \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \phi^\dag \ket \\
-& - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
+\qoi_p =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \vefadj \ket - \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket + \sbra \vefadj, \isigt \div \Edd \phi_p \sket \\
+=& \bra q, \vefadj \ket  + \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \vefadj \ket \\
+& - \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket + \sbra \vefadj, \isigt \div \Edd \phi_p \sket 
 \end{split}
 \end{equation}
 The first surface term can be dealt with readily using the adjoint boundary condition. For the second surface term, a first order approximation of the perturbed forward boundary condition is used for substitution.
 \begin{equation}
 \begin{split}
- - \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket  + \sbra \phi^\dag, \isigt \div \Edd \phi_p \sket 
-=&- \sbra \phi_p, 2J^{\dag,\text{out}} - B \phi^\dag \sket \\ &+ \sbra \phi^\dag, 2 J_p^{\text{inc}} - B \phi_p - \delta \isigt \div \Edd \phi_p \sket \\
-\approx&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 J_p^{\text{inc}} - \delta \isigt \div \Edd \phi \sket 
+ - \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket  + \sbra \vefadj, \isigt \div \Edd \phi_p \sket 
+=&- \sbra \phi_p, 2J^{\dag,\text{out}} - B \phi^\dag \sket \\ &+ \sbra \vefadj, 2 J_p^{\text{inc}} - B \phi_p - \delta \isigt \div \Edd \phi_p \sket \\
+\approx&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 J_p^{\text{inc}} - \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
-\todo{Reorder the above a bit. Save the 1st order approximation for the end. Before that, place the delta c terms in the FEM form where a $\nabla$ is acting on the adjoint. This should cancel out a surface delta c term before we have to make any approximations.}
-Finally, we have
+Finally, an expression for the \qoi response is found.
 \begin{equation}
-\label{QoIVETAdj}
+\label{QoIVETAdjlong}
 \begin{split}
 \delta \qoi =& \qoi_p - \qoi \\ 
-=& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \phi^\dag \ket 
-- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \phi^\dag, 2 \delta J_p^{\text{inc}} \sket \\
-& - \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket 
+=& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \vefadj \ket 
+- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 \delta J_p^{\text{inc}} \sket \\
+& - \sbra \vefadj, \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
 Again, it is advantageous to use $J^{\dag,\text{out}}=0$ in the adjoint boundary condition to remove a dependency on the 
-perturbed forward VET solution.
-
-\jcr{I am leaving your equations here but look at mine first and see what you think
+perturbed forward VET solution. Integration by parts can be applied to condense the $\delta \isigt$ terms. The result is the the final form for computing the \qoi response using the adjoint VET flux $\vefadj$. The accuracy of this method is a primary focus of this paper.
 \begin{equation}
+\label{VETsens}
 \begin{split}
-\qoi =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket - \int_\Gamma d^2 r \, \phi_p \left( - 2J^{\dag +} - B \phi^\dag \right) \cdot \vec{n} 
-\\ &+ \int_\Gamma d^2 r \, \phi^\dag \left( - 2J_p^- - B \phi_p - \delta \isigt \div \Edd \phi \right) \cdot \vec{n} 
+\delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket
+- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 \delta J_p^{\text{inc}} \sket \\
 \end{split}
 \end{equation}
-Subtract the adjoint $\qoi$ formulation from Eq.~\eqref{VETQoIAdj} to obtain the sensitivity expression for the adjoint VET formulation.
-\begin{equation}
-\begin{split}
-\delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket + \sbra 2\delta \phi, J^{\dag +} \sket  - \sbra 2\phi^\dag, \delta J^- \sket
-\\ &- \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
-\end{split}
-\end{equation}
-}
-\iwh{We discussed this in your office. The extra delta c term comes from the perturbed forward boundary conditions, which includes a delta c. In the thesis I will slightly rework the above section to make it a bit more explicit.}
 
-\subsection{Alternate boundary conditions}
-\todo{Consider an alternate form of the boundary conditions (for both forward and adjoint). Derive appropriate sensitivity. May need a slight reording of the section to mention the alternate boundary conditions a bit earlier}
+
+
+\section{Refinements}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Error from unperturbed Eddington assumption}
@@ -679,31 +670,67 @@ The above can be substituted into Eq.~\eqref{VETSensDeriv} to yield an expanded 
 \begin{equation}
 \label{QoIVETAdjNoBCEdd}
 \begin{split}
-\qoi =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&- \sbra \phi_p, \Edd \cdot \isigt \grad \phi^\dag \sket 
-+ \sbra \phi^\dag , \isigt \div \Edd \phi_p \sket
+\qoi =& \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \vefadj \ket \\
+&- \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket 
++ \sbra \vefadj , \isigt \div \Edd \phi_p \sket
 \end{split}
 \end{equation}
 The boundary condition for the perturbed forward solution takes on a slightly more complex form, as the additional $\delta \Edd$ and $\delta \BEdd$ terms come into play, but the derivation of the sensitivity proceeds similarly to the case ignoring Eddington perturbations.
 \begin{equation}
 \label{QoIVETAdjEdd}
 \begin{split}
-\delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \phi^\dag \ket \\
-&- \sbra 2\delta \phi, J^{\dag, \text{out}} \sket  + \sbra 2\phi^\dag, \delta J^{\text{inc}} \sket
-- \sbra \phi^\dag, \delta \isigt \div \Edd \phi \sket
+\delta \qoi =& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right) + \div \isigt \div \left( \delta \Edd \phi \right) - \delta \siga \phi, \vefadj \ket \\
+&- \sbra 2\delta \phi, J^{\dag, \text{out}} \sket  + \sbra 2 \vefadj, \delta J^{\text{inc}} \sket
+- \sbra \vefadj, \delta \isigt \div \Edd \phi \sket
 \\
-&- \sbra  \phi^\dag ,\isigt \div \delta \Edd \phi \sket
-- \sbra \phi^\dag, \phi \delta \BEdd \sket
+&- \sbra  \vefadj ,\isigt \div \delta \Edd \phi \sket
+- \sbra \vefadj, \phi \delta \BEdd \sket
 \end{split}
 \end{equation} 
 Comparing the above formulation with the unperturbed Eddington case shows that the terms lost by the Unperturbed Eddington assumption are 
 \begin{equation}
+\label{EddErrLong}
+ \bra \div \isigt \div \left( \delta \Edd \phi \right), \vefadj \ket
+- \sbra  \vefadj ,\isigt \div \delta \Edd \phi \sket
+- \sbra \vefadj, \phi \delta \BEdd \sket
+\end{equation} 
+more compactly expressed in the form
+\begin{equation}
 \label{EddErr}
- \bra \div \isigt \div \left( \delta \Edd \phi \right), \phi^\dag \ket
-- \sbra  \phi^\dag ,\isigt \div \delta \Edd \phi \sket
-- \sbra \phi^\dag, \phi \delta \BEdd \sket.
+ - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket
+- \sbra \vefadj, \phi \delta \BEdd \sket.
 \end{equation} 
 
+
+\subsection{Blending $\phi^\dag$ and $\varphi^\dag$}
+As a brief recap, two adjoint methods of determining sensitivity have been considered. The first is an Sn approach with sensitivity approximated by Eq.~\eqref{snSens}, which utilizes the forward Sn solutions $\psi$ and $\phi$ in conjunction with the Sn adjoint solutions $\psi^\dag$ and $\phi^\dag$. This equates to two angular Sn solves as well as storing two angular flux solutions for use. 
+
+The second method, which is the focus of this writing, is the VET formulation in which sensitivity is approximated by Eq.~\eqref{VETsens}. This method utilizes the forward solution $\phi$ as well as the VET adjoint solution $\vefadj$, in total this requires a forward Sn solve to determine $\phi$ and the unperturbed Eddington $\Edd$ and a scalar VET solve, but importantly no angular flux solution is stored.
+
+The latter method holds a clear advantage when dealing with source perturbations, both volumetric $\delta q$ and boundary $\delta \psi^\text{inc}$. Neither of these perturbations required a first order approximation, therefor the adjoint method is exact. Additionally neither requires storing the angular flux throughout the volume of the problem; only the scalar flux and the outgoing angular flux at the boundaries. From this a ``blended'' adjoint is proposed which uses the relevant Sn inner products for source perturbation, and VET inner products for cross section term. Contrasted to the VET adjoint, this blended method requires an additional SN solve to determine $\phi^\dag$. In a scenario where only sources are perturbed or only cross-sections are perturbed, the blended adjoint will match the results of the Sn method or VET method. What is not clear is how the blended method fares when both sources an cross-sections are perturbed.
+\begin{equation}
+\label{Blendsens}
+\begin{split}
+\delta \qoi =&  \bra \delta \scalSource , \phi^\dag \ket - \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket
+- \sbra \delta \psi^\text{inc}, \psi^\dag \sket \\
+\end{split}
+\end{equation}
+
+\subsection{Estimating $\delta \Edd$}
+Both the Sn and VET adjoint methods require a first-order perturbation assumption to be made, but the VET method also introduces the additional assumption that the Eddington remains unperturbed. As such, it seems reasonable that methods to approximate the Eddington perturbation $\delta \Edd$ may allow for reduced error in Eddington derived sensitivity, ideally approaching that of Sn adjoint. 
+
+A linear approximation scheme is considered in this paper. Let $\vp$ be a point the  parameter space, in this case $\lbrace \sigma_s , \sigma_t, q, \psi^{\text{inc}} \rbrace$ and $\delta p$ be the perturbation in that space.
+
+\begin{equation}
+\delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp
+\end{equation}
+
+Since no algebraic analytical form is known for $\Edd ( \vp )$, the derivative must be approximated using an additional value for $\Edd$ from an additional forward Sn solve.
+\begin{equation}
+\label{Eddapprox}
+\frac{\partial \Edd}{\partial \vp} \approx \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0}
+\end{equation}
+The need for an additional forward Sn solve to find $\Edd(\vp_1)$ is the primary cost of performing this method, and a constraint in situations where this approximation is viable. An analogous process can be used to approximate $\delta \BEdd$. With approximations for $\delta \Edd$ and $\delta \BEdd$ in hand, Eq.~\eqref{EddErr} can be used to to refine the VET sensitivity calculation. For situations where many perturbation scenarios need to be considered, this approximation method could prove useful. 
 
 \section{Alternate VET method}
 \todo{This is the "VET of the adjoint" as opposed to the above "adjoint of the VET". Rework section name. Explore this concept a bit more in-depth. I believe the angular vs scalar source choices end up playing a role in the difference in these two "adjoints".}
@@ -794,12 +821,12 @@ The above formulation also has a corresponding forward equation,
 \chapter{Results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Preliminary results}
+\section{Trial Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-At this point, four separate methods for \qoi calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
+At this point, six separate methods for \qoi calculation have been discussed; forward and adjoint inner products for both Sn and VET formulations, the ``blended'' method presented in Eq.~\eqref{Blendsens}, and the method of approximating $\delta \Edd$. When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
 
-The four methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
+The six methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
 \begin{subequations}
 \begin{equation}
 \text{\% \qoi response}=\frac{\delta \qoi}{\qoi} \,,
@@ -810,575 +837,206 @@ The four methods were implemented in a MATLAB finite element method (FEM) solver
 \end{subequations}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Manufactured Solutions}
-%%%%%%%----------------------------------------------------------------------------------------------
-\subsubsection{Pure Absorber}
-\begin{equation}
-\phi=\frac{q}{\sigma_a}
-\end{equation}
+\subsection{Homogeneous System, Homogeneous Perturbation}
+The first test case is a homogeneous material with a volumetric source throughout, and no incident flux. Assuming the system is sufficiently thick, the scalar flux tends to be flat towards the center and takes a value of $\phi=\frac{q}{\sigma_a}$. For this scenario, the system was first perturbed uniformly and individually in $q$, $\sigma_a$, and $\sigma_a$. Then a perturbation of both $q$ and $\sigma_a$ was considered. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh.
 
 \begin{figure}[H]
-\label{Absorber}
+\label{Trial1}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/22qSens.png}
-  \caption{Unperturbed state: $\siga=4$, $\sigs=0$. }
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/22qSens.png}
+  \label{T1:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/22sigaSens.png}
-  \caption{Unperturbed state: $\sigt=4$, $\sigs=0$. }
-  \label{fig:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/22sigaSens.png}
+  \label{T1:sfig2}
 \end{subfigure}
-\end{figure}
-
-\subsubsection{Incident Flux Through A Shield}
-\begin{equation}
-\phi = \phi_0 e^{\sigma_a \mu \Delta x}
-\end{equation}
-\begin{figure}[H]
-\label{Absorber}
-\centering
+%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/23incSens.png}
-  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/22sigsSens.png}
+  \label{T1:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/23sigaSens.png}
-  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
-  \label{fig:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/22qsigaSens.png}
+  \label{T1:sfig4}
 \end{subfigure}
+\caption{\qoi response to various perturbation scenarios for the homogeneous system under various homogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
 \end{figure}
 
-\subsubsection{Source Through A Shield}
-\begin{equation}
-\phi = \phi_0 e^{\sigma_a \mu \Delta x}
-\end{equation}
+In both the unperturbed and perturbed state, the Eddington is essentially at the diffusion limit of $\Edd = 1/3 \mathbb{I}$, so the unperturbed Eddington approximation should be a safe assumption to make in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first order approximation is needed, so all methods appear to give the same result. The $\siga$ perturbations begin to show the affects of the first order approximation, adjoint methods diverge from the exact forward methods. As would be expected, the system does not show strong sensitivity to $\sigs$ perturbations.
+
+\begin{table}[H]
+\label{TableT1}
+\centering
+  \begin{tabular}{| l | r | r | r | r |}
+    \hline
+    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     Sn Fwd 			&0.39998 &0.44419 &5.7577e-05 & 0.88858\\ \hline
+     VET Fwd			&0.39998 &0.44428 &2.7131e-05 &0.88868\\ \hline
+     Sn Adj			&0.39998 &0.39983 &6.6307e-05 &0.79980\\ \hline
+     VEF Adj 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
+     Blended 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
+     VET $\delta \Edd$ 	&0.39998 &0.39983 &5.9571e-05 &0.79981\\ \hline
+    \end{tabular}
+  \caption{Table of selected results for the homogeneous system under homogeneous perturbations. Values given are absolute $\delta \Edd$. }
+\end{table}
+
+
+%%%%%%%----------------------------------------------------------------------------------------------
+\subsection{Homogeneous System, Inhomogeneous Perturbation}
+The initial homogeneous unperturbed system is retained from the previous trial. Now the system is subjected to inhomogeneous perturbations. To accomplish this, only the left $3/5$th of the system experiences the perturbation. This creates generates a material boundary which tends to generate perturbations in $\delta E$.
 
 \begin{figure}[H]
-\label{Absorber}
+\label{Trial2}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/24qSens.png}
-  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/23qSens.png}
+  \label{T2:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/24sigaSens.png}
-  \caption{Unperturbed shield: $\siga=1$, $\sigs=0$. }
-  \label{fig:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/23sigaSens.png}
+  \label{T2:sfig2}
 \end{subfigure}
-\end{figure}
-
-
-\subsubsection{Incident Flux Through A Scatterer}
-
-\begin{figure}[H]
-\label{Scatterer}
-\centering
+%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/56incSens.png}
-  \caption{Unperturbed shield: $\siga=0$, $\sigs=1$. }
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/23sigsSens.png}
+  \label{T2:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/56sigsSens.png}
-  \caption{Unperturbed shield: $\siga=0$, $\sigs=1$. }
-  \label{fig:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/23qsigaSens.png}
+  \label{T2:sfig4}
 \end{subfigure}
+\caption{\qoi response to various perturbation scenarios for the homogeneous system under various inhomogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
 \end{figure}
 
-\subsubsection{Incident Flux Through A Scatterer into Absorber}
+The introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the adjoint methods match their respective forward found values, and the blended method matches the Sn value. The $\delta \Edd$ method begins to show promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact Sn adjoint. 
+
+\begin{table}[H]
+\centering
+  \begin{tabular}{| l | r | r | r | r |}
+    \hline
+    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     Sn Fwd 			&0.36309 &0.39952 &2.9680e-05 & 0.79915\\ \hline
+     VET Fwd			&0.35947 &0.39517 &1.5072e-05 &0.79040\\ \hline
+     Sn Adj  			&0.36309 &0.36301 &3.4051e-05 &0.72610\\ \hline
+     VEF Adj 			&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
+     Blended 			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
+     VET $\delta \Edd$ 	&0.36287 &0.36290 &3.0656e-05 &0.72586\\ \hline
+    \end{tabular}
+  \caption{Table of selected results for the homogeneous system under inhomogeneous perturbations. Values given are absolute $\delta \Edd$. }
+\end{table}
+
+%%%%%%%----------------------------------------------------------------------------------------------
+\subsection{Shielded Incident Flux}
+
 
 \begin{figure}[H]
-\label{Scatterer}
+\label{Trial3}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/57incSens.png}
-  \caption{Unperturbed shield: $\siga=0.1$, $\sigs=1$. }
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/24incSens.png}
+  \label{T3:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/57sigsSens.png}
-  \caption{Unperturbed shield: $\siga=0.1$, $\sigs=1$. }
-  \label{fig:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/24sigaSens.png}
+  \label{T3:sfig2}
 \end{subfigure}
+%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24sigsSens.png}
+  \label{T3:sfig3}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24incsigaSens.png}
+  \label{T3:sfig4}
+\end{subfigure}
+\caption{\qoi response to various perturbation scenarios for the.}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Simple Cases}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%----------------------------------------------------------------------------------------------
-\subsubsection{Homogeneous System, Uniform Perturbations}
-%%%%%%%----------------------------------------------------------------------------------------------
-Test case consisting of a 1D homogeneous system, with a volumetric source throughout. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh. Three systems of varying initial cross sections $\sigt$ and $\sigs$ were tested. Perturbations in $\sigt$, $\sigs$, and $\scalSource$ to the system were made uniformly, resulting in the perturbed system remaining homogeneous. The desired \qoi is the total flux in the middle fifth of the system.
-
-\todo{Add in incident flux perturbations. In the unperturbed state, the incident flux is 0, so we cant use a \% perturbation and will instead have to opt for an absolute perturbation}
-
-\jcr{change the other figures/caption in the same manner}
-
-\begin{figure}[H]
-\label{HomoPerts}
+\begin{table}[H]
 \centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/19sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/19sigsSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/20sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/20sigsSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/21sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/21sigsSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of $\sigt$ and $\sigs$ perturbation sensitivity for uniformly perturbed system.}
-\label{fig:fig}
-\end{figure}
-
-\begin{figure}[H]
-\label{HomoPertq}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/19qSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/19incSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/20qSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/20incSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/21qSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/21incSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of source and incident flux perturbation sensitivities for uniformly perturbed system.}
-\label{fig:fig}
-\end{figure}
-
-\jcr{comment the results!}
-
-\jcr{why no examples with changing the incident flux value?}
-
-
-
-\subsubsection{Region boundary perturbation}
-\begin{figure}[H]
-\label{Boundaries}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/43sigaSens.png}
-  \caption{QoI outside}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/43sigsSens.png}
-  \caption{QoI outside}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/44sigaSens.png}
-  \caption{centered QoI}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/44sigsSens.png}
-  \caption{centered QoI}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/45sigaSens.png}
-  \caption{QoI inside Pert}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/45sigsSens.png}
-  \caption{QoI inside pert}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of various qoi to layer perturbation system. Initial is homogeneous $\siga=1$ and $sigs=1$.}
-\label{fig:fig}
-\end{figure}
+  \begin{tabular}{| l | r | r | r | r |}
+    \hline
+    Method  &  $+10\% \psi^- $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% \psi^-,-10\% \siga$ \\ \hline
+     Sn Fwd 			&0.023401 &0.021079 &-0.0067476 & 0.046588\\ \hline
+     VET Fwd			&0.023181 &0.019670 &-0.0066481 &0.044818\\ \hline
+     Sn Adj  			&0.023401 &0.019975 &-0.0068956 &0.043376\\ \hline
+     VEF Adj 			&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
+     Blended 			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
+     VET $\delta \Edd$ 	&0.023181 &0.020503 &-0.0063928 &0.043685\\ \hline
+    \end{tabular}
+  \caption{Table of selected results for the shielding system under perturbations. Values given are absolute $\delta \Edd$. }
+\end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Homogeneous initial system, Non-Uniform Perturbations}
-%%%%%%%----------------------------------------------------------------------------------------------
-
-The next test case has the same initial conditions as the previous homogeneous case. however the system is perturbed into a inhomogeneous system. The system is split into 5 equal widths. The first, third, and fifth sections (corresponding to the center and the end sections) have the relevant variable perturbed in one direction, while the other two segments are perturbed in the opposite direction. The result is a system that is inhomogeneous, but with regular variations and symmetric about the midpoint. The \qoi is also retained from the previous case.
-
-\jcr{change the other figures/caption in the same manner as before}
-
-\begin{figure}[H]
-\label{InHomoPertt}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/39sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/39sigsSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/40sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/40sigsSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/41sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/41sigsSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of $\siga$ and $\sigs$ perturbation sensitivity for non-uniformly perturbed system.}
-\label{fig:fig}
-\end{figure}
-
-\begin{figure}[H]
-\label{InHomoPertq}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/39qSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/40qSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/41qSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of source ans incident perturbation sensitivities for non-uniformly perturbed system.}
-\label{fig:fig}
-\end{figure}
-
-
-\jcr{comment the results!}
-
-\jcr{why no examples with changing the incident flux value?}
-
-%%%%%%%----------------------------------------------------------------------------------------------
-\subsubsection{Streaming system}
-%%%%%%%----------------------------------------------------------------------------------------------
-To generate a streaming system, we retain the 5 equal width sectioning of the previous inhomogeneous example, but the second and fourth sections are converted to streaming regions ($\sigt \approx 0 $). Leaving three neutron producing sections separated by two streaming gaps. The \qoi remains as the total neutron count in the center fifth section.
-
-\jcr{same comments as above}
-\todo{Add in incident flux perturbation cases, similar to the homogeneous case.}
-
-\begin{figure}[H]
-\label{Streaming}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/49sigtSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/49sigsSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$.}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/50sigtSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/50sigsSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$.}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/51sigtSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/51sigsSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$.}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of $\sigt$ perturbation sensitivity for perturbed streaming system.}
-\label{fig:fig}
-\end{figure}
+\subsection{Reed Problem}
 
 
 \begin{figure}[H]
-\label{InHomoPertq}
+\label{Trial4}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/49qSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/7qSens.png}
+  \label{T4:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
+  \includegraphics[width=.98\linewidth]{figures2/7sigaSens.png}
+  \label{T4:sfig2}
+\end{subfigure}
+%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/50qSens.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/51qSens.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
+  \includegraphics[width=.98\linewidth]{figures2/7sigsSens.png}
+  \label{T4:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of source perturbation sensitivity for perturbed streaming system.}
-\label{fig:fig}
+  \includegraphics[width=.98\linewidth]{figures2/7qsigaSens.png}
+  \label{T4:sfig4}
+\end{subfigure}
+\caption{\qoi response to various perturbation scenarios for the Reed Problem.}
 \end{figure}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Complex systems}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Reed Problem}
-
-\begin{figure}[H]
-\label{Streaming}
+\begin{table}[H]
 \centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/7sigaSens.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/7sigsSens.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state:}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Sigma perturbations Reed problem}
-\label{fig:fig}
-\end{figure}
+  \begin{tabular}{| l | r | r | r | r |}
+    \hline
+    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     Sn Fwd 			&0.17580 &0.030945 &0.030235 & 0.20984\\ \hline
+     VET Fwd 			&0.17561 &0.029105 &0.047568 &0.20763\\ \hline
+     Sn Adj 			&0.17580 &0.030401 &0.030450 &0.20620\\ \hline
+     VEF Adj 			&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
+     Blended 			&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
+     VET $\delta \Edd$ 	&0.17561 &0.030289 &0.028361 &0.20590\\ \hline
+    \end{tabular}
+  \caption{Table of selected results for the Reed system under perturbations. Values given are absolute $\delta \Edd$. }
+\end{table}
 
-
-\begin{figure}[H]
-\label{InHomoPertq}
-\centering
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/7qSens.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=2$, $\sigs=1$}
-  \label{fig:sfig4}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig2}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=1$, $\sigs=0.5$}
-  \label{fig:sfig5}
-\end{subfigure}%
-\\
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures/holder.png}
-  \caption{Unperturbed state: $\sigt=0.5$, $\sigs=0.25$}
-  \label{fig:sfig6}
-\end{subfigure}%
-\caption{Plots of source perturbation sensitivity for perturbed streaming system.}
-\label{fig:fig}
-\end{figure}
-
-
-\subsubsection{No absorption system}
-\todo{Manufactured solution. Create a system bounded by two QoI regions on each side. In the center of the region, have an arbitrary system of sources and pure scattering only. The bounding QoI regions should detect all of the neutrons produced by the sources in the system, since they are just scattered about and change direction. However, the Eddington perturbation may cause errors in the sensitivity.}
-
+\section{Looking towards time dependence}
 
 
 %The next line is the format for inserting new sections.
 %Replace the name "newsection"  with the name of your
 %new section file.
 %\include{data/newsection}
+
+
+%\bibliography{IanProp} 
+%\bibliographystyle{ieeetr}
 
 %fix spacing in bibliography, if any...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1401,7 +1059,7 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 %This file is a .bib database that contains the sources.
 %This removes the dependency on the previous file
 %bibliography.tex.
-\bibliography{data/IanRefs}
+\bibliography{IanProp}
 
 
 

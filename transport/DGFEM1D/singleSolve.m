@@ -3,9 +3,9 @@ global npar dat snq IO_opts results
 
 [dEdq, dEdsa, dEdss, dEdinc]=getEslopes;
 
-qPertFac=0.1;
-sigaPertFac=-0.1;
-sigsPertFac=0.0;
+qPertFac=0.0;
+sigaPertFac=-0.0;
+sigsPertFac=0.1;
 incPertFac=0.0;
 % Load Perturbations. Used in adjoint sensitivity
 dat.sigaPert = dat.sigaPertRegion.*dat.siga*sigaPertFac+dat.sigaPertRegion.*0;
@@ -36,7 +36,7 @@ calcAdjointSensitivity
 % fprintf('delta qoi using VEF math adjoint E Interp: \t\t %g \n',delta_qoi_VEF_interp);
 % delta_qoi_VEF_Epert = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E_pert);
 % fprintf('delta qoi using VEF math adjoint E Interp: \t\t %g \n',delta_qoi_VEF_Epert);
-[results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
+[results.deltaE_interp,results.deltaB_L,results.deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,results.Ebd_pert);
 %fprintf('E Interp Correction: \t\t %g \n',deltaE_term);
 
 displaySensitivity

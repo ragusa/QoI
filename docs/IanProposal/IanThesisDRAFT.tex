@@ -21,6 +21,7 @@
 \usepackage{amsmath, amsthm, amssymb, amsfonts, booktabs, graphicx, float, esint, subcaption, xspace, xcolor}
 
 \usepackage{stix,stmaryrd}
+\usepackage{hyperref}
 
 %If you have JPEG format images, add .jpg as an
 %allowed file extension below. Same for Bitmaps (.bmp).
@@ -328,6 +329,7 @@ The advantage of the above expression for $\delta \qoi$ is that two solves, one 
 
 
 \chapter{Derivations}
+\jcr{I believe chapter titles must be in UPPER case. Also, find a more meaningful chapter title. This one is way too generic}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discrete Ordinates (SN) Transport}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -532,11 +534,11 @@ with $\vJ$ the net current and
 \end{equation}
 Finally, using \eqref{1am}, we get:
 \begin{equation}
-2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn(\vr) \cdot \frac{1}{\sigt} \div \Edd \phi \,.
+2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,.
 \end{equation}
 Note that we recover the Robin boundary conditions for diffusion when $\Edd = \tfrac{1}{3} \mathbb{I}$:
 \[
-2 J^{\text{inc}}(\vr) = \frac{\phi(\vr)}{2} + \vn(\vr) \cdot \frac{1}{3\sigt} \grad \phi \,.
+2 J^{\text{inc}} = \frac{\phi}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
 \]
 
 
@@ -578,6 +580,7 @@ For reasons that will become apparent during sensitivity calculations, the bound
 2J^{\dag,\text{out}} = B \vefadj+ 
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj   \quad \vr \in \bound
 \end{equation}
+\jcr{I suspect a $\vn$ to be missing in the above equation}
 Note that the Robin boundary conditions are recovered for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$:
 \[
 2 J^{\dag,\text{out}} = \frac{\vefadj}{2} + \vn \cdot \frac{1}{3\sigt} \grad \vefadj \,.
@@ -633,7 +636,19 @@ Hence
 \[ 
 \frac{1}{\sigma'} \approx \frac{1}{\sigma} - \frac{\delta\sigma}{\sigma^2}
 \]
-Your delta sigma and mine differ by a factor $-\sigma^{-2}$. What am I missing?
+But you are using
+\[
+\frac{1}{\sigma'} = \frac{1}{\sigma} + \frac{1}{\Delta\sigma}
+\]
+So, we have
+\[
+\frac{1}{\Delta\sigma} \approx  - \frac{\delta\sigma}{\sigma^2} 
+\quad \text{or} \quad
+\frac{\sigma}{\Delta\sigma} \approx  - \frac{\delta\sigma}{\sigma} 
+\quad \text{or} \quad
+\frac{(\Delta\sigma)^{-1}}{\sigma^{-1}} \approx  - \frac{\delta\sigma}{\sigma} 
+\]
+So, in your calculation, are you perturbing in relative fractions of $\sigma$, or in relative fractions of $\sigma^{-1}$? You way the perturbation is done should be the same in the Sn code and in the VET code, otherwise comparisons cannot be made!
 }
 \begin{subequations}
 \begin{equation}
@@ -646,7 +661,7 @@ Your delta sigma and mine differ by a factor $-\sigma^{-2}$. What am I missing?
  2J_p^\text{inc} = B \phi_p  + \vn \cdot  (\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  \quad \vr \in \bound
 \end{equation}
 \end{subequations}
-The usual adjoint process is performed, starting with the \qoi definition using the response function (adjoint source) and the perturbed forward solution. 
+The usual adjoint process is performed, starting with the perturbed \qoi definition using the response function (adjoint source) and the perturbed forward solution. Then, the left-hand side of the adjoint equation is inserted and the operators are carried over to the perturbed forward solution (integration by parts):
 \begin{equation}
 \label{VETSensDeriv}
 \begin{split}
@@ -658,7 +673,8 @@ The usual adjoint process is performed, starting with the \qoi definition using 
 \end{split}
 \end{equation}
 \jcr{you use two different adjoint flux notations in the above, $\phi^\dag$, and $\vefadj $. It could be that this is all over the document. Give it a pass through to clean this up.}
-A first-order perturbation approximation of Eq.~\eqref{VEFPert} can be used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution.
+A first-order perturbation approximation of Eq.~\eqref{VEFPert}
+\footnote{Eq.~\eqref{VEFPert} can be viewed as $A_p \phi_p = q+\delta q = A \phi_p + \delta A \phi + O(\delta^2)$, hence $A \phi_p  \simeq  q+\delta q -\delta A \phi$} is then used to substitute into the sensitivity Eq.~\eqref{VETSensDeriv}, yielding a form independent of the perturbed forward solution in the volumetric inner products:
 \begin{equation}
 \label{QoIVETAdjNoBC}
 \begin{split}
@@ -667,7 +683,14 @@ A first-order perturbation approximation of Eq.~\eqref{VEFPert} can be used to s
 & - \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket + \sbra \vefadj, \isigt \div \Edd \phi_p \sket 
 \end{split}
 \end{equation}
-The first surface term can be dealt with readily using the adjoint boundary condition. For the second surface term, a first order approximation of the perturbed forward boundary condition is used for substitution.
+The first surface term in Eq.~\eqref{QoIVETAdjNoBC} 
+can be dealt with readily using the adjoint boundary condition ($\phi_p$ will be dealt with shortly). For the second surface term, we use a first-order approximation of the perturbed forward boundary condition  
+\[
+2 J_p^{\text{inc}} = B \phi_p + \sigma_{t,p}^{-1}\div \Edd \phi_p
+= B \phi_p + (\isigt + \delta \isigt) \div \Edd \phi_p
+\approx = B \phi_p + \isigt  \div \Edd \phi_p + \delta \isigt  \div \Edd \phi
+\]
+Reporting back in the surface terms, we obtain:
 \begin{equation}
 \begin{split}
  - \sbra \phi_p, \Edd \cdot \isigt \grad \vefadj \sket  + \sbra \vefadj, \isigt \div \Edd \phi_p \sket 
@@ -676,13 +699,13 @@ The first surface term can be dealt with readily using the adjoint boundary cond
 \approx&- \sbra \phi_p, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 J_p^{\text{inc}} - \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
-Finally, an expression for the \qoi response is found.
+Finally, a first-order expression for the sensitivity in the \qoi is as follows:
 \begin{equation}
 \label{QoIVETAdjlong}
 \begin{split}
 \delta \qoi =& \qoi_p - \qoi \\ 
-=& \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \phi \right)  - \delta \siga \phi, \vefadj \ket 
-- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 \delta J_p^{\text{inc}} \sket \\
+=& \bra \delta \scalSource , \vefadj \ket - \bra -\div \delta \isigt \div \left( \Edd \phi \right)  + \delta \siga \phi, \vefadj \ket 
+- \sbra \delta \phi, 2J^{\dag,\text{out}} \sket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
 & - \sbra \vefadj, \delta \isigt \div \Edd \phi \sket 
 \end{split}
 \end{equation}
@@ -704,7 +727,7 @@ perturbed forward VET solution. Integration by parts can be applied to condense 
 \subsection{Error from unperturbed Eddington assumption}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-Beyond the first order approximation common to adjoint formulations, the VET sensitivity formulation also made the assumption that the Eddington tensor remained unperturbed under perturbations of the other parameters. To observe the terms that were dropped in this approximation, consider a reformulation of the perturbed forward equation, this time introducing $\delta \Edd$ and $\delta  B$ terms. 
+In addition to the first-order approximation common to adjoint formulations, the VET sensitivity formulation also made the assumption that the Eddington tensors $\Edd$ and $B$ remained unchanged under perturbations of the other parameters. To observe the terms that were dropped in this approximation, consider a reformulation of the perturbed forward equation, this time introducing $\delta \Edd$ and $\delta  B$ terms. 
 \begin{subequations}
 \begin{equation}
 \label{VEFPerEdd}
@@ -736,18 +759,18 @@ The boundary condition for the perturbed forward solution takes on a slightly mo
 - \sbra \vefadj, \phi \delta \BEdd \sket
 \end{split}
 \end{equation} 
-Comparing the above formulation with the unperturbed Eddington case shows that the terms lost by the Unperturbed Eddington assumption are 
+Comparing the above formulation with the unperturbed Eddington case shows that the terms lost by the ``Unperturbed Eddington'' assumption are 
 \begin{equation}
 \label{EddErrLong}
  \bra \div \isigt \div \left( \delta \Edd \phi \right), \vefadj \ket
 - \sbra  \vefadj ,\isigt \div \delta \Edd \phi \sket
-- \sbra \vefadj, \phi \delta \BEdd \sket
+- \sbra \vefadj, \phi \delta \BEdd \sket \,,
 \end{equation} 
 more compactly expressed in the form
 \begin{equation}
 \label{EddErr}
  - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket
-- \sbra \vefadj, \phi \delta \BEdd \sket.
+- \sbra \vefadj, \phi \delta \BEdd \sket \,.
 \end{equation} 
 
 

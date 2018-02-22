@@ -69,7 +69,7 @@ for iel=1:npar.nel
     Jac   = npar.dx(iel)/2;
     % assemble
     if blended>0
-        d_qoi = d_qoi + Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/snq.sw) ;
+        d_qoi = d_qoi + Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/ snq.sw) ;
     else
         d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
     end

@@ -12,9 +12,9 @@ outputMatrix=[];
 today=datestr(now,'mmddyyHHMM');
 %[pathstr,name,ext] = fileparts(pwd); 
 file=['DGFEM1D_prob',int2str(dat.pb_ID),'_',today,'.csv'];
-filename=fullfile('C:\Users\Ian\checkout','output',file);
+%filename=fullfile('C:\Users\Ian\checkout','output',file);
 %figurePath='C:\Users\Ian\checkout\QoI\docs\IanProposal\figures2';
-figurePath='C:\Users\Ian\winprojects\QoI\docs\IanProposal\figures2';
+figurePath='C:\Users\Ian\Projects\QoI\docs\IanProposal\figures2';
 figureFolder='figures2';
 %filename=fullfile('E:\Storage\git_checkout','output',file);
 % outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
@@ -67,7 +67,7 @@ for ii=1:numel(sigaPertFactor)
     B_interp=results.Ebd+(dBdsa.*sigaPertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    sigaSensValues=[sigaSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];   
+    sigaSensValues=[sigaSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];   
 end
 dat=datStart;
 for ii=1:numel(sigsPertFactor)
@@ -96,7 +96,7 @@ for ii=1:numel(sigsPertFactor)
     B_interp=results.Ebd+(dBdss.*sigsPertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    sigsSensValues=[sigsSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+    sigsSensValues=[sigsSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 end
 dat=datStart;
 for ii=1:numel(sourcePertFactor)
@@ -122,7 +122,7 @@ for ii=1:numel(sourcePertFactor)
     B_interp=results.Ebd+(dBdq.*sourcePertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    qSensValues=[qSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+    qSensValues=[qSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 end
 dat=datStart;
 for ii=1:numel(incPertFactor)
@@ -149,7 +149,7 @@ for ii=1:numel(incPertFactor)
     B_interp=results.Ebd+(dBdinc.*incPertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    incSensValues=[incSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+    incSensValues=[incSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 end
 
 % %%%%%%%%%Try 3D graph
@@ -186,7 +186,7 @@ end
 %         B_interp=results.Ebd+(dBdq.*sourcePertFactor(ii))+(dBdsa.*sigaPertFactor(jj));
 %         [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
 %         delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp;
-%         multiSensValues=[multiSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+%         multiSensValues=[multiSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 %         xPert=[xPert sourcePertFactor(ii)];
 %         yPert=[yPert sigaPertFactor(jj)];
 %     end
@@ -251,7 +251,7 @@ for ii=1:numel(sourcePertFactor)
     B_interp=results.Ebd+(dBdq.*sourcePertFactor(ii))+(-1*dBdsa.*sourcePertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    twoSensValues=[twoSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+    twoSensValues=[twoSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 end
 figure(502)
 hold on
@@ -263,7 +263,8 @@ plot(sourcePertFactor,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(sourcePertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'qsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -305,7 +306,7 @@ for ii=1:numel(incPertFactor)
     B_interp=results.Ebd+(dBdinc.*incPertFactor(ii))+(-1*dBdsa.*incPertFactor(ii));
     [results.deltaE_interp,deltaB_L,deltaB_R,volValues]=compute_deltaE_QoI_term(results.phiVEFa,results.phiVEF,results.phiVEF_pert,results.E,E_interp,results.Ebd,B_interp);
     delta_qoi_VEF_a_Eint=results.delta_qoi_VEF_a+results.deltaE_interp+deltaB_L+deltaB_R;
-    twoSensValues=[twoSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint]];
+    twoSensValues=[twoSensValues; [results.delta_qoi_sn_f  results.delta_qoi_VEF_f  results.delta_qoi_sn_a  results.delta_qoi_VEF_a results.delta_qoi_blend_a delta_qoi_VEF_a_Eint results.delta_qoi_AltVEF_a]];
 end
 figure(503)
 hold on
@@ -317,7 +318,8 @@ plot(incPertFactor,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(incPertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'incsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -338,7 +340,8 @@ plot(sigaPertFactor,sigaSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigaPertFactor,sigaSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigaPertFactor,sigaSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigaPertFactor,sigaSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(sigaPertFactor,sigaSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -357,7 +360,8 @@ plot(sigsPertFactor,sigsSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigsPertFactor,sigsSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigsPertFactor,sigsSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigsPertFactor,sigsSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(sigsPertFactor,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -376,7 +380,8 @@ plot(sourcePertFactor,qSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor,qSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,qSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,qSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(sourcePertFactor,qSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
 dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -395,7 +400,8 @@ plot(incPertFactor,incSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor,incSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,incSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,incSensValues(:,6)./(results.qoi_sn_f),'--dm')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'},'Position',[0.5 0.80 0.01 0.01])
+plot(incPertFactor,incSensValues(:,7)./(results.qoi_sn_f),'--+r')
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incSens'];
 dataFile=['data\',int2str(dat.pb_ID),'inc.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -406,6 +412,7 @@ print(fullPath{1},'-dpng');
 
 do_plot(results.phi,'Sn',610,dat.forward_flux)
 do_plot(results.phiVEF,'VET',610,dat.forward_flux)
+do_plot(results.phiAltVEF,'AltVET',610,dat.forward_flux)
 figure(611)
 figureFile=[int2str(dat.pb_ID),'phi'];
 figureName=fullfile(figurePath,figureFile);
@@ -413,6 +420,7 @@ print(figureName,'-dpng');
 
 do_plot(results.phia,'Sn',611,dat.adjoint_flux)
 do_plot(results.phiVEFa,'VET',611,dat.adjoint_flux)
+do_plot(results.phiAltVEFa,'AltVET',611,dat.adjoint_flux)
 figure(612)
 figureFile=[int2str(dat.pb_ID),'phia'];
 figureName=fullfile(figurePath,figureFile);

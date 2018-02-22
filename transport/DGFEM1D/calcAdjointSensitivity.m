@@ -15,4 +15,5 @@ results.delta_qoi_sn_a_pert = compute_perturbed_qoi_Sn(dat.adjoint_flux,results.
 % Compute perturbed QoIs using VEF math adjoint method and unperturbed
 % forward, alternate method
 %delta_qoi_VEF_a_alt = compute_perturbed_qoi_VEF(dat.adjoint_flux,phiVEFa_alt,phiVEF_alt,Ea);
+results.delta_qoi_AltVEF_a = compute_perturbed_qoi_VEFAlt(dat.adjoint_flux,results.phia,results.phi,results.phiAltVEF,results.psia,results.Ea);
 end

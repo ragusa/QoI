@@ -5,8 +5,8 @@ global npar dat snq IO_opts results
 
 qPertFac=0.0;
 sigaPertFac=-0.0;
-sigsPertFac=0.1;
-incPertFac=0.0;
+sigsPertFac=0.0;
+incPertFac=0.1;
 % Load Perturbations. Used in adjoint sensitivity
 dat.sigaPert = dat.sigaPertRegion.*dat.siga*sigaPertFac+dat.sigaPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*dat.sigs*sigsPertFac+dat.sigsPertRegion.*0;

@@ -56,7 +56,7 @@ for idir=1:snq.n_dir;
     % retrieve boundary condition for that direction
     psi_in = inc(idir); 
     % shortcut
-    mu = snq.mu(idir);
+    mu = snq.mu(idir); %IWH ROMOVE THIS
     gradient = grad*mu;
     
     % loop over spatial cells

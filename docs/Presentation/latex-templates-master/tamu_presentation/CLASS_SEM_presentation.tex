@@ -98,7 +98,7 @@
     pdfauthor={Ian Halvic},
 }
 
-\title[ ]{}
+\title[Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation]{}
 \author[ ]{Ian Halvic}
 \institute[Texas A\&M]{Department of Nuclear Engineering \\ Texas A\&M University}
 \date[2/24/17]
@@ -441,9 +441,22 @@ Form a $\delta \qoi$ inner-product by picking the exact source terms from SN adj
 
 \begin{frame}\frametitle{Estimate $\delta \Edd$}
  \begin{flushleft}
+Attempt to approximate by taking the slop with respect to perturbation parameters $\vp$
 \begin{equation}
 \delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp \approx \left( \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0} \right) \delta \vp
 \end{equation}
+ \begin{equation}
+\label{VETsens}
+\begin{split}
+\delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
+& - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket
+- \sbra \vefadj, \phi \delta \BEdd \sket
+\end{split}
+\end{equation}
+\begin{itemize}
+\item + Attempts to resolve errors from the $\delta \Edd = 0$ assumption in VET adjoint
+\item - Requires an additional SN solve for each perturbation parameter we which to estimate $\delta \Edd$ in. Pointless for only testing one perturbation scenario, potentially powerful for testing many perturbation scenarios in a single parameter.
+\end{itemize}
 \end{flushleft}
 \end{frame}
 

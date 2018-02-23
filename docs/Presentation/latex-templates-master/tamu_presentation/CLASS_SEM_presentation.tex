@@ -94,11 +94,11 @@
 
 % set up pdf support and indexing
 \hypersetup{
-    pdftitle={Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation},
+    pdftitle={Adjoint-Based Sensitivity for Radiation Transport Using an Eddington Tensor Formulation},
     pdfauthor={Ian Halvic},
 }
 
-\title[Adjoint-based sensitivity for radiation transport using an Eddington tensor formulation]{}
+\title[]{Adjoint-Based Sensitivity for Radiation Transport Using an Eddington Tensor Formulation}
 \author[ ]{Ian Halvic}
 \institute[Texas A\&M]{Department of Nuclear Engineering \\ Texas A\&M University}
 \date[2/24/17]
@@ -126,9 +126,17 @@
 
 \begin{frame}[t]\frametitle{Motivation}
 \begin{flushleft}
+Adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest (\qoi). In general these methods 
+have the advantages
 \begin{itemize}
-\item (Layout why we want to use Adjoints. No additional solves to get $\delta \qoi$)
-\item (Why we can't just use SN adjoint? memory issues.)
+\item No additional solves required to find the change in \qoi
+\item Change in \qoi is found using a simple inner product
+\end{itemize}
+\vspace{5mm}
+While computationally efficient, for transport memory usage may become an issue.
+\begin{itemize}
+\item Requires storing both the forward angular $\psi$ and adjoint angular $\psi^\dag$ fluxes
+\item consider a quasi-diffusion approach to reduce the dimensionality, so only scalar fluxes are stored
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -137,9 +145,12 @@
 
 \begin{frame}\frametitle{Approach}
 \begin{flushleft}
+We will consider a simple transport system
 \begin{itemize}
-\item (Maybe Brief Operator overview of adjoint method using generic operator A.)
-\item (Layout the problem to be considered: 1 group transport, scalar sources)
+\item steady state, 1 group
+\item isotropic sources and response functions
+\item isotropic scattering
+\item incident flux boundary conditions
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -150,13 +161,14 @@
 \subsection{}	% we have to keep these to get the navigation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{SN Transport}
+\begin{frame}\frametitle{325
++Transport}
  \begin{flushleft}
 To begin, consider the one-group SN transport system with isotropic source $q$ and scattering $\sigs$
 \begin{subequations}
 \begin{equation}
 \label{SNfwd}
-- \vO \cdot \grad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + \angSource
+ \vO \cdot \grad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + \angSource
 \end{equation}
 \begin{equation}
 \psi(\vr) = \psi^{ \text{inc}}(\vr) \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
@@ -175,13 +187,13 @@ We are concerned with a volumetric and isotropic \qoi given by $\scalResp$
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{SN Transport}
+\begin{frame}\frametitle{Transport}
  \begin{flushleft}
 This presents the most straightforward (and most expensive) way to determine the change in the \qoi due to perturbations in the system parameters
 \begin{subequations}
 \begin{equation}
 \label{SNfwdp}
-- \vO \cdot \grad \psi_p + ( \sigt \delta \sigt) \psi_p = \frac{\sigs+\delta \sigs}{4 \pi} \phi_p + \angSourcepd
+\vO \cdot \grad \psi_p + ( \sigt \delta \sigt) \psi_p = \frac{\sigs+\delta \sigs}{4 \pi} \phi_p + \angSourcepd
 \end{equation}
 \begin{equation}
 \psi(\vr) = \psi_p^{ \text{inc}}(\vr) \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
@@ -199,18 +211,18 @@ Leading to the simple result
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{SN Transport Adjoint}
+\begin{frame}\frametitle{Transport Adjoint}
  \begin{flushleft}
 To avoid a forward solve for every perturbation case, an adjoint SN method may be employed. The adjoint system is defined
 \begin{subequations}
 \begin{equation}
-- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
+- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
 \end{equation}
 \begin{equation}
 \psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
 \end{equation}
 \end{subequations}
-Through the standard adjoint method a surface term is gained in the \qoi
+Through the standard adjoint method a surface term is added in the \qoi
 \begin{equation}
 \begin{split}
 \qoi &= \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag , \psi \sketSN \\
@@ -223,7 +235,7 @@ Through the standard adjoint method a surface term is gained in the \qoi
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\\
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{SN Transport Adjoint Sensitivity}
+\begin{frame}\frametitle{Transport Adjoint}
  \begin{flushleft}
  Multiply by the perturbed $\psi_p$ by $\scalResp$ and integrate. First order approximation used on last step.
 \begin{equation}
@@ -244,7 +256,7 @@ Through the standard adjoint method a surface term is gained in the \qoi
 \end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- \begin{frame}\frametitle{SN Transport Adjoint Sensitivity}
+ \begin{frame}\frametitle{Transport Adjoint}
  \begin{flushleft}
 Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
 \begin{equation}
@@ -255,17 +267,20 @@ Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
  , \psi^\dag  \ketSN - \sbraSN \delta \psi, \psi^\dag \sketSN
 \end{split}
 \end{equation}
+Pros
 \begin{itemize}
-\item + Do not need SN solve for each perturbation scenario, just 2 SN solves to get $\psi$ and $\psi^\dag$
-\item - Only first order perturbation accurate ($\delta \sigs \delta \phi=0$, $\delta \sigt \delta \phi=0$)
-\item - Need to store angular dependent $\psi$ and $\psi^\dag$, which can be prohibitive
+\item Do not need SN solve for each perturbation scenario, just 2 SN solves to get $\psi$ and $\psi^\dag$
+\end{itemize}
+Cons
+\begin{itemize}
+\item Only first order perturbation accurate ($\delta \sigs \delta \phi=0$, $\delta \sigt \delta \phi=0$)
+\item Need to store angular dependent $\psi$ and $\psi^\dag$, which can be prohibitive
 \end{itemize}
 \end{flushleft}
 \end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
- 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{VET Transport}
@@ -279,7 +294,7 @@ Formulate the P1 equations and define an Eddington Tensor $\Edd$ and a Boundary 
 \begin{equation}
 \Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
 , \quad \quad 
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \, \vr \in \bound
+\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\phi(\vr)} , \, \vr \in \bound
 \end{equation}
 Combine into the VET transport formulation \cite{Miften}
 \begin{subequations}
@@ -295,84 +310,10 @@ Combine into the VET transport formulation \cite{Miften}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Transport}
- \begin{flushleft}
-Formulate the P1 equations and define an Eddington Tensor $\Edd$ and a Boundary Eddington Factor $\BEdd$ 
-\begin{equation}
-\div \vec{J} + (\sigt-\sigs) \phi = \scalSource
-, \quad \quad 
-\div \left(  \int d\Omega \vO \vO \psi \right) + \sigt \vec{J} = 0 
-\end{equation}
-\begin{equation}
-\Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
-, \quad \quad 
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \, \vr \in \bound
-\end{equation}
-Combine into the VET transport formulation \cite{Miften}
-\begin{subequations}
-\begin{equation}
-\label{VEFForm}
-- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource 
-\end{equation}
-\begin{equation}
-2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi 
-\end{equation}
-\end{subequations}
-\end{flushleft}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{VET Transport Adjoint}
- \begin{flushleft}
-To derive an expression for the VET adjoint equation $\vefadj$, start with the forward VET balance equation, Eq.~\eqref{VEFForm}
-\begin{equation}
-\label{VEFadjFormDeriv}
-\begin{split}
-\bra \scalSource , \vefadj \ket &= - \bra \div \left( \frac{1}{\sigt}\div \Edd \phi \right), \vefadj \ket +  \bra \siga \phi, \vefadj \ket   \\
-&= \bra \frac{1}{\sigt}\div \Edd \phi, \grad \vefadj \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \vn \cdot \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket   \\
- &=  - \bra \phi, \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) \ket  +  \bra  \phi, \siga \vefadj \ket \\
- & - \sbra \vn \cdot  \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \vn \cdot  \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
-\end{split}
-\end{equation}
-Where the inner product $\sbra f ,g \sket = \oint_{\partial V} fg \, dS$ has been defined
-\end{flushleft}
-\end{frame}
-
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}\frametitle{VET Transport Adjoint}
- \begin{flushleft}
-From the previous balance equation, an obvious form of the VET adjoint emerges
-\begin{subequations}
-\begin{equation}
-\label{adjForm}
-- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) + \siga \vefadj = \scalResp
-\end{equation}
-\begin{equation}
-\label{adjVETBC}
-2J^{\dag,\text{out}} = B \vefadj+ \vn \cdot
-\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj    \quad \vr \in \bound
-\end{equation}
-\end{subequations}
-Choosing $2J^{\dag,\text{out}} =0$ results in the relatively simple \qoi expression using this new formulation
-\begin{equation}
-\label{adjVETqoi}
-\qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket
-\end{equation}
-Of particular note is that $ \phi^\dag \neq \vefadj$
-\end{flushleft}
-\end{frame}
-
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}\frametitle{VET Transport Adjoint Response}
  \begin{flushleft}
 Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under system perturbation. Note $\ell_t = \frac{1}{\sigt}$
 \begin{equation}
@@ -394,7 +335,7 @@ Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under s
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Transport Adjoint Response}
+\begin{frame}\frametitle{VET Transport Adjoint}
  \begin{flushleft}
  Subtracting off the unperturbed \qoi in Eq.~\eqref{adjVETqoi} and cleaning up some boundary terms results in
  \begin{equation}
@@ -403,11 +344,15 @@ Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under s
 \delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
 \end{split}
 \end{equation}
+Pros
 \begin{itemize}
-\item + Requires only 1 SN solve to get $\Edd$ and $\phi$, and one scalar VET solve for $\varphi^\dag$
-\item + No angular fluxes stored, only $\Edd$
-\item - Only first order perturbation accurate (as was SN adjoint)
-\item - Major assumption that $\delta \Edd=0$, which is not always true. This means that the method in general is not exact for source perturbations $\delta q$ and $\delta \psi^{\text{inc}}$, which was the case for SN
+\item Requires only 1 SN solve to get $\Edd$ and $\phi$, and 1 scalar VET solve for $\varphi^\dag$
+\item No angular fluxes stored, only $\Edd$
+\end{itemize}
+Cons
+\begin{itemize}
+\item Only first order perturbation accurate (as was SN adjoint)
+\item Major assumption that $\delta \Edd=0$, which is not always true. This means that the method in general is not exact for source perturbations $\delta q$ and $\delta \psi^{\text{inc}}$, which was the case for SN
 
 \end{itemize}
 \end{flushleft}
@@ -420,17 +365,20 @@ Form a $\delta \qoi$ inner-product by picking the exact source terms from SN adj
 \begin{equation}
 \label{Blendsens}
 \begin{split}
-\delta \qoi =&  \bra \angSourced , \phi^\dag \ket - \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket
-- \sbraSN \delta \psi^\text{inc}, \psi^\dag \sketSN \\
+\delta \qoi =&  \textcolor{red}{\bra \angSourced , \phi^\dag \ket} \textcolor{blue}{- \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket} \textcolor{red}{
+- \sbraSN \delta \psi^\text{inc}, \psi^\dag \sketSN }\\
 \end{split}
 \end{equation}
+Pros
 \begin{itemize}
-\item + Requires 2 SN solves to get $\Edd$, $\phi$ and $\phi^\dag$ then one VET solve for $\varphi^\dag$
-\item + No angular fluxes stored
-\item + Still exact for source perturbations (equivalent to SN adjoint)
-\item - Lacks rigorous derivation
-\item - Could experience issues when both source and cross-section perturbation are present, compared to pure VET adjoint
-
+\item Requires 2 SN solves to get $\Edd$, $\phi$ and $\phi^\dag$ then one VET solve for $\varphi^\dag$
+\item No angular fluxes stored
+\item Still exact for source perturbations (equivalent to SN adjoint)
+\end{itemize}
+Cons
+\begin{itemize}
+\item Lacks rigorous derivation
+\item Could experience issues when both source and cross-section perturbation are present, compared to pure VET adjoint
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -443,7 +391,7 @@ Form a $\delta \qoi$ inner-product by picking the exact source terms from SN adj
  \begin{flushleft}
 Attempt to approximate by taking the slop with respect to perturbation parameters $\vp$
 \begin{equation}
-\delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp \approx \left( \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0} \right) \delta \vp
+\delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp \approx \left( \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0} \right) \cdot \delta \vp
 \end{equation}
  \begin{equation}
 \label{VETsens}
@@ -453,9 +401,13 @@ Attempt to approximate by taking the slop with respect to perturbation parameter
 - \sbra \vefadj, \phi \delta \BEdd \sket
 \end{split}
 \end{equation}
+Pros
 \begin{itemize}
-\item + Attempts to resolve errors from the $\delta \Edd = 0$ assumption in VET adjoint
-\item - Requires an additional SN solve for each perturbation parameter we which to estimate $\delta \Edd$ in. Pointless for only testing one perturbation scenario, potentially powerful for testing many perturbation scenarios in a single parameter.
+\item Attempts to resolve errors from the $\delta \Edd = 0$ assumption in VET adjoint
+\end{itemize}
+Cons
+\begin{itemize}
+\item Requires an additional SN solve for $\Edd(\vp_1)$. Pointless for only testing one perturbation scenario, potentially powerful for testing many perturbation scenarios
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -466,12 +418,12 @@ Attempt to approximate by taking the slop with respect to perturbation parameter
 
 \begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
 \begin{flushleft}
-Reverse the order of the VET derivation, start with adjoint P1 and works towards an alternate forward $\varphi$
+Reverse the order of the VET derivation, start with adjoint P1 and work towards an alternate forward $\varphi$
 \begin{equation}
 \label{0amAlt}
-\div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = 4\pi \scalResp 
+-\div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = 4\pi \scalResp 
 , \quad \quad 
-\div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0
+-\div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0
 \end{equation}
 \begin{equation}
 \Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)}
@@ -558,12 +510,16 @@ Some cleanup gives
 \delta \qoi = \bra \delta q^\dag, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
 - \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN
 \end{equation}
+Pros
 \begin{itemize}
-\item + Requires 1 SN solve to get $\Edd^\dag$ and $\phi^\dag$ then one VET solve for $\varphi$
-\item + No angular fluxes stored
-\item + Still exact for volumetric source perturbations $\delta q$
-\item - Assumes an unperturbed $\Edd^\dag$
-\item - Not exact for perturbed response $\delta q^\dag$, which was trivial for forward derived methods 
+\item Requires 1 SN solve to get $\Edd^\dag$ and $\phi^\dag$ then one VET solve for $\varphi$
+\item No angular fluxes stored
+\item Still exact for volumetric source perturbations $\delta q$
+\end{itemize}
+Cons
+\begin{itemize}
+\item Assumes an unperturbed $\Edd^\dag$
+\item Not exact for perturbed response $\delta q^\dag$, which was trivial for forward derived methods 
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -578,11 +534,22 @@ Some cleanup gives
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Solver}
+\begin{frame}\frametitle{Solvers}
 \begin{flushleft}
+Transport solver ($\psi$, $\psi^\dag$, $\phi$, $\phi^\dag$)
 \begin{itemize}
-\item (Describe solver approach: 1D, FEM, ect.)
+\item 1D slab geometry solver
+\item Iterative SN method
+\item Discontinuous Galerkin FEM for each iteration
+\item Uniform grid, 200 elements
 \end{itemize}
+VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
+\begin{itemize}
+\item 1D slab geometry solver
+\item Discontinuous Galerkin FEM
+\item Uniform grid, 200 elements
+\end{itemize}
+
 \end{flushleft}
 \end{frame}
 
@@ -631,7 +598,7 @@ Some cleanup gives
      VET Adj 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
      Blended 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
      VET $\delta \Edd$ 	&0.39998 &0.39983 &5.9537e-05 &0.79981\\ \hline
-     VET Alt			& --  & --  &	--		&  --\\ \hline
+     VET Alt			&0.39998 &0.39980  &4.986e-05	 &0.79978\\ \hline
     \end{tabular}
   \caption{Table of selected results for the homogeneous system under homogeneous perturbations. Values given are absolute $\delta \Edd$. }
 \end{table}
@@ -683,7 +650,7 @@ Some cleanup gives
      VET Adj 			&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
      Blended 			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
      VET $\delta \Edd$ 	&0.36287 &0.36290 &3.0640e-05 &0.72586\\ \hline
-     VET Alt			& --  & --  &	--		&  --\\ \hline
+     VET Alt			&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
     \end{tabular}
   \caption{Table of selected results for the homogeneous system under inhomogeneous perturbations. Values given are absolute $\delta \Edd$. }
 \end{table}
@@ -695,28 +662,28 @@ Some cleanup gives
  \begin{flushleft}
 
 \begin{figure}[H]
-\label{Trial1}
+\label{Trial3}
 \centering
 \begin{subfigure}{.5\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24qSens.png}
-  \label{T1:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/24incSens.png}
+  \label{T3:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textheight}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24sigaSens.png}
-  \label{T1:sfig2}
+  \label{T3:sfig2}
 \end{subfigure}
 %
 \begin{subfigure}{.5\textheight}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24sigsSens.png}
-  \label{T1:sfig3}
+  \label{T3:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24qsigaSens.png}
-  \label{T1:sfig4}
+  \includegraphics[width=.98\linewidth]{figures2/24incsigaSens.png}
+  \label{T3:sfig4}
 \end{subfigure}
 \end{figure}
 \end{flushleft}
@@ -735,7 +702,7 @@ Some cleanup gives
      VET Adj 			&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
      Blended 			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
      VET $\delta \Edd$ 	&0.023181 &0.020070 &-0.0065156 &0.043251\\ \hline
-     VET Alt			&0.023401 &0.035869 &	--		&  --\\ \hline
+     VET Alt			&0.023401 &0.035869 &-0.012563	&0.059270\\ \hline
     \end{tabular}
   \caption{Table of selected results for the shielding system under perturbations. Values given are absolute $\delta \Edd$. }
 \end{table}
@@ -751,10 +718,28 @@ Some cleanup gives
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Solver}
+\begin{frame}\frametitle{Takeaways}
 \begin{flushleft}
 \begin{itemize}
-\item (Final remarks, next steps, issues with scattering in 1D, references,)
+\item All 4 VET formulations show ability to approximate $\delta \qoi$.
+
+\item Blended method may be a quick refinement over the straightforward VET.
+
+\item $\delta \Edd$ method appears to work quite well, but requires additional SN solves. Potentially useful for computing over a very large perturbation space.
+
+\item The Alternate VET method using $\varphi$ can deal with source perturbations quite better than $\varphi^\dag$ VET methods. (At the expense of response $q^\dag$ perturbations.
+
+\item The Alternate VET method shows issues with incident flux. May need to refine boundary conditions of the $\varphi$ equations.
+\end{itemize}
+\end{flushleft}
+\end{frame}
+
+\begin{frame}\frametitle{Looking Forward}
+\begin{flushleft}
+\begin{itemize}
+\item Extend tests to 2D/3D. Strong sensitivity to $\sigs$ is difficult to test in the 1D system. Inability to scatter ``around'' obstacles.
+\item Potentially extend $\delta \Edd$ method to the $\varphi$ formulation.
+\item Alternate boundary conditions for VET method.
 \end{itemize}
 \end{flushleft}
 \end{frame}

@@ -84,7 +84,7 @@ for idir=1:snq.n_dir;
             psi_in = psi_local(1);
         end
         % compute the new scalar fluxes
-        phi(:,i) = phi(:,i) + snq.w(idir)*psi_local; %IWH remove snq.w(idir)*?
+        phi(:,i) = phi(:,i) + snq.w(idir)*psi_local; 
         % storage angular flux
         if keep_angular_flux 
             psi(:,i,idir) = psi_local;

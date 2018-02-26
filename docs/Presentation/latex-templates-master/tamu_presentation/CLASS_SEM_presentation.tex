@@ -133,7 +133,7 @@ have the advantages
 \item Change in \qoi is found using a simple inner product
 \end{itemize}
 \vspace{5mm}
-While computationally efficient, for transport memory usage may become an issue.
+While computationally efficient for transport memory usage may become an issue.
 \begin{itemize}
 \item Requires storing both the forward angular $\psi$ and adjoint angular $\psi^\dag$ fluxes
 \item consider a quasi-diffusion approach to reduce the dimensionality, so only scalar fluxes are stored
@@ -155,23 +155,49 @@ We will consider a simple transport system
 \end{flushleft}
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Approach}
+\begin{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/blocks.png}
+\end{figure}
+\end{flushleft}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Formulations}	% define sections here, it is possible to get section slides automatically, but this is not enabled
 \subsection{}	% we have to keep these to get the navigation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{325
-+Transport}
+\begin{frame}\frametitle{SN Transport}
+\begin{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/blocks1.png}
+\end{figure}
+\end{flushleft}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{(SN) Transport}
  \begin{flushleft}
-To begin, consider the one-group SN transport system with isotropic source $q$ and scattering $\sigs$
+To begin, consider the one-group transport system with isotropic source $q$ and scattering $\sigs$
 \begin{subequations}
 \begin{equation}
 \label{SNfwd}
  \vO \cdot \grad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + \angSource
 \end{equation}
 \begin{equation}
-\psi(\vr) = \psi^{ \text{inc}}(\vr) \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
+\psi(\vr) = \psi^{ \text{inc}}(\vr) \quad \vr \in \partial V^{-} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
 \end{equation}
 \end{subequations}
 We are concerned with a volumetric and isotropic \qoi given by $\scalResp$
@@ -187,16 +213,16 @@ We are concerned with a volumetric and isotropic \qoi given by $\scalResp$
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Transport}
+\begin{frame}\frametitle{(SN) Transport}
  \begin{flushleft}
 This presents the most straightforward (and most expensive) way to determine the change in the \qoi due to perturbations in the system parameters
 \begin{subequations}
 \begin{equation}
 \label{SNfwdp}
-\vO \cdot \grad \psi_p + ( \sigt \delta \sigt) \psi_p = \frac{\sigs+\delta \sigs}{4 \pi} \phi_p + \angSourcepd
+\vO \cdot \grad \psi_p + ( \sigt + \delta \sigt) \psi_p = \frac{\sigs+\delta \sigs}{4 \pi} \phi_p + \angSourcepd
 \end{equation}
 \begin{equation}
-\psi(\vr) = \psi_p^{ \text{inc}}(\vr) \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
+\psi(\vr) = \psi_p^{ \text{inc}}(\vr) \quad \vr \in \partial V^{-} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
 \end{equation}
 \end{subequations}
 Leading to the simple result
@@ -211,9 +237,9 @@ Leading to the simple result
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Transport Adjoint}
+\begin{frame}\frametitle{(SN) Transport Adjoint}
  \begin{flushleft}
-To avoid a forward solve for every perturbation case, an adjoint SN method may be employed. The adjoint system is defined
+To avoid a forward solve for every perturbation case, an adjoint method may be employed.\cite{Marchuk} The adjoint system is defined 
 \begin{subequations}
 \begin{equation}
 - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
@@ -235,7 +261,7 @@ Through the standard adjoint method a surface term is added in the \qoi
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\\
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Transport Adjoint}
+\begin{frame}\frametitle{(SN) Transport Adjoint}
  \begin{flushleft}
  Multiply by the perturbed $\psi_p$ by $\scalResp$ and integrate. First order approximation used on last step.
 \begin{equation}
@@ -256,7 +282,7 @@ Through the standard adjoint method a surface term is added in the \qoi
 \end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- \begin{frame}\frametitle{Transport Adjoint}
+ \begin{frame}\frametitle{(SN) Transport Adjoint}
  \begin{flushleft}
 Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
 \begin{equation}
@@ -274,16 +300,29 @@ Pros
 Cons
 \begin{itemize}
 \item Only first order perturbation accurate ($\delta \sigs \delta \phi=0$, $\delta \sigt \delta \phi=0$)
-\item Need to store angular dependent $\psi$ and $\psi^\dag$, which can be prohibitive
+\item Need to store angular dependent $\psi$ and $\psi^\dag$, which can be prohibitive for time-dependent problems
 \end{itemize}
 \end{flushleft}
 \end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{VET Formulation}
+\begin{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/blocks2.png}
+\end{figure}
+\end{flushleft}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Transport}
+\begin{frame}\frametitle{VET Formulation}
  \begin{flushleft}
 Formulate the P1 equations and define an Eddington Tensor $\Edd$ and a Boundary Eddington Factor $\BEdd$ 
 \begin{equation}
@@ -296,7 +335,7 @@ Formulate the P1 equations and define an Eddington Tensor $\Edd$ and a Boundary 
 , \quad \quad 
 \BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\phi(\vr)} , \, \vr \in \bound
 \end{equation}
-Combine into the VET transport formulation \cite{Miften}
+Combine into the VET formulation \cite{Miften}
 \begin{subequations}
 \begin{equation}
 \label{VEFForm}
@@ -310,10 +349,72 @@ Combine into the VET transport formulation \cite{Miften}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\begin{frame}\frametitle{VET Formulation}
+ \begin{flushleft}
+Where the boundary condition came from \cite{Miften}
+\begin{equation}
+\begin{split}
+2 J^{\text{inc}}(\vr) 
+&\equiv  2 \int_{\vO \cdot \vn <0 }  d \Omega\, | \vO \cdot \vec{n} | \psi^{\text{inc}}(\vr,\vO) \\
+&= 2\int_{\vO \cdot \vn <0 } d \Omega\,  | \vO \cdot \vn |  \psi(\vr,\vO)\\
+&= \int_{4\pi} d \Omega\,  \left( | \vO \cdot \vn |- \vO\cdot\vn\right)  \psi(\vr,\vO) \\
+&= \BEdd(\vr) \phi(\vr) - \vn \cdot \vJ \\
+&= \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi 
+\end{split}
+\end{equation}
+\end{flushleft}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Transport Adjoint}
+\begin{frame}\frametitle{VET Formulation Adjoint}
+ \begin{flushleft}
+To derive an expression for the VET adjoint equation $\vefadj$, start with the forward VET balance equation, Eq.~\eqref{VEFForm}
+\begin{equation}
+\label{VEFadjFormDeriv}
+\begin{split}
+\bra \scalSource , \vefadj \ket &= - \bra \div \left( \frac{1}{\sigt}\div \Edd \phi \right), \vefadj \ket +  \bra \siga \phi, \vefadj \ket   \\
+&= \bra \frac{1}{\sigt}\div \Edd \phi, \grad \vefadj \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \vn \cdot \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket   \\
+ &=  - \bra \phi, \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) \ket  +  \bra  \phi, \siga \vefadj \ket \\
+ & - \sbra \vn \cdot  \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \vn \cdot  \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
+\end{split}
+\end{equation}
+Where the inner product $\sbra f ,g \sket = \oint_{\partial V} fg \, dS$ has been defined
+\end{flushleft}
+\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{VET Formulation Adjoint}
+ \begin{flushleft}
+From the previous balance equation, an obvious form of the VET adjoint emerges
+\begin{subequations}
+\begin{equation}
+\label{adjForm}
+- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) + \siga \vefadj = \scalResp
+\end{equation}
+\begin{equation}
+\label{adjVETBC}
+2J^{\dag,\text{out}} = B \vefadj+ \vn \cdot
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj    \quad \vr \in \bound
+\end{equation}
+\end{subequations}
+Choosing $2J^{\dag,\text{out}} =0$ results in the relatively simple \qoi expression using this new formulation
+\begin{equation}
+\label{adjVETqoi}
+\qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket
+\end{equation}
+Of particular note is that $ \phi^\dag \neq \vefadj$
+\end{flushleft}
+\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{VET Formulation Adjoint}
  \begin{flushleft}
 Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under system perturbation. Note $\ell_t = \frac{1}{\sigt}$
 \begin{equation}
@@ -335,7 +436,7 @@ Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under s
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Transport Adjoint}
+\begin{frame}\frametitle{VET Formulation Adjoint}
  \begin{flushleft}
  Subtracting off the unperturbed \qoi in Eq.~\eqref{adjVETqoi} and cleaning up some boundary terms results in
  \begin{equation}
@@ -361,7 +462,7 @@ Cons
 
 \begin{frame}\frametitle{``Blended'' Approach}
  \begin{flushleft}
-Form a $\delta \qoi$ inner-product by picking the exact source terms from SN adjoint Eq.~\eqref{snSens} and cross-section terms from VET adjoint Eq.~\eqref{VETsens}
+Form a $\delta \qoi$ inner-product by picking the exact source terms from \textcolor{red}{SN adjoint Eq.~\eqref{snSens}} and cross-section terms from \textcolor{blue}{VET formulation adjoint Eq.~\eqref{VETsens}}
 \begin{equation}
 \label{Blendsens}
 \begin{split}
@@ -389,7 +490,7 @@ Cons
 
 \begin{frame}\frametitle{Estimate $\delta \Edd$}
  \begin{flushleft}
-Attempt to approximate by taking the slop with respect to perturbation parameters $\vp$
+Attempt to approximate by taking the slope with respect to perturbation parameters $\vp$
 \begin{equation}
 \delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp \approx \left( \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0} \right) \cdot \delta \vp
 \end{equation}
@@ -413,7 +514,21 @@ Cons
 \end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
+\begin{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/blocks3.png}
+\end{figure}
+\end{flushleft}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
@@ -428,7 +543,7 @@ Reverse the order of the VET derivation, start with adjoint P1 and work towards 
 \begin{equation}
 \Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)}
 , \quad \quad 
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \, \vr \in \bound
+\BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\phi^\dag(\vr)} \, \vr \in \bound
 \end{equation}
 Gives the familiar form
 \begin{subequations}
@@ -464,11 +579,11 @@ Adjoint of this Alternate VET is proposed
 \label{AdjQoIAltExpand}
 \begin{split}
 QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
-&= \bra \phi^\dag , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket - \sbra \psi^\dag,  \psi \sket \\
-&= \bra 4\pi \scalResp  ,\varphi \ket - \sbra \psi^\dag,  \psi \sket  
+&= \bra \phi^\dag , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
+&= \bra 4\pi \scalResp  ,\varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN  
 - \sbra \Edd^\dag \cdot \frac{1}{\sigt}\grad \varphi,  \phi^\dag \sket 
 + \sbra \frac{1}{\sigt} \div \Edd^\dag \phi^\dag,  \varphi \sket \\
-&=  \bra 4\pi \scalResp  ,\varphi \ket - \sbra \psi^\dag,  \psi \sket - \sbra \phi^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} \sket
+&=  \bra 4\pi \scalResp  ,\varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN - \sbra \phi^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} \sket
 \end{split}
 \end{equation}
 \end{flushleft}
@@ -477,23 +592,43 @@ QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbraSN \
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
+%\begin{flushleft}
+%Perturbations are introduced in the adjoint VET $\phi^\dag$ system, $\varphi$ system remains unperturbed.
+%\begin{equation}
+%\begin{split}
+%- \bra\div \left( \isigt \div \Edd^\dag \phi^\dag_p  \right) +  \siga  \phi^\dag_p , \varphi \ket  =& \bra \div \left( \delta \isigt \div \Edd^\dag \phi^\dag  \right) - \delta \siga , %\varphi \ket \\ 
+%&+ \bra 4 \pi (\scalResp +\delta \scalResp) \phi^\dag , \varphi \ket \\
+%\end{split}
+%\end{equation}
+%The adjoint process is then applied to the LHS
+%\begin{equation}
+%\label{AltVetPertDeriv2}
+%\begin{split}
+% \bra  \phi^\dag_p , \angSource \ket  =& \bra 4 \pi \scalResp + 4 \pi\delta \scalResp , \varphi \ket + \bra\div \left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \varphi \ket 
+%- \bra \delta \siga \phi^\dag , \varphi \ket \\
+%&- \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  \\
+%\end{split}
+%\end{equation} 
+%\end{flushleft}
+%\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
 \begin{flushleft}
-Perturbations are introduced in the adjoint VET $\phi^\dag$ system, $\varphi$ system remains unperturbed 
+Perturbations are introduced in the adjoint VET $\phi^\dag$ system, $\varphi$ system remains unperturbed.
 \begin{equation}
 \begin{split}
-- \bra\div \left( \isigt \div \Edd^\dag \phi^\dag_p  \right) +  \siga  \phi^\dag_p , \varphi \ket  =& \bra \div \left( \delta \isigt \div \Edd^\dag \phi^\dag  \right) - \delta \siga , \varphi \ket \\ 
-&+ \bra 4 \pi (\scalResp +\delta \scalResp) \phi^\dag , \varphi \ket \\
-\end{split}
-\end{equation}
-The adjoint process is then applied to the LHS
-\begin{equation}
-\label{AltVetPertDeriv2}
-\begin{split}
- \bra  \phi^\dag_p , \angSource \ket  =& \bra 4 \pi \scalResp + 4 \pi\delta \scalResp , \varphi \ket + \bra\div \left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \varphi \ket 
-- \bra \delta \siga \phi^\dag , \varphi \ket \\
-&- \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  \\
+QoI + \sbraSN \psi^\dag,  \psi \sketSN  
+=& \bra \phi^\dag_p , \angSource \ket \\
+=& \bra \phi^\dag_p , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket \\
+=& \bra 4 \pi \scalResp + 4 \pi\delta \scalResp , \varphi \ket + \bra\div \left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \varphi \ket \\
+&- \bra \delta \siga \phi^\dag , \varphi \ket 
+- \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  \\
 \end{split}
 \end{equation} 
 \end{flushleft}
@@ -549,9 +684,40 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \item Discontinuous Galerkin FEM
 \item Uniform grid, 200 elements
 \end{itemize}
-
+Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and $\delta \sigt=\delta \siga+\delta \sigs$ is computed.
 \end{flushleft}
 \end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Homogeneous System, Homogeneous Perturbation}
+        \begin{flushleft}
+             Homogeneous System with Homogeneous Perturbation
+          	 \begin{itemize}
+			      \item $\sigt=2$, $\sigs=1$
+			      \item $q=2$, $\psi^{\text{inc}}=0$
+			      \item $q^\dag=1$ for $4 \leq x \leq 6$
+			      \item Perturbed throughout
+  			 \end{itemize} 
+            \end{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phi.png}
+  \label{T1:sfig1}
+\end{subfigure}
+%
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{Homogeneous System, Homogeneous Perturbation}
  \begin{flushleft}
@@ -584,6 +750,8 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \end{flushleft}
 \end{frame}
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}\frametitle{Homogeneous System, Homogeneous Perturbation}
  \begin{flushleft}
 \begin{table}[H]
@@ -605,6 +773,36 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \end{flushleft}
 \end{frame}
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
+        \begin{flushleft}
+             Homogeneous System with Non-Homogeneous Perturbation
+          	 \begin{itemize}
+			      \item $\sigt=2$, $\sigs=1$
+			      \item $q=2$, $\psi^{\text{inc}}=0$
+			      \item $q^\dag=1$ for $4 \leq x \leq 6$
+			      \item \textcolor{red}{Perturbed for $0 \leq x \leq 6$}
+  			 \end{itemize} 
+            \end{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/23phi.png}
+  \label{T1:sfig1}
+\end{subfigure}
+%
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/23phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
  \begin{flushleft}
@@ -637,6 +835,8 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \end{flushleft}
 \end{frame}
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
  \begin{flushleft}
 \begin{table}[H]
@@ -657,7 +857,37 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \end{flushleft}
 \end{frame}
 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}\frametitle{Shielded Incident Flux}
+        \begin{flushleft}
+             Shielded System
+          	 \begin{itemize}
+			      \item Shielding $\sigt=1$, $\sigs=0.5$ for $1 \leq x  \leq 2$ (Vacuum else, $\sigt=1E-8$)
+			      \item $q=0$, $\psi^{\text{inc}}=1$ at $x=0$
+			      \item $q^\dag=1$ for $3 \leq x \leq 4$
+			      \item $\sigt$, $\siga$ perturbed in shield
+  			 \end{itemize} 
+            \end{flushleft}
+\begin{figure}[H]
+\label{Trial1}
+\centering
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phi.png}
+  \label{T1:sfig1}
+\end{subfigure}
+%
+\begin{subfigure}{0.45\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}\frametitle{Shielded Incident Flux}
  \begin{flushleft}
 
@@ -689,7 +919,9 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \end{flushleft}
 \end{frame}
 
-\begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Shielded Incident Flux}
  \begin{flushleft}
 \begin{table}[H]
 \centering
@@ -741,6 +973,13 @@ VET solver ($\phi$, $\phi^\dag$, $\varphi$, $\varphi^\dag$)
 \item Potentially extend $\delta \Edd$ method to the $\varphi$ formulation.
 \item Alternate boundary conditions for VET method.
 \end{itemize}
+\end{flushleft}
+\end{frame}
+
+\begin{frame}\frametitle{References}
+\begin{flushleft}
+\bibliography{IanProp} 
+\bibliographystyle{ieeetr}
 \end{flushleft}
 \end{frame}
 

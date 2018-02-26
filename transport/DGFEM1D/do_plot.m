@@ -35,7 +35,7 @@ if ~init
     dat.leg{(figID+1)}=char(dat.leg{(figID+1)},my_legend);
 end
 % markers
-my_markers = ['+', 'o', '*', 's', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
+my_markers = ['+', 'o', 's', '*', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
 [n1,n2]=size(dat.leg{(figID+1)});
 sss=sprintf('%s-',my_markers(n1));
 figure(1+figID); hold all;
@@ -52,7 +52,8 @@ else
 end
 % filename=sprintf('scal_%s_sn%i.png',tit,sn);
 % print('-dpng',filename);
-legend(dat.leg{figID+1},'Location','Best');
+leg1=legend(dat.leg{figID+1},'Location','Best');
+set(leg1,'Interpreter','latex');
 hold off;
 
 % if length(varargin)>=1

@@ -410,17 +410,17 @@ csvwrite(fullPath{2},outputMatrix)
 title(dataFile,'interpreter','none')
 print(fullPath{1},'-dpng');
 
-do_plot(results.phi,'Sn',610,dat.forward_flux)
-do_plot(results.phiVEF,'VET',610,dat.forward_flux)
-do_plot(results.phiAltVEF,'AltVET',610,dat.forward_flux)
+do_plot(results.phi,'$$\phi$$ Sn',610,dat.forward_flux)
+do_plot(results.phiVEF,'$$\phi$$ VET',610,dat.forward_flux)
+do_plot(results.phiAltVEF,'$$\varphi$$ AltVET',610,dat.forward_flux)
 figure(611)
 figureFile=[int2str(dat.pb_ID),'phi'];
 figureName=fullfile(figurePath,figureFile);
 print(figureName,'-dpng');
 
-do_plot(results.phia,'Sn',611,dat.adjoint_flux)
-do_plot(results.phiVEFa,'VET',611,dat.adjoint_flux)
-do_plot(results.phiAltVEFa,'AltVET',611,dat.adjoint_flux)
+do_plot(results.phia,'$$\phi^\dag$$ Sn',611,dat.adjoint_flux)
+do_plot(results.phiVEFa,'$$\phi^\dag$$ VET',611,dat.adjoint_flux)
+do_plot(results.phiAltVEFa,'$$\varphi^\dag$$ AltVET',611,dat.adjoint_flux)
 figure(612)
 figureFile=[int2str(dat.pb_ID),'phia'];
 figureName=fullfile(figurePath,figureFile);

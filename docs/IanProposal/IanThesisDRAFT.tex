@@ -158,8 +158,8 @@
 \renewcommand{\tamudepthead}{Professor Yassin Hassan}
 
 %Type only May, August, or December.
-\renewcommand{\tamugradmonth}{January}
-\renewcommand{\tamugradyear}{2017}
+\renewcommand{\tamugradmonth}{March}
+\renewcommand{\tamugradyear}{2018}
 %Your department name goes here.
 \renewcommand{\tamudepartment}{Nuclear Engineering}
 
@@ -240,14 +240,13 @@ the primary time-dependent variable, the angular flux, needs to be stored as wel
 A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The method examined in this work is termed  as a ``Variable Eddington Tensor'' formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase {Background}}
+\chapter{\uppercase {Background (Transport)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%----------------------------------------------------------------------------------------------
-\section{Steady-state one-group neutron transport equation}
+\section{Steady-state One-group Neutron Transport Equation}
 %%%%%%%----------------------------------------------------------------------------------------------
-\jcr{I do not understand the numbering. why is this a subsection of the introduction?}
 
-This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of the quasi-diffusion's effectiveness in this setting will provide sufficient insight to advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. The one-group steady-state transport equation with isotropic scattering for a volume $V$ bounded by its surface $\partial V$ is given below.
+This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of the quasi-diffusion's effectiveness in this setting will provide sufficient insight to advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. The one-group steady-state transport equation with isotropic sources and isotropic scattering for a volume $V$ bounded by its surface $\partial V$ is given below.
 \jcr{I think we discussed how VEF would be applied to transient and did some derivations. I think these need to be included somewhere because (1) this is why we decided to look at VEF, and (2) to write the derivation down and not lose it in the future}
 \iwh{I have sort of a derivation towards the end of this paper, I can try to move it earlier, but I sort of run into slight problem.
 I would have to derive and introduce the Eddington Tensor within the context of the time dependent equation, where the end result is still a bit ugly 
@@ -256,7 +255,7 @@ diffusion-esque equation at the end.}
 
 \begin{equation}
 \label{SS1GTE}
-\vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO), \quad \forall \vr \in V
+\vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + \frac{1}{4 \pi} q(\vr), \quad \forall \vr \in V
 \end{equation}
 \begin{equation}
 \label{SS1GTE_bc}
@@ -271,7 +270,7 @@ The possibly uncertain parameters in this system are: the total and scattering c
 %%%%%%%----------------------------------------------------------------------------------------------
 
 %----------------------------------------------------------------------------------------------
-\subsection{Quantity of interest, response function, and inner products}
+\subsection{Quantity of Interest, Response Functions, and Inner Products}
 %----------------------------------------------------------------------------------------------
 Frequently, the solution to the transport equation is not the sought after value, but rather some Quantity of Interest (\qoi), a functional that depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), a \qoi
 defined as
@@ -280,14 +279,13 @@ defined as
 \end{equation}
 where $R(\vr, \vO)$ is termed the ``response function'' which is used to characterize the meaning of the desired \qoi. The response function can take on physically defined forms, such as the cross section of a detector; or it may take a form of a mathematical construct, such as $R(\vr, \vO)=1/v$ to return the total number of neutrons present in the system. Another example is to let $R(\vr, \vO)=\sigma \chi(\vr)$ to obtain the total reactor in a portion of the domain ($\chi(\vr)=1$ if $\vr \in$ region of interest, and 0 otherwise). To avoid confusion with the spatial location vector $\vr$, the response function will frequently be expressed as $q^\dag$, the adjoint source, as we have already noted that there is a relationship between the solution, the adjoint solution, and their respective source terms. 
 
-For the sake of brevity in this Thesis, particularly for expressing the \qoi, two volumetric inner products are defined both using $\bra \bullet , \bullet \ket$ notation. These two inner-products are for use with angular and scalar flux respectively. 
+Two volumetric inner products are defined using $\braSN \bullet , \bullet \ketSN$ and $\bra \bullet , \bullet \ket$ notations. These two inner-products are for use with angular and scalar flux respectively. 
 \begin{subequations}
 \begin{equation}
-\bra \psi , \angResp \ket_{V \times \mathcal{S}_2}  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)\angResp(\vr, \vO)
+\braSN \psi , f \ketSN  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO)
 \end{equation}
-where $\mathcal{S}_2$ denotes the unit sphere.
 \begin{equation}
-\bra \phi(\vr) ,\angResp \ket_V  = \int_V dV \,  \phi(\vr)\angResp(\vr)
+\bra \phi(\vr) , f \ket  = \int_V dV \,  \phi(\vr) g(\vr)
 \end{equation}
 \end{subequations}
 For later use, two additional inner products are also defined as surface integrals over the region 
@@ -300,14 +298,10 @@ boundary $\partial V$. The latter splitting incoming and outgoing surface integr
 \sbraSN \psi , g \sketSN_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
 \end{equation}
 \end{subequations}
-
-The inner product subscripts will frequently be dropped when it is unambiguous which one is being used,
- typically indicated by the presence of an angular-dependent flux variable, e.g., $\psi$ or an 
- angular-independent flux variable, e.g., $\phi$. Therefore, with this notation, the quantity of interest 
- can be compactly expressed as shown below.
+Therefore, with this notation, the quantity of interest can be compactly expressed as shown below.
 \begin{equation}
 \label{QoIDef}
-\qoi = \bra \psi(\vr,\vO), \angResp(\vr,\vO) \ket  = \bra \phi(\vr) , \scalResp(\vr) \ket
+\qoi = \braSN \psi(\vr,\vO), \scalResp(\vr) \ketSN  = \bra \phi(\vr) , \scalResp(\vr) \ket
 \end{equation}
 \iwh{I am commenting this out, I think this actual sentence was leftover from a comment in a previous version that I messed up deleting. 
 The above is an unperturbed QoI using the forward flux solution and a volumetric response function, so no boundary terms should be present. 
@@ -336,35 +330,35 @@ base or nominal values of the parameters.
 %%%%%%%----------------------------------------------------------------------------------------------
 
 Adjoint operators can provide a useful tool for sensitivity calculations. Using inner product 
-notation $\bra \cdot , \cdot \ket$, consider the system of interest $\mathbf{A} \psi = q$. Call this this 
+notation consider the system of interest $\mathbf{A} \psi = q$. Call this this 
 the forward system, with forward operator $\mathbf{A}$. Consider a test function $\psi^\dag$, the 
-adjoint operator $\mathbf{A^\dag}$ is defined such that $\bra \mathbf{A} \psi, \psi^\dag \ket = \bra \psi, 
-\mathbf{A^\dag} \psi^\dag \ket $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on 
+adjoint operator $\mathbf{A^\dag}$ is defined such that $\braSN \mathbf{A} \psi, \psi^\dag \ketSN = \braSN \psi, 
+\mathbf{A^\dag} \psi^\dag \ketSN $. For differential operators, derivation of $\mathbf{A^\dag}$ generally relies on 
 application of the divergence theorem (integration by parts), typically resulting in boundary 
 terms ($BC$). Using the response function of the desired \qoi, the adjoint system can be constructed 
 as $\mathbf{A^\dag} \psi^\dag = q^\dag$, leading to an alternate expression of the \qoi using the 
 adjoint solution $\psi^\dag $.
 \begin{equation}
 \label{genAdjQoI}
-\qoi = \bra \psi, \psi^\dag \ket = \bra q , \psi^\dag \ket + BC
+\qoi = \braSN \psi, \scalResp \ketSN = \braSN q , \psi^\dag \ketSN + BC
 \end{equation} 
 From the above, it follows that a first-order approximation to the change in the quantity of interest ($\delta \qoi$)
 based on perturbations to the initial system, including perturbation to the forward 
 operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the inner product form shown in Eq.~\eqref{genAdjSens} \cite{Marchuk}. Derivation of this begins with the perturbed system $\mathbf{A_p} \psi_p = q_p$ multiplied by the adjoint function $\psi^\dag$ defined above. After expressing the perturbations in a $\delta$ form a first order approximation of $\delta \mathbf{A} \delta \psi = 0$ is used. An integration by parts is used to transpose $\mathbf{A}$ to $\mathbf{A^\dag}$, resulting in boundary terms appearing. 
 \begin{equation}
 \begin{split}
-\bra \mathbf{A_p} \psi_p ,\psi^\dag\ket &= \bra q_p ,\psi^\dag \ket \\
-\bra \left( \mathbf{A}+\delta \mathbf{A} \right) \left( \psi + \delta \psi \right),\psi^\dag\ket &= \bra q+\delta q ,\psi^\dag \ket \\
-\bra \mathbf{A} \psi +\delta \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ket &\approx \bra q+\delta q ,\psi^\dag \ket \\
-\bra \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ket &= \bra q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ket \\
-\bra \psi +\delta \psi , \mathbf{A^\dag} \psi^\dag\ket &= \bra q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ket + BC \\
-\bra \psi_p , q^\dag \psi^\dag\ket &= \bra q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ket + BC \\
+\braSN \mathbf{A_p} \psi_p ,\psi^\dag\ketSN &= \braSN q_p ,\psi^\dag \ketSN \\
+\braSN \left( \mathbf{A}+\delta \mathbf{A} \right) \left( \psi + \delta \psi \right),\psi^\dag\ketSN &= \braSN q+\delta q ,\psi^\dag \ketSN \\
+\braSN \mathbf{A} \psi +\delta \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ketSN &\approx \braSN q+\delta q ,\psi^\dag \ketSN \\
+\braSN \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN \\
+\braSN \psi +\delta \psi , \mathbf{A^\dag} \psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN + BC \\
+\braSN \psi_p , q^\dag \psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN + BC \\
 \end{split}
 \end{equation}
 The left side of the final step of the above derivation is the perturbed \qoi. Subtracting Eq.~\eqref{genAdjQoI} from this yields the desired expression for the $\delta$ \qoi.
 \begin{equation}
 \label{genAdjSens}
-\delta \qoi \approx \bra \delta q - \delta \mathbf{A} \psi , \psi^\dag \ket + BC
+\delta \qoi \approx \braSN \delta q - \delta \mathbf{A} \psi , \psi^\dag \ketSN + BC
 \end{equation}
 The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
 \jcr{in the thesis, you need to go through the algebra for the transport and the VET equations. not here, this is only the proposal}
@@ -384,75 +378,54 @@ sections. I could just blindly state the SN and VET equations right now, but tha
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                           SECTION II
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\chapter{\uppercase {Transport Formulations}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discrete Ordinates (SN) Transport}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-A discrete ordinates (SN) method can be used to solve the one group steady state transport 
-equation (Eq.~\eqref{SS1GTE}). The focus of this method is to discretize the angular variable 
-into discrete directions. Using an angular quadrature with $D$ directions $\vO_d$, the transport 
-equation is solved along each direction:
-\begin{equation}
-\label{1gTE}
-\vO_d \cdot \grad \psi_d + \sigt \psi_d = \frac{\sigs}{4 \pi} \phi + \angSource \quad \vr \in V ,\  \forall d\in [1,D]
-\end{equation}
-%
-The scalar flux can be computed from the angular flux as follows
-\[
-\phi(\vr) \approx \sum_{d=1}^D w_d \psi_d(\vr) \,,
-\] 
-where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is the angular quadrature weight. This leads to a coupled system of $D$ equations of the form shown in Eq.~\eqref{1gTE}, where the system is coupled through the scattering source term. This system of equations, where both 
-the angular flux and scalar flux are unknowns is solved iteratively, using source iteration as follows:
-\begin{subequations}
-\begin{equation}
-\label{1gTE}
-\vO_d \cdot \grad \psi_d + \sigt \psi_d^{(\ell+1)} = \frac{\sigs}{4 \pi} \phi^{(\ell)} + \angSource \,,
-\end{equation}
-\begin{equation}
-\phi(\vr)^{(\ell+1)} = \sum_{d=1}^D w_d \psi_d^{(\ell+1)}(\vr) \,.
-\end{equation}
-\end{subequations}
-
-
-
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Adjoint Formulation for SN Transport}
+\subsection{Adjoint Formulation for Transport}
 %%%%%%%----------------------------------------------------------------------------------------------
-In a fairly straightforward application of the adjoint method previously shown, the adjoint equation which corresponds to the SN transport formulation with adjoint source (response function)
+In a fairly straightforward application of the adjoint method previously shown, 
+\begin{equation}
+\label{SnAdjDeriv}
+\begin{split}
+\braSN \frac{1}{4 \pi} q , \psi^\dag  \ketSN  
+=& \braSN \vO \cdot \grad \psi + \sigt \psi - \frac{\sigs}{4 \pi} \phi, \psi^\dag \ketSN \\
+=& \braSN \vO \cdot \grad \psi, \psi^\dag \ketSN  + \braSN \sigt \psi, \psi^\dag \ketSN  - \braSN \frac{\sigs}{4 \pi}  \phi, \psi^\dag \ketSN \\
+=& - \braSN  \psi, \vO \cdot \grad \psi^\dag \ketSN  + \braSN \psi, \sigt \psi^\dag \ketSN  - \braSN   \psi, \frac{\sigs}{4 \pi} \phi^\dag \ketSN + \sbraSN \psi^\dag,  \psi \sketSN\\
+=& \braSN  \psi,-  \vO \cdot \grad \psi^\dag  +  \sigt \psi^\dag -  \frac{\sigs}{4 \pi} \phi^\dag \ketSN + \sbraSN \psi^\dag,  \psi \sketSN\\
+\end{split}
+\end{equation}
+the adjoint equation which corresponds to the transport formulation with adjoint source (response function)
 $\angResp$ is
 
 \begin{subequations}
 \begin{equation}
-- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
+\label{anAdj}
+- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
 \end{equation}
 \begin{equation}
 \psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
 \end{equation}
 \end{subequations}
 where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to that of 
-the forward scalar flux definition. It is worth noting that the SN adjoint equation is in the form of the standard transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward SN transport solvers to be easily adapted to solving the SN adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equation Eq.~\eqref{genAdjQoI}. %
+the forward scalar flux definition. It is worth noting that the adjoint equation is in the form of the standard transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward SN transport solvers to be easily adapted to solving the SN adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equations Eq.~\eqref{genAdjQoI} and Eq.~\eqref{SnAdjDeriv}. %
 \begin{equation}
 \label{snAdjQoI}
 QoI = \bra \psi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN
 \end{equation}
 %
-The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. 
+The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. Setting $\psi^{\dag \text{out}}(\vr)=0$ removes the outgoing flux integral.
 %
 \begin{equation}
 \label{snAdjQoIBCsplit}
-\qoi = \bra \psi^\dag , \angSource \ket - \sbraSN \psi^{\dag \text{out}},  \psi \sketSN_+ - \sbraSN \psi^\dag,  \psi^{\text{inc}} \sketSN_- \,.
+\begin{split}
+\qoi &= \braSN \psi^\dag , \angSource \ketSN - \sbraSN \psi^\dag,  \psi^{\text{inc}} \sketSN_- \\
+&= \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi^{\text{inc}} \sketSN_- \,.
+\end{split}
 \end{equation}
 
 \jcr{in the thesis, remember to explain that the adjoint source is not to be divided by 2 even when the response is isotropic in angle}
 \todo{Go into detail about which source to use, angular vs scalar source. Looking forward, I think this has an impact when considering the different adjoint forms: VET of the adjoint vs adjoint of the VET.}
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{SN Transport Adjoint Sensitivity}
+\subsection{Transport Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $\delta \psi^{inc}$. These perturbations result in a perturbed solution to the SN-transport equation $\psi_p$. 
@@ -471,15 +444,14 @@ the perturbed \qoi can be expressed as:
 \begin{equation}
 \label{snSensPart}
 \begin{split}
-QoI_p &=\bra \psi_p , \angResp \ket \\
-&=\bra \psi_p , - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  \ket \\
-%&= \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbra \psi_p, \psi^\dag \sket\\
+QoI_p &=\braSN \psi_p , \angResp \ketSN \\
+&=\braSN \psi_p , - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  \ketSN \\
 \end{split}
 \end{equation}
 Next, we perform an integration by parts and obtain:
 \begin{equation}
 \label{snSensPart2}
-QoI_p = \bra  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ket - \sbraSN \psi_p, \psi^\dag \sketSN
+QoI_p = \braSN  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN
 \end{equation}
 Note that the cross sections are unperturbed in Eq.~\eqref{snSensPart2}.
 Using a $\delta$ notation for the perturbed system variables ($\sigma_{s,p} = \sigs + \delta \sigs$ for example), we
@@ -487,46 +459,49 @@ can introduce the perturbed quantities:
 \begin{equation}
 \label{snSensPart3}
 \begin{split}
-QoI_p &= \bra  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p - \frac{\sigma_{s,p}}{4 \pi} \phi_p
+QoI_p &= \braSN  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p - \frac{\sigma_{s,p}}{4 \pi} \phi_p
 +\frac{\delta \sigs}{4 \pi} \phi_p
- , \psi^\dag  \ket - \sbraSN \psi_p, \psi^\dag \sketSN \\
- &= \bra  \angSource_p - \delta\sigt\psi_p + \frac{\delta \sigs}{4 \pi} \phi_p
- , \psi^\dag  \ket - \sbraSN \psi_p, \psi^\dag \sketSN
+ , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \\
+ &= \braSN  \angSourcep - \delta\sigt\psi_p + \frac{\delta \sigs}{4 \pi} \phi_p
+ , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN
 \end{split}
 \end{equation}
-Next, note that some terms have double perturbations, such as $\delta \sigt \delta \psi$ once it is observed
-that $\psi_p=\psi+\delta\psi$. 
-In a first-order approximation, these doubly perturbed terms are ignored, yielding:
+Next, note that the cross section terms have double perturbations terms $\delta \sigt \delta \psi$ and $\delta \sigs \delta \psi$ once it is observed
+that $\psi_p=\psi+\delta\psi$. In a first-order approximation, these doubly perturbed terms are ignored, yielding:
 \begin{equation}
 \label{snAdjQoI}
-QoI_p \approx \bra  \angSource + \delta \angSource - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
- , \psi^\dag  \ket - \sbraSN \psi_p, \psi^\dag \sketSN \,.
+QoI_p \approx \braSN  \angSource + \angSourced - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
+ , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \,.
 \end{equation}
 
 Subtraction of the unperturbed \qoi expression in Eq.~\eqref{snAdjQoI} supplies a final equation for computing the change in \qoi using only the system perturbations and the unperturbed forward solution $\psi$ and the adjoint unperturbed
 solution $\psi^\dag$, removing the need to solve the perturbed forward equation. 
 Furthermore the boundary terms can be split into incoming and outgoing contributions.
-Using a zero-outcoming  boundary condition for the adjoint flux
+Using a zero outgoing boundary condition for the adjoint flux
 (thus $\sbra \delta \psi, \psi^{\dag,\text{out}} \sket_+=0$), one obtains the final 
 form of the perturbation in the \qoi.
 \begin{equation}
 \label{snSens}
 \begin{split}
-\delta QoI &= \bra \delta \angSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ket - \sbraSN \delta \psi, \psi^\dag \sketSN \\
-&= \bra \delta \angSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \,.
+\delta QoI &= \braSN \delta \angSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ketSN - \sbraSN \delta \psi, \psi^\dag \sketSN \\
+&= \braSN \angSourced - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ketSN - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \\
+&= \bra \angSourced  + \frac{\delta\sigs}{4 \pi} \phi , \phi^\dag  \ket - \braSN  \delta \sigt \psi , \psi^\dag \ketSN - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \,.
 \end{split}
 \end{equation}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{\uppercase {Variable Eddington Tensor Formulations}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{VET formulation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Variable Eddington Tensor Formulations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Motivation} 
+%\subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
-While the SN adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
+While the transport adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
 flux data across 6-dimensions (space/energy/angle). For time independent systems, Hayes \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
-the forward steady-state SN transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a The Variable Eddington Tensor (VET) approach (which only requires
+the forward steady-state transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a The Variable Eddington Tensor (VET) approach (which only requires
 storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this MS work,
 we investigate this question in the simpler setting a steady-state simulations.
 \jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire
@@ -538,7 +513,7 @@ to demonstrate/explain that the ideas you applied in SS were actually going to b
 \iwh{Going to place the derivation in an appendix. This is requested in a few places, not sure if you want it both here and earlier.}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Forward VET formulation}
+\subsection{Forward VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 The VET formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity evaluations. To present the VET formulation, the zero-th and first angular moments of steady-state transport equation are computed by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
@@ -596,18 +571,18 @@ with $\vJ$ the net current and
 \begin{equation}
 \BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound \,.
 \end{equation}
-Finally, using \eqref{1am}, we get:
+$\vJ$ can substituted using \eqref{currentE} to get the final form of the VET forward boundary condition:
 \begin{equation}
 2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,.
 \end{equation}
-Note that we recover the Robin boundary conditions for diffusion when $\Edd = \tfrac{1}{3} \mathbb{I}$:
+Note that the Robin boundary conditions for diffusion is recovered when $\Edd = \tfrac{1}{3} \mathbb{I}$ and $B=\tfrac{1}{2}$:
 \[
 2 J^{\text{inc}} = \frac{\phi}{2} + \vn \cdot \frac{1}{3\sigt} \grad \phi \,.
 \]
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Adjoint VET formulation}
+\subsection{Adjoint VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 Since the VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. The typical adjoint process is followed in which the forward equation is multiplied by a test function and all operators are transferred to the test function using integration by parts. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
@@ -638,14 +613,13 @@ This leads to the adjoint equation of the VET formulation, given in Eq.~\eqref{a
 \label{adjForm}
 - \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) + \siga \vefadj = \scalResp
 \end{equation}
-For reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}. This boundary condition can be somewhat inferred by considering the forward VET adjoint boundary condition and observing the form of the boundary terms in the adjoint \qoi definition in Eq.~\eqref{VEFadjFormDeriv}.
-
+By inspection of the boundary terms in Eq.~\eqref{VEFadjFormDeriv} and for reasons that will become apparent during sensitivity calculations, the boundary condition chosen for the adjoint equation is given in Eq.~\eqref{adjVETBC}.
 \begin{equation}
 \label{adjVETBC}
 2J^{\dag,\text{out}} = B \vefadj+ \vn \cdot
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj    \quad \vr \in \bound
 \end{equation}
-Note that the Robin boundary conditions are recovered for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$:
+Note that the Robin boundary conditions are recovered for the adjoint diffusion problem, when $\Edd = \tfrac{1}{3} \mathbb{I}$ and $B=\tfrac{1}{2}$:
 \[
 2 J^{\dag,\text{out}} = \frac{\vefadj}{2} +\vn \cdot \frac{1}{3\sigt} \grad \vefadj \,.
 \]
@@ -653,7 +627,7 @@ In contrast to the adjoint SN formulation, the VET adjoint equation does not tak
 forward VET transport equation, therefore the forward VET solver 
 cannot necessarily be re-used to solve the adjoint equation. 
 \jcr{where will you explain how the adjoint VET equation is discretized and then solved?}
-
+\iwh{Between the derivations here and teh presentation of results, I am adding a new section that basically explains the solution method (for both Transport (SN) and VET)}
 To obtain the \qoi using this formulation substitute in the adjoint equation definition 
 into Eq.~\eqref{VEFadjFormDeriv} and apply boundary conditions of both the forward and adjoint.
 \begin{equation}
@@ -677,7 +651,7 @@ set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition, yielding the fina
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{VET adjoint sensitivity}
+\subsection{VET Adjoint Aensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 As was done in the SN transport formulation, we consider perturbations to the system parameters. However, in contrast to the SN case, the assumption is also made that the Eddington factor remains unperturbed under these system perturbations. This is an approximation because, in the general case, changing the system's parameters should change the angular flux solution, and hence
@@ -713,8 +687,6 @@ So, in your calculation, are you perturbing in relative fractions of $\sigma$, o
 \label{VEFPert}
 - \div \left((\isigt + \delta \isigt)\div \Edd \phi_p \right) + (\siga + \delta \siga)\phi_p = \scalSource + \delta \scalSource  \quad \vr \in \domain
 \end{equation}
-\end{subequations}
-\begin{subequations}
 \begin{equation}
  2J_p^\text{inc} = B \phi_p  + \vn \cdot  (\isigt + \delta \isigt) \vec{\nabla} \cdot \left(\Edd \phi_p \right)  \quad \vr \in \bound
 \end{equation}
@@ -779,10 +751,10 @@ perturbed forward VET solution. Integration by parts can be applied to condense 
 
 
 
-\section{Refinements}
+\section{Refinements of VET Sensitivity}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Error from unperturbed Eddington assumption}
+\subsection{Error From Unperturbed Eddington Assumption}
 %%%%%%%----------------------------------------------------------------------------------------------
 
 In addition to the first-order approximation common to adjoint formulations, the VET sensitivity formulation also made the assumption that the Eddington tensors $\Edd$ and $B$ remained unchanged under perturbations of the other parameters. To observe the terms that were dropped in this approximation, consider a reformulation of the perturbed forward equation, this time introducing $\delta \Edd$ and $\delta  B$ terms. 
@@ -833,11 +805,11 @@ more compactly expressed in the form
 
 
 \subsection{Blending $\phi^\dag$ and $\varphi^\dag$}
-As a brief recap, two adjoint methods of determining sensitivity have been considered. The first is an SN approach with sensitivity approximated by Eq.~\eqref{snSens}, which utilizes the forward SN solutions $\psi$ and $\phi$ in conjunction with the SN adjoint solutions $\psi^\dag$ and $\phi^\dag$. This equates to two angular SN solves as well as storing two angular flux solutions for use. 
+As a brief recap, two adjoint methods of determining sensitivity have been considered. The first is a transport approach with sensitivity approximated by Eq.~\eqref{snSens}, which utilizes the forward transport solutions $\psi$ and $\phi$ in conjunction with the transport adjoint solutions $\psi^\dag$ and $\phi^\dag$. This equates to two angular transport solves as well as storing two angular flux solutions for use. 
 
-The second method, which is the focus of this writing, is the VET formulation in which sensitivity is approximated by Eq.~\eqref{VETsens}. This method utilizes the forward solution $\phi$ as well as the VET adjoint solution $\vefadj$, in total this requires a forward SN solve to determine $\phi$ and the unperturbed Eddington $\Edd$ followed by a scalar VET solve for $\vefadj$, but importantly no angular flux solution $\psi$ is stored.
+The second method is the VET formulation in which sensitivity is approximated by Eq.~\eqref{VETsens}. This method utilizes the forward solution $\phi$ as well as the VET adjoint solution $\vefadj$, in total this requires a forward SN solve to determine $\phi$ and the unperturbed Eddington $\Edd$ followed by a scalar VET solve for $\vefadj$, but importantly no angular flux solution $\psi$ is stored.
 
-The latter method holds a clear advantage when dealing with source perturbations, both volumetric $\delta q$ and boundary $\delta \psi^\text{inc}$. Neither of these perturbations required a first order approximation, therefor the adjoint method is exact. Additionally neither requires storing the angular flux throughout the volume of the problem; only the scalar flux and the outgoing angular flux at the boundaries. From this a ``blended'' adjoint is proposed which uses the relevant SN inner products for source perturbation, and VET inner products for cross section term. Contrasted to the VET adjoint, this blended method requires an additional SN solve to determine $\phi^\dag$. In a scenario where only sources are perturbed or only cross-sections are perturbed, the blended adjoint will match the results of the SN method or VET method. What is not clear is how the blended method fares when both sources an cross-sections are perturbed.
+The former method holds a clear advantage when dealing with source perturbations, both volumetric $\delta q$ and boundary $\delta \psi^\text{inc}$. Neither of these perturbations required a first order approximation, therefor the adjoint method is exact. Additionally neither requires storing the angular flux; only the scalar flux. From this a ``blended'' adjoint is proposed which uses the relevant SN inner products for source perturbation, and VET inner products for cross section terms. Contrasted to the VET adjoint, this blended method requires an additional transport solve to determine $\phi^\dag$. In a scenario where only sources are perturbed or only cross-sections are perturbed, the blended adjoint will match the results of the SN method or VET method. What is not clear is how the blended method fares when both sources an cross-sections are perturbed.
 \begin{equation}
 \label{Blendsens}
 \begin{split}
@@ -847,7 +819,7 @@ The latter method holds a clear advantage when dealing with source perturbations
 \end{equation}
 
 \subsection{Estimating $\delta \Edd$}
-Both the SN and VET adjoint methods require a first-order perturbation assumption to be made, but the VET method also introduces the additional assumption that the Eddington remains unperturbed. As such, it seems reasonable that methods to approximate the Eddington perturbation $\delta \Edd$ may allow for reduced error in Eddington derived sensitivity, ideally approaching that of SN adjoint. 
+Both the transport and VET adjoint methods require a first-order perturbation assumption to be made, but the VET method also introduces the additional assumption that the Eddington remains unperturbed. As such, it seems reasonable that methods to approximate the Eddington perturbation $\delta \Edd$ may allow for reduced error in Eddington derived sensitivity, ideally approaching that of transport adjoint. 
 
 A linear approximation scheme is considered in this paper. Let $\vp$ be a point the  parameter space, in this case $\lbrace \sigma_s , \sigma_t, q, \psi^{\text{inc}} \rbrace$ and $\delta p$ be the perturbation in that space.
 
@@ -855,36 +827,37 @@ A linear approximation scheme is considered in this paper. Let $\vp$ be a point 
 \delta \Edd \approx \frac{\partial \Edd}{\partial \vp} \cdot \delta \vp
 \end{equation}
 
-Since no algebraic analytical form is known for $\Edd ( \vp )$, the derivative must be approximated using an additional value for $\Edd$ from an additional forward SN solve.
+Since no algebraic analytical form is known for $\Edd ( \vp )$, the derivative must be approximated using an additional value for $\Edd$ from an additional forward transport solve.
 \begin{equation}
 \label{Eddapprox}
 \frac{\partial \Edd}{\partial \vp} \approx \frac{\Edd(\vp_1) - \Edd(\vp_0)}{\vp_1 - \vp_0}
 \end{equation}
-The need for an additional forward SN solve to find $\Edd(\vp_1)$ is the primary cost of performing this method, and a constraint in situations where this approximation is viable. An analogous process can be used to approximate $\delta \BEdd$. With approximations for $\delta \Edd$ and $\delta \BEdd$ in hand, Eq.~\eqref{EddErr} can be used to to refine the VET sensitivity calculation. For situations where many perturbation scenarios need to be considered, this approximation method could prove useful. 
+The need for an additional transport solve to find $\Edd(\vp_1)$ is the primary cost of performing this method, and a constraint in situations where this approximation is viable. An analogous process can be used to approximate $\delta \BEdd$. With approximations for $\delta \Edd$ and $\delta \BEdd$ in hand, Eq.~\eqref{EddErr} can be used to to refine the VET sensitivity calculation. For situations where many perturbation scenarios need to be considered, this approximation method could prove useful. 
 
-\section{Alternate VET method}
+\section{Alternate VET Method}
 The process by which the VET adjoint equation was formulation involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It's worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the angular dependent adjoint flux (which is still in a transport-like equation form) then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
 
 \begin{equation}
 \label{snAdjAlt}
-- \vO_d \cdot \grad \psi^\dag_d + \sigt \psi^\dag_d = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
+- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
 \end{equation}
 %
 \begin{equation}
 \psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
 \end{equation}
 The zero-th and first angular moments of the adjoint expression are then taken and combined into a single system, as was done with the forward-derived VET method.
+\begin{subequations}
 \begin{equation}
 \label{0amAlt}
 \div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = 4\pi \scalResp \,,
 \end{equation}
-%
 \begin{equation}
 \label{1amAlt}
 \div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0 \,.
 \end{equation}
+\end{subequations}
 %
-Notable is t hat a factor of $4 \pi$ exists in the zero-th order equation due to the integration of the scalar response. This carries through to the corresponding VET formulation.
+Notable is that a factor of $4 \pi$ exists in the zero-th order equation due to the integration of the scalar response. This carries through to the corresponding VET formulation.
 \begin{subequations}
 \begin{equation}
 \label{TranAdjVEFForm}
@@ -897,17 +870,18 @@ Notable is t hat a factor of $4 \pi$ exists in the zero-th order equation due to
 In the above, an ``Adjoint Eddington Tensor'' and an ``Adjoint Boundary Eddington Factor'' terms are required, and defined as
 \begin{equation}
 \label{AdjEddDef}
-\Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} \, .
+\Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)} 
 \end{equation} 
 \begin{equation}
 \BEdd^\dag(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi^\dag}{\int_{4\pi} d\Omega \, \psi^\dag} \quad , \vr \in \bound \,.
 \end{equation}
-Of important note is that since the above was directly derived from the SN-transport adjoint equations, the QoI definition  still holds.
+Since the above was directly derived from the transport adjoint equation, the \qoi definition still holds.
 \begin{equation}
 \label{AdjQoIAlt}
-QoI = \bra \psi , \angSource^\dag \ket = \bra \phi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket 
+QoI = \braSN \psi , \scalResp\ketSN = \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN 
 \end{equation}
-The above formulation also has a corresponding forward equation, with solution denoted by $\varphi$. Where as the forward-derived VET method retained the SN forward solution $\phi$ but generated an alternative adjoint $\varphi$, the adjoint-derived VET (aVET) method retains the SN adjoint solution $\phi$ and generates an alternate forward solution $\varphi$. The result is an alternate forward system that is isomorphic to the alternate adjoint system from earlier.
+The above formulation also has a corresponding forward equation, with solution denoted by $\varphi$. Where as the forward-derived VET method retained the SN forward solution $\phi$ but generated an alternative adjoint $\varphi$, the adjoint-derived VET (aVET) method retains the SN adjoint solution $\phi$ and generates an alternate forward solution $\varphi$. The result is an alternate forward system that is isomorphic to the alternate adjoint system for $\varphi^\dag$ from earlier.
+\begin{subequations}
 \begin{equation}
 \label{ForwardVEFAlt}
 - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi  = \angSource  \,.
@@ -915,27 +889,30 @@ The above formulation also has a corresponding forward equation, with solution d
 \begin{equation}
 2 J^{\text{inc}}(\vr) = \BEdd^\dag(\vr) \varphi(\vr) + \Edd^\dag \cdot \frac{1}{\sigt} \grad \varphi  \,
 \end{equation} 
+\end{subequations}
 A new expression for the \qoi can be found by using Eq.~\eqref{AdjQoIAlt} and Eq.~\eqref{ForwardVEFAlt}, this time expressed using the $\varphi$.
  \begin{equation}
 \label{AdjQoIAltExpand}
 \begin{split}
-QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbra \psi^\dag,  \psi \sket \\
-&= \bra \phi^\dag , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket - \sbra \psi^\dag,  \psi \sket \\
+QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
+&= \bra \phi^\dag , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
 &= \bra 4\pi \scalResp  ,\varphi \ket - \sbra \psi^\dag,  \psi \sket  
 - \sbra \Edd^\dag \cdot \frac{1}{\sigt}\grad \varphi,  \phi^\dag \sket 
 + \sbra \frac{1}{\sigt} \div \Edd^\dag \phi^\dag,  \varphi \sket \\
-&=  \bra 4\pi \scalResp  ,\varphi \ket - \sbra \psi^\dag,  \psi \sket - \sbra \phi^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} \sket
+&=  \bra 4\pi \scalResp  ,\varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN - \sbra \phi^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} \sket
 \end{split}
 \end{equation}
 
-\subsection{Alternate VET sensitivity}
-For sensitivity, a perturbed adjoint $\phi^\dag_p$ is now considered. This is expanded to the first order using the $\delta$ notation, and the typical adjoint method is applied. A perturbation to the response is also introduced. For the previous methods, this was dealt with trivially by the product $\delta \qoi = \bra \phi , \delta q^\dag \ket$, however, since the value of $\phi$ isn't necessarily available in the aVET method, this type of perturbation requires additional attention.
+\subsection{Alternate VET Sensitivity}
+For sensitivity, a perturbed adjoint $\phi^\dag_p$ is now considered. This is expanded to the first order using the $\delta$ notation, and the typical adjoint method is applied. A perturbation to the response is also introduced. For the previous methods, this was dealt with trivially by the product $\delta \qoi = \bra \phi , \delta q^\dag \ket$, however, since the value of $\phi$ isn't necessarily available in the aVET method, this type of perturbation requires additional attention. In addition $\delta q$ and $\delta \psi^{\text{inc}}$ perturbations may have occurred, but are not reflected in the perturbed adjoint equation below. As was done with the forward derived VET the assumption $\delta \Edd^\dag$ is made.
+\begin{subequations}
 \begin{equation}
 - \div \left( (\isigt + \delta \isigt )\div \Edd^\dag \phi^\dag_p  \right)  +  (\siga + \delta \siga) \phi^\dag_p  =  4 \pi \scalResp + 4 \pi\delta \scalResp
 \end{equation}
 \begin{equation}
-2 J^{^\dag,\text{out}}(\vr) = \BEdd^\dag(\vr) \phi^\dag(\vr)  + \vn \cdot (\isigt + \delta \isigt) \div \Edd^\dag  \phi^\dag  \,.
+2 J^{^\dag,\text{out}}(\vr) = \BEdd^\dag(\vr) \phi^\dag(\vr)_p  + \vn \cdot (\isigt + \delta \isigt) \div \Edd^\dag  \phi^\dag_p  \,.
 \end{equation}
+\end{subequations}
 An inner-product with $\varphi$ is taken and the perturbation terms are collected on the RHS leaving the original operator on the LHS.
 \begin{equation}
 \begin{split}
@@ -969,14 +946,14 @@ Taking boundary conditions into account, Eq.~\eqref{AltVetPertDeriv} becomes
 &- \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  \quad . \\
 \end{split}
 \end{equation} 
-A important relation to keep in mind that the perturbed \qoi can be expressed using the perturbed adjoint. A first order approximation must be made, namely $\bra \phi^\dag_p , \delta \angSource \ket \approx \bra \phi^\dag , \delta \angSource \ket$, however, under source perturbations that approximation is exact.
+A important relation to keep in mind that the perturbed \qoi can be expressed using the perturbed adjoint. A first order approximation must be made, namely $\bra \phi^\dag_p ,  \angSourced \ket \approx \bra \phi^\dag , \angSourced \ket$, however, for $\delta q$ and $\delta \psi^{\text{inc}}$ perturbations the adjoint system remains unperturbed so $\phi=\phi^\dag$.
 \begin{equation}
 \begin{split}
 \qoi_p  = \bra \psi_p , \angSource_p^\dag \ket &= \bra \phi^\dag_p , \angSourcep \ket - \sbra \psi^\dag,  \psi_p \sket \\
-&\approx \bra \phi^\dag_p , \angSource \ket + \bra \phi^\dag , \delta \angSourcep \ket - \sbra \psi^\dag,  \psi_p \sket \\
+&\approx \bra \phi^\dag_p , \angSource \ket + \bra \phi^\dag , \angSourced \ket - \sbra \psi^\dag,  \psi_p \sket \\
 \end{split} 
 \end{equation}
-The above relation can be combined with the \qoi form derived in Eq.~\eqref{AdjQoIAltExpand} to give a sensitivity product. 
+The above relation can be combined with the unperturbed \qoi form derived in Eq.~\eqref{AdjQoIAltExpand} and the expression in  Eq.~\eqref{AltVetPertDeriv2} to give a sensitivity product. 
 \begin{equation}
 \delta \qoi = \bra \delta q^\dag, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
 - \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_-
@@ -987,6 +964,40 @@ The above relation can be combined with the \qoi form derived in Eq.~\eqref{AdjQ
 %%                           SECTION III
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\chapter{\uppercase {Solution Methods}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discrete Ordinates (SN) Transport}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+A discrete ordinates (SN) method can be used to solve the one group steady state transport 
+equation (Eq.~\eqref{SS1GTE}). The focus of this method is to discretize the angular variable 
+into discrete directions. Using an angular quadrature with $D$ directions $\vO_d$, the transport 
+equation is solved along each direction:
+\begin{equation}
+\label{1gTE}
+\vO_d \cdot \grad \psi_d + \sigt \psi_d = \frac{\sigs}{4 \pi} \phi + \angSource \quad \vr \in V ,\  \forall d\in [1,D]
+\end{equation}
+%
+The scalar flux can be computed from the angular flux as follows
+\[
+\phi(\vr) \approx \sum_{d=1}^D w_d \psi_d(\vr) \,,
+\] 
+where $\psi_d(\vr) = \psi(\vr, \vO_d)$ and $w_d$ is the angular quadrature weight. This leads to a coupled system of $D$ equations of the form shown in Eq.~\eqref{1gTE}, where the system is coupled through the scattering source term. This system of equations, where both 
+the angular flux and scalar flux are unknowns is solved iteratively, using source iteration as follows:
+\begin{subequations}
+\begin{equation}
+\label{1gTE}
+\vO_d \cdot \grad \psi_d^{(\ell+1)} + \sigt \psi_d^{(\ell+1)} = \frac{\sigs}{4 \pi} \phi^{(\ell)} + \angSource \,,
+\end{equation}
+\begin{equation}
+\phi(\vr)^{(\ell+1)} = \sum_{d=1}^D w_d \psi_d^{(\ell+1)}(\vr) \,.
+\end{equation}
+\end{subequations}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discontinuous Galerkin Method}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\todo{WORKING ON THIS WRITEUP}
 
 
 \chapter{\uppercase {Results}}
@@ -1230,9 +1241,10 @@ For the systems tested, the VET method shows promise for use in sensitivity calc
 
 Scattering perturbations showed possibly the most interesting behavior. The deviation of the VET and SN methods is stronger (relative to the SN sensitivity) in most of the test case when $\sigs$ is perturbed. Additionally, the shielding system presented a scenario where the $\delta \Edd$ approach appeared to introduce more error. Unfortunately, the testing of heavy scatting systems in one spacial dimension can be a bit limited. In a two or three dimensions, the ability for particles to scatter around objects exists in general, while this is not present in one dimension. Expanding the discussed concepts to higher spacial dimensions would be a worthwhile next step, particularly in observing the effects of scattering on the VET method.
 
-\begin{appendices}
+\newpage
+\chapter{\uppercase{Appendices}}
 
-\section{Time Dependent VET}
+\section{APPENDIX A: Time Dependent VET}
 While out of scope for this writing, a major goal of this method is the application towards time-dependent systems. As such, it is worth taking a brief look at how the VET formulation would look in a time dependent system. As with the steady state, the starting point is the one-group transport equation, now with the time derivative factor.
 \begin{equation}
 \label{Trans1GTE}
@@ -1271,7 +1283,7 @@ f=- \div \left( \frac{1}{\sigt} \div \left( \Edd \phi \right) \right)  + (\siga)
 \end{equation}
 which is the steady state equation, and muse about how that term must be dealt with accurately to produce time evolution. 
 Doing sensitivity we want an operator $A \phi = b$ which the above isn't exactly due to the $\vec{J}$. In addition to $\Edd$ is is reasonable to store some vector value like $\vec{g}=\frac{\vec{J}}{\phi}$? That way there is a well defined $A$ operator to perform the adjoint process on.}
-\end{appendices}
+
 %The next line is the format for inserting new sections.
 %Replace the name "newsection"  with the name of your
 %new section file.

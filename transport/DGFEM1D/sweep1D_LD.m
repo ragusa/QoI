@@ -29,20 +29,6 @@ grad = [1 1;-1 -1]/2;
 edgp = [0 0;0 1];
 edgm = [1 0;0 0];
 
-%IWH trying this method
-% compute elementary mass matrix
-%porder=npar.porder;
-%[xq,wq] = GLNodeWt(porder+1);
-%[b,dbdx] =feshpln(xq,porder);
-%mass=zeros(porder+1,porder+1);
-%grad=zeros(porder+1,porder+1);
-%for i=1:porder+1
-%    for j=1:porder+1
-%        mass(i,j)= dot(wq.*b(:,i), b(:,j));
-%        grad(i,j)= dot(wq.*b(:,i), dbdx(:,j));
-%    end
-%end
-
 
 % loop over directions
 for idir=1:snq.n_dir;

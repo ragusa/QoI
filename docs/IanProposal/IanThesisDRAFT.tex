@@ -409,7 +409,7 @@ where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to that
 the forward scalar flux definition. It is worth noting that the adjoint equation is in the form of the standard transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward SN transport solvers to be easily adapted to solving the SN adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equations Eq.~\eqref{genAdjQoI} and Eq.~\eqref{SnAdjDeriv}. %
 \begin{equation}
 \label{snAdjQoI}
-QoI = \bra \psi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN
+QoI = \braSN \psi^\dag , \angSource \ketSN - \sbraSN \psi^\dag,  \psi \sketSN
 \end{equation}
 %
 The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. Setting $\psi^{\dag \text{out}}(\vr)=0$ removes the outgoing flux integral.
@@ -469,7 +469,7 @@ QoI_p &= \braSN  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p
 Next, note that the cross section terms have double perturbations terms $\delta \sigt \delta \psi$ and $\delta \sigs \delta \psi$ once it is observed
 that $\psi_p=\psi+\delta\psi$. In a first-order approximation, these doubly perturbed terms are ignored, yielding:
 \begin{equation}
-\label{snAdjQoI}
+\label{snAdjQoIp}
 QoI_p \approx \braSN  \angSource + \angSourced - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \,.
 \end{equation}
@@ -593,7 +593,7 @@ The equation below is not right, as you have not defined the bracket notation fo
 %\llfloor a \rrfloor \quad \lbrackubar a\rbrackubar 
 %\]
 In your definition, I believe $\vn \cdot$ will appear, hence making all of the vector quantities I see below become scalars.}
-Starting with the forward VET balance equation, Eq.~\eqref{VEFForm}, we have 
+Starting with the forward VET balance equation, Eq.~\eqref{VEFForm}
 \begin{equation}
 \label{VEFadjFormDeriv}
 \begin{split}
@@ -896,7 +896,7 @@ A new expression for the \qoi can be found by using Eq.~\eqref{AdjQoIAlt} and Eq
 \begin{split}
 QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
 &= \bra \phi^\dag , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN \\
-&= \bra 4\pi \scalResp  ,\varphi \ket - \sbra \psi^\dag,  \psi \sket  
+&= \bra 4\pi \scalResp  ,\varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN  
 - \sbra \Edd^\dag \cdot \frac{1}{\sigt}\grad \varphi,  \phi^\dag \sket 
 + \sbra \frac{1}{\sigt} \div \Edd^\dag \phi^\dag,  \varphi \sket \\
 &=  \bra 4\pi \scalResp  ,\varphi \ket - \sbraSN \psi^\dag,  \psi \sketSN - \sbra \phi^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} \sket
@@ -949,14 +949,15 @@ Taking boundary conditions into account, Eq.~\eqref{AltVetPertDeriv} becomes
 A important relation to keep in mind that the perturbed \qoi can be expressed using the perturbed adjoint. A first order approximation must be made, namely $\bra \phi^\dag_p ,  \angSourced \ket \approx \bra \phi^\dag , \angSourced \ket$, however, for $\delta q$ and $\delta \psi^{\text{inc}}$ perturbations the adjoint system remains unperturbed so $\phi=\phi^\dag$.
 \begin{equation}
 \begin{split}
-\qoi_p  = \bra \psi_p , \angSource_p^\dag \ket &= \bra \phi^\dag_p , \angSourcep \ket - \sbra \psi^\dag,  \psi_p \sket \\
-&\approx \bra \phi^\dag_p , \angSource \ket + \bra \phi^\dag , \angSourced \ket - \sbra \psi^\dag,  \psi_p \sket \\
+\qoi_p  = \bra \psi_p , \angSource_p^\dag \ket &= \bra \phi^\dag_p , \angSourcep \ket - \sbraSN \psi^\dag,  \psi_p \sketSN \\
+&\approx \bra \phi^\dag_p , \angSource \ket + \bra \phi^\dag , \angSourced \ket - \sbraSN \psi^\dag,  \psi_p \sketSN \\
 \end{split} 
 \end{equation}
 The above relation can be combined with the unperturbed \qoi form derived in Eq.~\eqref{AdjQoIAltExpand} and the expression in  Eq.~\eqref{AltVetPertDeriv2} to give a sensitivity product. 
 \begin{equation}
+\label{AltVETsens}
 \delta \qoi = \bra \delta q^\dag, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
-- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbra \delta \psi^{\text{inc}}, \psi^\dag \sket_-
+- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_-
 \end{equation}
 
 \iwh{There is actually something really strange going on with the Vet adjoint ``forward''  $\varphi$ equation boundary condition. The most natural way is to base it off of of the true forward incident $J$, but unless I am missing something there is actually some form of freedom there. The ramifications for this are most present in Test case 3 below, where the Alternate VET method is particularly bad at dealing with incident flux scenarios when cross sections are perturbed. Its maybe worth discussing in person at some point}.
@@ -974,7 +975,7 @@ equation (Eq.~\eqref{SS1GTE}). The focus of this method is to discretize the ang
 into discrete directions. Using an angular quadrature with $D$ directions $\vO_d$, the transport 
 equation is solved along each direction:
 \begin{equation}
-\label{1gTE}
+\label{1gSNTE}
 \vO_d \cdot \grad \psi_d + \sigt \psi_d = \frac{\sigs}{4 \pi} \phi + \angSource \quad \vr \in V ,\  \forall d\in [1,D]
 \end{equation}
 %
@@ -993,12 +994,12 @@ the angular flux and scalar flux are unknowns is solved iteratively, using sourc
 \phi(\vr)^{(\ell+1)} = \sum_{d=1}^D w_d \psi_d^{(\ell+1)}(\vr) \,.
 \end{equation}
 \end{subequations}
-
+Iteration terminates once $\left|\phi^{(\ell+1)} - \phi^{(\ell)} \right| \leq \text{Tol}$, which was set to $1E-8$ for this work.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discontinuous Galerkin Method}
+\section{Discontinuous Galerkin Finite Element Method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \todo{WORKING ON THIS WRITEUP}
-
+With angular discretization covered by SN, a spacial discretization and solution scheme in now needed both for the SN transport form shown in Eq.~\eqref{1gSNTE} and the various VET methods. A 1-d Discontinuous Galerkin (DG) Finite Element Method (FEM) was chosen. 
 
 \chapter{\uppercase {Results}}
 
@@ -1006,11 +1007,17 @@ the angular flux and scalar flux are unknowns is solved iteratively, using sourc
 \section{Trial Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-At this point, six separate methods for \qoi calculation have been discussed: 
+At this point, 5 separate methods for unperturbed \qoi calculation have been discussed: 
+\begin{enumerate}
+\item forward and adjoint inner products for both SN and VET formulations (4 approaches), and,
+\item the alternate VET (adjoint VET) method in Eq.~\eqref{AdjQoIAltExpand}.
+\end{enumerate} 
+as well as 7 separate methods for $\delta$\qoi calculation: 
 \begin{enumerate}
 \item forward and adjoint inner products for both SN and VET formulations (4 approaches),
-\item the ``blended'' method presented in Eq.~\eqref{Blendsens}, and,
-\item the method of approximating $\delta \Edd$.
+\item the ``blended'' method presented in Eq.~\eqref{Blendsens},
+\item the method of approximating $\delta \Edd$ shown in Eq.~\eqref{Eddapprox}, and,
+\item the alternate VET inner product in  Eq.~\eqref{AltVETsens}.
 \end{enumerate} 
 
 When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
@@ -1018,7 +1025,7 @@ When dealing with sensitivity measurements, the forward solutions are expected t
 The six methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced perturbation and the magnitude of the perturbation. The results of the four different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
 \begin{subequations}
 \begin{equation}
-\text{\% \qoi response}=\frac{\delta \qoi}{\qoi} \,,
+\text{\qoi \% response}=\frac{\delta \qoi}{\qoi} \,,
 \end{equation}
 \begin{equation}
 \text{$p$ \% change}=\frac{\delta p}{p} \,.
@@ -1056,23 +1063,23 @@ The first test case is a homogeneous material with a volumetric source throughou
 \caption{\qoi response to various perturbation scenarios for the homogeneous system under various homogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
 \end{figure}
 
-In both the unperturbed and perturbed state, the Eddington is essentially at the diffusion limit of $\Edd = 1/3 \mathbb{I}$, so the unperturbed Eddington approximation should be a safe assumption to make in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first order approximation is needed, so all methods appear to give the same result. The $\siga$ perturbations begin to show the affects of the first order approximation, adjoint methods diverge from the exact forward methods. As would be expected, the system does not show strong sensitivity to $\sigs$ perturbations.
+In both the unperturbed and perturbed state, the Eddington is essentially at the infinite medium limit, so the unperturbed Eddington approximation should be a safe assumption to make in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first order approximation is needed, so all methods appear to give the same result. The $\siga$ perturbations begin to show the affects of the first order approximation, adjoint methods diverge from the exact forward methods. As would be expected, the system does not show strong sensitivity to $\sigs$ perturbations.
 
 \begin{table}[H]
 \label{TableT1}
 \centering
-  \begin{tabular}{| l | r | r | r | r |}
+  \begin{tabular}{| l | r || r | r | r | r |}
     \hline
-    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
-     SN Fwd 			&0.39998 &0.44419 &5.7577e-05 & 0.88858\\ \hline
-     VET Fwd			&0.39998 &0.44428 &2.7131e-05 &0.88868\\ \hline
-     SN Adj			&0.39998 &0.39983 &6.6307e-05 &0.79980\\ \hline
-     VET Adj 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
-     Blended 			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
-     VET $\delta \Edd$ 	&0.39998 &0.39983 &5.9537e-05 &0.79981\\ \hline
-     VET Alt			& --  & --  &	--		&  --\\ \hline
+    Method  & $\qoi$ & $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     SN Fwd 			&3.99976	&0.39998 &0.44419 &5.7577e-05 & 0.88858\\ \hline
+     VET Fwd			&3.99976	&0.39998 &0.44428 &2.7131e-05 &0.88868\\ \hline
+     SN Adj			    &3.99976	&0.39998 &0.39983 &6.6307e-05 &0.79980\\ \hline
+     VET Adj 			&3.99976	&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
+     Blended 			&-			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
+     VET $\delta \Edd$ 	&-			&0.39998 &0.39983 &5.9537e-05 &0.79981\\ \hline
+     aVET				&3.99976 	&0.39998 &0.39980  &4.986e-05	 &0.79978\\ \hline
     \end{tabular}
-  \caption{Table of selected results for the homogeneous system under homogeneous perturbations. Values given are absolute $\delta \Edd$. }
+  \caption{Table of selected $\delta \qoi$ values for the homogeneous system under homogeneous perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 
@@ -1107,23 +1114,23 @@ The initial homogeneous unperturbed system is retained from the previous trial. 
 \caption{\qoi response to various perturbation scenarios for the homogeneous system under various inhomogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
 \end{figure}
 
-The introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the adjoint VET method, however the found value still lies closer to the VET value than the SN adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact SN adjoint. 
+The introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the adjoint VET method, however the found value still lies closer to the VET value than the SN adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact SN adjoint. The alternate VET method shows its exact nature for the source perturbation, as well as being the VET method with the closest value to the SN adjoint for $\siga$ perturbations. 
 
 
 \begin{table}[H]
 \centering
-  \begin{tabular}{| l | r | r | r | r |}
+  \begin{tabular}{| l | r || r | r | r | r |}
     \hline
-    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
-     SN Fwd 			&0.36309 &0.39952 &2.9680e-05 & 0.79915\\ \hline
-     VET Fwd			&0.35947 &0.39517 &1.5072e-05 &0.79040\\ \hline
-     SN Adj  			&0.36309 &0.36301 &3.4051e-05 &0.72610\\ \hline
-     VET Adj 			&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
-     Blended 			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
-     VET $\delta \Edd$ 	&0.36287 &0.36290 &3.0640e-05 &0.72586\\ \hline
-     VET Alt			& --  & --  &	--		&  --\\ \hline
+    Method  & $\qoi$ & $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     SN Fwd 			&3.99976	&0.36309 &0.39952 &2.9680e-05 & 0.79915\\ \hline
+     VET Fwd			&3.99976	&0.35947 &0.39517 &1.5072e-05 &0.79040\\ \hline
+     SN Adj  			&3.99976	&0.36309 &0.36301 &3.4051e-05 &0.72610\\ \hline
+     VET Adj 			&3.99976	&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
+     Blended 			&-			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
+     VET $\delta \Edd$ 	&-			&0.36287 &0.36290 &3.0640e-05 &0.72586\\ \hline
+     VET Alt			&3.99976	&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
     \end{tabular}
-  \caption{Table of selected results for the homogeneous system under inhomogeneous perturbations. Values given are absolute $\delta \Edd$. }
+  \caption{Table of selected $\delta \qoi$ values for the homogeneous system under inhomogeneous perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -1158,22 +1165,22 @@ To observe the response to perturbations in the incident flux, a simple shieldin
 \caption{\qoi response to various perturbation scenarios for the.}
 \end{figure}
 
-Response to perturbation in the incident flux behaves as expected, in that adjoint methods match their respective forward found values. The $\delta E$ approximation method helps approach the SN value in most cases, however when dealing with scattering perturbations, the $\delta E$ method actually results in a $\delta \qoi$ value further from the SN value than the basic VET method. 
+Response to perturbation in the incident flux behaves as expected, in that adjoint methods match their respective forward found values. The $\delta E$ approximation method helps approach the SN value in most cases, however when dealing with scattering perturbations, the $\delta E$ method actually results in a $\delta \qoi$ value further from the SN value than the basic VET method. The alternate VET method is as expected exact for the incident flux perturbations, but shows issues with cross-section perturbations in this test case.
 
 \begin{table}[H]
 \centering
-  \begin{tabular}{| l | r | r | r | r |}
+  \begin{tabular}{| l | r || r | r | r | r |}
     \hline
-    Method  &  $+10\% \psi^- $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% \psi^-,-10\% \siga$ \\ \hline
-     SN Fwd 			&0.023401 &0.021079 &-0.0067476 & 0.046588\\ \hline
-     VET Fwd			&0.023181 &0.019670 &-0.0066481 &0.044818\\ \hline
-     SN Adj  			&0.023401 &0.019975 &-0.0068956 &0.043376\\ \hline
-     VET Adj 			&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
-     Blended 			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
-     VET $\delta \Edd$ 	&0.023181 &0.020070 &-0.0065156 &0.043251\\ \hline
-     VET Alt			&0.023401 &0.035869 &	--		&  --\\ \hline
+    Method  & $\qoi$ & $+10\% \psi^- $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% \psi^-,-10\% \siga$ \\ \hline
+     SN Fwd 			&0.234008 	&0.023401 &0.021079 &-0.0067476 & 0.046588\\ \hline
+     VET Fwd			&0.234008 	&0.023181 &0.019670 &-0.0066481 &0.044818\\ \hline
+     SN Adj  			&0.231931 	&0.023401 &0.019975 &-0.0068956 &0.043376\\ \hline
+     VET Adj 			&0.231698 	&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
+     Blended 			&-			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
+     VET $\delta \Edd$ 	&-			&0.023181 &0.020070 &-0.0065156 &0.043251\\ \hline
+     VET Alt			&0.234008 	&0.023401 &0.035869 &-0.012563	&0.059270\\ \hline
     \end{tabular}
-  \caption{Table of selected results for the shielding system under perturbations. Values given are absolute $\delta \Edd$. }
+  \caption{Table of selected $\delta \qoi$ values for the shielding system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -1217,22 +1224,22 @@ As a final test, a more varied and complex system is tested. The system is split
 \caption{\qoi response to various perturbation scenarios for the Reed Problem.}
 \end{figure}
 
-The effect of scattering perturbations is more pronounced in the Reed problem, along with the error between the SN and VET derived methods. The $\Delta \Edd$ approximation method proves quite valuable in this problem however, and moves the response much closer to the SN adjoint found sensitivity for cross-section perturbations. 
+The effect of scattering perturbations is more pronounced in the Reed problem, along with the error between the SN and VET derived methods. The $\delta \Edd$ approximation method proves quite valuable in this problem however, and moves the response much closer to the SN adjoint found sensitivity for cross-section perturbations. For cross-section perturbations, the alternate VET method appears closer to VET sensitivity values than SN sensitivity for this test case.
 
 \begin{table}[H]
 \centering
-  \begin{tabular}{| l | r | r | r | r |}
+  \begin{tabular}{| l | r || r | r | r | r |}
     \hline
-    Method  &  $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
-     SN Fwd 			&0.17580 &0.030945 &0.030235 & 0.20984\\ \hline
-     VET Fwd 			&0.17561 &0.029105 &0.047568 &0.20763\\ \hline
-     SN Adj 			&0.17580 &0.030401 &0.030450 &0.20620\\ \hline
-     VET Adj 			&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
-     Blended 			&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
-     VET $\delta \Edd$ 	&0.17561 &0.030291 &0.028388 &0.20590\\ \hline
-     VET Alt		 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
+    Method  & $\qoi$ & $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     SN Fwd 			&1.75802 	&0.17580 &0.030945 &0.030235 & 0.20984\\ \hline
+     VET Fwd 			&1.75802 	&0.17561 &0.029105 &0.047568 &0.20763\\ \hline
+     SN Adj 			&1.75603  	&0.17580 &0.030401 &0.030450 &0.20620\\ \hline
+     VET Adj 			&1.75602  	&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
+     Blended 			&-	 		&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
+     VET $\delta \Edd$ 	&-		 	&0.17561 &0.030291 &0.028388 &0.20590\\ \hline
+     VET Alt		 	&1.75601 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
     \end{tabular}
-  \caption{Table of selected results for the Reed system under perturbations. Values given are absolute $\delta \Edd$. }
+  \caption{Table of selected $\delta \qoi$ values for the Reed system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 \chapter{\uppercase {Conclusion and looking ahead}}
@@ -1240,6 +1247,8 @@ The effect of scattering perturbations is more pronounced in the Reed problem, a
 For the systems tested, the VET method shows promise for use in sensitivity calculations. For the majority of the trials the error between the VET and SN adjoint sensitivities was $<10\%$ of the SN sensitivity, and $<1\%$ of the unperturbed QoI. The blended method demonstrated an approach to increase the accuracy, particularly for source perturbations, at the cost of an additional SN solve to obtain $\phi$. The $\delta \Edd$ approximation approach was even more accurate in most cases, but requires at least 1 extra SN solve for each perturbed system property, making it viable in scenarios where many perturbation scenarios must be tested. 
 
 Scattering perturbations showed possibly the most interesting behavior. The deviation of the VET and SN methods is stronger (relative to the SN sensitivity) in most of the test case when $\sigs$ is perturbed. Additionally, the shielding system presented a scenario where the $\delta \Edd$ approach appeared to introduce more error. Unfortunately, the testing of heavy scatting systems in one spacial dimension can be a bit limited. In a two or three dimensions, the ability for particles to scatter around objects exists in general, while this is not present in one dimension. Expanding the discussed concepts to higher spacial dimensions would be a worthwhile next step, particularly in observing the effects of scattering on the VET method.
+
+For the homogeneous test cases, the alternate VET method utilizing $\varphi$ showed obvious advantages by way of it's exact nature for source perturbations and closest values to SN adjoint formulation for $\sigma_a$ perturbations. This method however appeared to have difficulties with the incident flux scenario, returning response values significantly higher than any other method. For the Reed problem, the alternate VET method appeared to return values most similar to the standard VET method, but with the source perturbation response values exact. 
 
 \newpage
 \chapter{\uppercase{Appendices}}

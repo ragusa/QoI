@@ -189,7 +189,7 @@
 \section{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three process outlined by the National Research Council \cite{NRCVVUQ}
+Computational simulations have become important tools for engineers and scientists across a wide array of disciplines. These simulations allow for researchers to examine significantly complex and long life systems in a way that is frequently more economical in both time and money than construction of the real world system, if even feasible. An important step in creating one of these methods is confirmation that the results can be trusted to reasonably approximate the real life scenario. This can be accomplished using three processes outlined by the National Research Council \cite{NRCVVUQ}
 
 
 \begin{itemize}
@@ -200,7 +200,7 @@ Computational simulations have become important tools for engineers and scientis
 
 
 Adjoint methods are particularly useful for UQ. In general, adjoint methods provide a mechanism for computing quantities
- of interest (\qoi) and sensitivity coefficients and, more generally, for propagating uncertainty and error in the 
+ of interest (\qoi) and sensitivity coefficients and, more generally, for propagating uncertainty in the 
  system variables to the error in the desired quantity of interest. They accomplish this in a particularly economical 
  way, requiring only two full system solves (one forward and one adjoint solve) in steady state in order to determine 
  first-order sensitivity coefficients for any combination of sources of uncertainty, as opposed to performing multiple 
@@ -213,7 +213,8 @@ bracket notation for inner products over the phase space, it is easy to note tha
 obtained using {\it either} the forward solution $u$ folded with the response function of interest 
 (which is also the adjoint source, $q^\dag$) {\it or} the adjoint solution folded with the forward source~:
 \[
-\qoi = \bra u, q^\dag \ket = \bra u^\dag, q \ket \,.
+\qoi := \bra u, q^\dag \ket = \bra u, \mathbf{A}^\dag u^\dag \ket = 
+\bra \mathbf{A} u , u^\dag \ket = \bra q, u^\dag\ket \,.
 \]
 The sensitivity coefficient due to parameter $p$ can be obtained using two forward solves
 \[
@@ -222,13 +223,12 @@ The sensitivity coefficient due to parameter $p$ can be obtained using two forwa
 where the superscript $^\prime$ denotes a perturbed value. However, one may employ the unperturbed adjoint solution to obtain
 a {\it first-order} estimate of the sensitivity coefficient
 \[
-\delta_p \qoi = \bra u^\dag, \delta_p q - \mathbf{ \delta_p A} u \ket \,.
+\delta_p \qoi = \bra u^\dag, \delta_p q - \delta_p \mathbf{A} u \ket  + \mathcal{O}(\delta^2)\,.
 \]
-\jcr{since this is the thesis, the above expression should be demonstrated later. I understand that this chapter is only the intro, so you give a rapid overview...}
-The subsequent sections will provide additional details and will apply these formulations to neutron transport problems. However, it is already evident that if the forward source $q$ is uncertain and only a few \qoi are requested, it is preferable to employ the adjoint formulation to compute the quantity of interest (one needs only one adjoint solution per response function). Furthermore, the sensitivity of the
-\qoi to many uncertain parameters is more advantageously computed using the adjoint.
+The subsequent sections will provide derivations and additional details and will apply these formulations to neutron transport problems. However, it is already evident that if the forward source $q$ is uncertain and only a few \qoi are requested (i.e., only a few response functions $q^\dag$ are needed), then it is preferable to employ the adjoint formulation to compute the quantity of interest (one needs only one adjoint solution per response function $q^\dag$). Furthermore, the first-order sensitivity of the
+\qoi to many uncertain parameters is more advantageously computed using the adjoint formalism.
 
-
+\jcr{I did already point out that this was a repeat. Can you deal with this, blend what needs to be blended in and remove the rest. If this is where you mention previous work related to using an adjoint approach, the literature review needs to be seriously beefed-up. 2-3 citations are not a lot for a thesis. It seems that most of the UQ adjoint literature review happens in the introduction, so augment this. you are mentioning time-dependent problems and the need to save the adjoint at various times (checkpointing), there are clever algo for that too, reference them...}
 Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Adjoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. These adjoint methods have been applied across various complex and time dependent systems. An example of adjoint methods applied to hydrodynamic systems with shocks can be found in Wildey et al. \cite{Wildey}. A more relevant adjoint example to neutron transport occurs in Stripling et al. in the form of reactor burn-up equations \cite{Stripling}.
 
 
@@ -239,9 +239,13 @@ the primary time-dependent variable, the angular flux, needs to be stored as wel
 
 A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The method examined in this work is termed  as a ``Variable Eddington Tensor'' formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
 
+
+\jcr{at some point, you need to say: This Thesis is organized as follows: in Chapter xx, we discuss blabla. ...... FORESHADOW}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{\uppercase {Background (Transport)}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\jcr{foreshadow: what is this chapter about? what will you discuss in the various sections ...?}
 %%%%%%%----------------------------------------------------------------------------------------------
 \section{Steady-state One-group Neutron Transport Equation}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -1323,7 +1327,7 @@ Doing sensitivity we want an operator $A \phi = b$ which the above isn't exactly
 %This file is a .bib database that contains the sources.
 %This removes the dependency on the previous file
 %bibliography.tex.
-\bibliography{IanProp}
+\bibliography{QoI_MS}
 
 
 

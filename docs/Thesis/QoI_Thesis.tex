@@ -249,14 +249,12 @@ A potential solution to the memory requirement for the time-dependent transport 
 %%%%%%%----------------------------------------------------------------------------------------------
 \section{Steady-state One-group Neutron Transport Equation}
 %%%%%%%----------------------------------------------------------------------------------------------
+\jcr{the first sentences actually need to go before the section. according to the section's title, this should be about the SS 1-g transport, not why you are looking at that model. that must come before. I am adding new lines to make it obvious where the break needs to be.}
+\jcr{is this the first time you use the term quasi-diffusion? if so, it clearly needs to be defined before, maybe in the introduction chapter}
+This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. \jcr{you must mention that the appendix xyz contains a derivation of the time-dependent version approach where we think VET could be useful}
 
-This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of the quasi-diffusion's effectiveness in this setting will provide sufficient insight to advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. The one-group steady-state transport equation with isotropic sources and isotropic scattering for a volume $V$ bounded by its surface $\partial V$ is given below.
-\jcr{I think we discussed how VEF would be applied to transient and did some derivations. I think these need to be included somewhere because (1) this is why we decided to look at VEF, and (2) to write the derivation down and not lose it in the future}
-\iwh{I have sort of a derivation towards the end of this paper, I can try to move it earlier, but I sort of run into slight problem.
-I would have to derive and introduce the Eddington Tensor within the context of the time dependent equation, where the end result is still a bit ugly 
-looking; as opposed to introduction in the steady state cases where the purpose if more clear and we end up with a fairly nice
-diffusion-esque equation at the end.}
 
+The one-group steady-state transport equation with isotropic sources and isotropic scattering for a volume $V$ bounded by its surface $\partial V$ is given below.
 \begin{equation}
 \label{SS1GTE}
 \vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + \frac{1}{4 \pi} q(\vr), \quad \forall \vr \in V
@@ -276,30 +274,29 @@ The possibly uncertain parameters in this system are: the total and scattering c
 %----------------------------------------------------------------------------------------------
 \subsection{Quantity of Interest, Response Functions, and Inner Products}
 %----------------------------------------------------------------------------------------------
-Frequently, the solution to the transport equation is not the sought after value, but rather some Quantity of Interest (\qoi), a functional that depends on the transport solution. Given $\psi(\vr,\vO)$ the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), a \qoi
-defined as
+Frequently, the solution to the transport equation is not the sought after value, but rather some Quantity of Interest (\qoi), a functional that depends on the transport solution. Given $\psi(\vr,\vO)$, the solution of the one-group steady-state transport (Eq.~\eqref{SS1GTE}), and $R(\vr, \vO)$, a ``response function'' specific to the desired \qoi, the quantity of interest is defined as
 \begin{equation}
 \qoi =  \int_V dV \int_{4 \pi} d \vO \,  R(\vr, \vO) \psi(\vr, \vO)
 \end{equation}
-where $R(\vr, \vO)$ is termed the ``response function'' which is used to characterize the meaning of the desired \qoi. The response function can take on physically defined forms, such as the cross section of a detector; or it may take a form of a mathematical construct, such as $R(\vr, \vO)=1/v$ to return the total number of neutrons present in the system. Another example is to let $R(\vr, \vO)=\sigma \chi(\vr)$ to obtain the total reactor in a portion of the domain ($\chi(\vr)=1$ if $\vr \in$ region of interest, and 0 otherwise). To avoid confusion with the spatial location vector $\vr$, the response function will frequently be expressed as $q^\dag$, the adjoint source, as we have already noted that there is a relationship between the solution, the adjoint solution, and their respective source terms. 
+The response function $R$ can take on physically defined forms, such as the cross section of a detector; or it may take a form of a mathematical construct, such as $R(\vr, \vO)=1/v$ to return the total number of neutrons present in the system. Another example is to let $R(\vr, \vO)=\sigma \chi(\vr)$ to obtain the total \tcr{reactor} in a portion of the domain ($\chi(\vr)=1$ if $\vr \in$ region of interest, and 0 otherwise). Note that the response function will frequently be expressed as $q^\dag$, the adjoint source, as we have already noted that there is a relationship between the solution, the adjoint solution, and their respective source terms. 
 
-Two volumetric inner products are defined using $\braSN \bullet , \bullet \ketSN$ and $\bra \bullet , \bullet \ket$ notations. These two inner-products are for use with angular and scalar flux respectively. 
+Two volumetric inner products are defined using  the $\braSN \bullet , \bullet \ketSN$ and $\bra \bullet , \bullet \ket$ notations. These two inner-products are for use with angular and scalar fluxes, respectively. 
 \begin{subequations}
 \begin{equation}
-\braSN \psi , f \ketSN  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO)
+\braSN \psi , f \ketSN  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO) \,,
 \end{equation}
 \begin{equation}
-\bra \phi(\vr) , f \ket  = \int_V dV \,  \phi(\vr) g(\vr)
+\bra \phi(\vr) , f \ket  = \int_V dV \,  \phi(\vr) g(\vr) \,.
 \end{equation}
 \end{subequations}
-For later use, two additional inner products are also defined as surface integrals over the region 
-boundary $\partial V$. The latter splitting incoming and outgoing surface integrals.
+For later use, two additional inner products are also defined as surface integrals over the domain 
+boundary $\partial V$. The second definition is used to distinguish between incoming and outgoing surface integrals.
 \begin{subequations}
 \begin{equation}
-\sbraSN \psi , g \sketSN  = \int_{\bound} dS \int_{4 \pi} d \Omega \, \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
+\sbraSN \psi , g \sketSN  = \int_{\bound} dS \int_{4 \pi} d \Omega \, \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO) \,,
 \end{equation}
 \begin{equation}
-\sbraSN \psi , g \sketSN_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO)
+\sbraSN \psi , g \sketSN_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)g(\vr, \vO) \,.
 \end{equation}
 \end{subequations}
 Therefore, with this notation, the quantity of interest can be compactly expressed as shown below.
@@ -307,25 +304,17 @@ Therefore, with this notation, the quantity of interest can be compactly express
 \label{QoIDef}
 \qoi = \braSN \psi(\vr,\vO), \scalResp(\vr) \ketSN  = \bra \phi(\vr) , \scalResp(\vr) \ket
 \end{equation}
-\iwh{I am commenting this out, I think this actual sentence was leftover from a comment in a previous version that I messed up deleting. 
-The above is an unperturbed QoI using the forward flux solution and a volumetric response function, so no boundary terms should be present. 
-here is the commented out sentence. "The boundary terms arise from the integration by parts of the streaming terms."}
-\jcr{what boundary terms? you expression is not complete, you forgot the boundary terms}
-\jcr{additionally, I believe you should start demonstrating these relationships. It is fine in the abstract,
- early introduction, but here we are getting into some details. Imagine another
-first-year grad student reading this, they would wonder were these expressions are coming from, 
-especially if they never heard of adjoint equations}
 
 %----------------------------------------------------------------------------------------------
 \subsection{Sensitivity Coefficients}
 %----------------------------------------------------------------------------------------------
-A hurdle in utilizing the transport equation numerically to make real world predictions is that none of 
-the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) are not known exactly. This error in 
-the system parameters is expected to translate to error in the \qoi value. Ideally, a reasonable error 
+A hurdle in utilizing the transport equation numerically to make real world predictions is that 
+the system's parameters ($\sigt$, $\sigs$, $q$, and $\psi^{inc}$) may not be known exactly. This uncertainty in 
+the system parameters is expected to translate to an uncertainty in the \qoi value. Ideally, a reasonable error 
 range would be determined for each system parameter and the system simulation would run over a finely 
 discretized parameter space, using the resulting \qoi values to generate an error range for the \qoi. 
 However, this straightforward method tends to be resource-intensive, requiring a complete forward solve 
-of the transport equation for each input error scenario. Adjoint methods offer a way to drastically 
+of the transport equation for each input uncertainty scenario. Adjoint methods offer a way to drastically 
 reduce the number of solves, while generally remaining fairly accurate for small perturbations around 
 base or nominal values of the parameters.
 
@@ -346,42 +335,25 @@ adjoint solution $\psi^\dag $.
 \label{genAdjQoI}
 \qoi = \braSN \psi, \scalResp \ketSN = \braSN q , \psi^\dag \ketSN + BC
 \end{equation} 
-From the above, it follows that a first-order approximation to the change in the quantity of interest ($\delta \qoi$)
+From the above \jcr{what? where? there was no actual rigorous derivation above}, it follows that a first-order approximation to the change in the quantity of interest ($\delta \qoi$)
 based on perturbations to the initial system, including perturbation to the forward 
-operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the inner product form shown in Eq.~\eqref{genAdjSens} \cite{Marchuk}. Derivation of this begins with the perturbed system $\mathbf{A_p} \psi_p = q_p$ multiplied by the adjoint function $\psi^\dag$ defined above. After expressing the perturbations in a $\delta$ form a first order approximation of $\delta \mathbf{A} \delta \psi = 0$ is used. An integration by parts is used to transpose $\mathbf{A}$ to $\mathbf{A^\dag}$, resulting in boundary terms appearing. 
+operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the inner product form shown in Eq.~\eqref{genAdjSens} \cite{Marchuk}. Derivation of this begins with the perturbed system $\mathbf{A}_p \psi_p = q_p$ multiplied by the adjoint function $\psi^\dag$ defined above. After expressing the perturbations in a $\delta$ form a first order approximation of $\delta \mathbf{A} \delta \psi = 0$ is used. An integration by parts is used to transpose $\mathbf{A}$ to $\mathbf{A^\dag}$, resulting in boundary terms appearing. 
 \begin{equation}
 \begin{split}
-\braSN \mathbf{A_p} \psi_p ,\psi^\dag\ketSN &= \braSN q_p ,\psi^\dag \ketSN \\
+\braSN \mathbf{A}_p \psi_p ,\psi^\dag\ketSN &= \braSN q_p ,\psi^\dag \ketSN \\
 \braSN \left( \mathbf{A}+\delta \mathbf{A} \right) \left( \psi + \delta \psi \right),\psi^\dag\ketSN &= \braSN q+\delta q ,\psi^\dag \ketSN \\
 \braSN \mathbf{A} \psi +\delta \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ketSN &\approx \braSN q+\delta q ,\psi^\dag \ketSN \\
 \braSN \mathbf{A} \psi + \mathbf{A} \delta \psi ,\psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN \\
 \braSN \psi +\delta \psi , \mathbf{A^\dag} \psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN + BC \\
-\braSN \psi_p , q^\dag \psi^\dag\ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN + BC \\
+\braSN \psi_p , q^\dag \ketSN &= \braSN q+\delta q - \delta \mathbf{A} \psi  ,\psi^\dag \ketSN + BC \\
 \end{split}
 \end{equation}
-The left side of the final step of the above derivation is the perturbed \qoi. Subtracting Eq.~\eqref{genAdjQoI} from this yields the desired expression for the $\delta$ \qoi.
+The left side of the final step of the above derivation is the perturbed \qoi. Subtracting Eq.~\eqref{genAdjQoI} from this yields the desired expression for the $\delta\qoi$.
 \begin{equation}
 \label{genAdjSens}
-\delta \qoi \approx \braSN \delta q - \delta \mathbf{A} \psi , \psi^\dag \ketSN + BC
+\delta \qoi \approx \braSN \delta q - \delta \mathbf{A} \psi , \psi^\dag \ketSN + \delta BC
 \end{equation}
-The advantage of the above expression for $\delta \qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety $\delta \mathbf{A}$ and $\delta q$.
-\jcr{in the thesis, you need to go through the algebra for the transport and the VET equations. not here, this is only the proposal}
-\iwh{Ok, I think most of the derivation is covered in sufficient detail in the latter sections.}
-\jcr{I think it is easier to add 3-4 equations right now and not have to postpone this any further. Similarly, it would be nice to explain why we call this first-order by choosing what terms are actually dropped}
-\iwh{The first part "you need to go through the algebra for the transport and the VET equations", that is pretty much the entirety of the next 2 
-sections. I could just blindly state the SN and VET equations right now, but that doesn't seem to be like what you are asking for.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  New template code for TAMU Theses and Dissertations starting Fall 2016.  
-%
-%
-%  Author: Sean Zachary Roberson
-%  Version 3.17.06
-%  Last Updated: 6/15/2017
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+The advantage of the above expression for $\delta\qoi$ is that two solves, one for the forward and another for the adjoint, can be used to approximate the sensitivity for a variety of operator and source perturbations, $\delta \mathbf{A}$ and $\delta q$.
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint Formulation for Transport}
@@ -390,11 +362,12 @@ In a fairly straightforward application of the adjoint method previously shown,
 \begin{equation}
 \label{SnAdjDeriv}
 \begin{split}
-\braSN \frac{1}{4 \pi} q , \psi^\dag  \ketSN  
+\braSN \frac{q}{4 \pi} , \psi^\dag  \ketSN  
 =& \braSN \vO \cdot \grad \psi + \sigt \psi - \frac{\sigs}{4 \pi} \phi, \psi^\dag \ketSN \\
 =& \braSN \vO \cdot \grad \psi, \psi^\dag \ketSN  + \braSN \sigt \psi, \psi^\dag \ketSN  - \braSN \frac{\sigs}{4 \pi}  \phi, \psi^\dag \ketSN \\
 =& - \braSN  \psi, \vO \cdot \grad \psi^\dag \ketSN  + \braSN \psi, \sigt \psi^\dag \ketSN  - \braSN   \psi, \frac{\sigs}{4 \pi} \phi^\dag \ketSN + \sbraSN \psi^\dag,  \psi \sketSN\\
 =& \braSN  \psi,-  \vO \cdot \grad \psi^\dag  +  \sigt \psi^\dag -  \frac{\sigs}{4 \pi} \phi^\dag \ketSN + \sbraSN \psi^\dag,  \psi \sketSN\\
+=& \braSN  \psi,q^\dag \ketSN + \sbraSN \psi^\dag,  \psi \sketSN\\
 \end{split}
 \end{equation}
 the adjoint equation which corresponds to the transport formulation with adjoint source (response function)
@@ -406,17 +379,22 @@ $\angResp$ is
 - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
 \end{equation}
 \begin{equation}
-\psi^\dag(\vr) = \psi^{\dag \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
+\psi^\dag(\vr) = \psi^{\dag, \text{out}}(\vr)=0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} > 0 \}
 \end{equation}
 \end{subequations}
 where the definition of the adjoint scalar flux $\phi^\dag$ is analogous to that of 
-the forward scalar flux definition. It is worth noting that the adjoint equation is in the form of the standard transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward SN transport solvers to be easily adapted to solving the SN adjoint system. Once the adjoint solution is obtained, the corresponding QoI can be calculated with a simple inner product with the forward source term, as follows from equations Eq.~\eqref{genAdjQoI} and Eq.~\eqref{SnAdjDeriv}. %
+the forward scalar flux. It is worth noting that the adjoint equation is in the form of the standard transport equation, only with the direction of travel reversed ($\vO \to -\vO)$. This often allows for forward SN transport solvers to be easily adapted to solving the SN adjoint system. Once the adjoint solution is obtained, the corresponding \qoi can be calculated with a simple inner product with the forward source term, as follows from equations Eq.~\eqref{genAdjQoI} and Eq.~\eqref{SnAdjDeriv}. 
 \begin{equation}
 \label{snAdjQoI}
-QoI = \braSN \psi^\dag , \angSource \ketSN - \sbraSN \psi^\dag,  \psi \sketSN
+\qoi := \braSN  \psi,q^\dag \ketSN = \braSN \psi^\dag , \angSource \ketSN - \sbraSN \psi^\dag,  \psi \sketSN
 \end{equation}
 %
-The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, which are handled by the forward and adjoint boundary conditions respectively. Setting $\psi^{\dag \text{out}}(\vr)=0$ removes the outgoing flux integral.
+The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing flux integrals, 
+\[
+\sbraSN \psi^\dag, \psi \sketSN_- 
+= \sbraSN \psi^\dag,  \psi^{\text{inc}} \sketSN_- + \sbraSN \psi^{\dag,\text{out}},\psi \sketSN_+
+\]
+which are handled by the forward and adjoint boundary conditions respectively. Setting $\psi^{\dag, \text{out}}=0$ removes the outgoing flux integral:
 %
 \begin{equation}
 \label{snAdjQoIBCsplit}
@@ -435,7 +413,7 @@ The surface interval in \eqref{snAdjQoI} can be split into incoming and outgoing
 Now consider perturbations to our system. Specifically perturbations of $\delta \sigt$, $\delta \sigs$, and $\delta q$ to the total cross section, scattering cross section and angular source term respectively. In addition, the incident angular flux is also perturbed by $\delta \psi^{inc}$. These perturbations result in a perturbed solution to the SN-transport equation $\psi_p$. 
 \begin{equation}
 \label{snFwdPert}
-\vO \cdot \grad \psi_p + \sigma_{t,p} \psi_p = \frac{\sigma_{s,p}}{4 \pi} \phi_p + \angSource_p,  \quad \forall \vr \in V
+\vO \cdot \grad \psi_p + \sigma_{t,p} \psi_p = \frac{\sigma_{s,p}}{4 \pi} \phi_p + \frac{q_p}{4\pi},  \quad \forall \vr \in V
 \end{equation}
 \begin{equation}
 \psi_p(\vr) = \psi_p^{\text{inc}}(\vr), \quad \forall \vr \in \partial V^{-}
@@ -443,7 +421,7 @@ Now consider perturbations to our system. Specifically perturbations of $\delta 
 Any quantity with a subscript $p$ is to be understood as the perturbed value, that is, as 
 the sum of the unperturbed value and the perturbation amount: $a_p = a + \delta a$.
 
-This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Using the {\it unperturbed} adjoint equation given in Eq.~\eqref{snAdj},
+This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Note that we assumed that the response function (adjoint source) was not affected by the perturbation. Using the {\it unperturbed} adjoint equation given in Eq.~\eqref{snAdj},
 the perturbed \qoi can be expressed as:
 \begin{equation}
 \label{snSensPart}
@@ -463,8 +441,7 @@ can introduce the perturbed quantities:
 \begin{equation}
 \label{snSensPart3}
 \begin{split}
-QoI_p &= \braSN  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p - \frac{\sigma_{s,p}}{4 \pi} \phi_p
-+\frac{\delta \sigs}{4 \pi} \phi_p
+QoI_p &= \braSN  \vO \cdot \grad \psi_p + (\sigma_{t,p}- \delta\sigt)\psi_p - \frac{\sigma_{s,p}-\delta \sigs}{4 \pi} \phi_p
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \\
  &= \braSN  \angSourcep - \delta\sigt\psi_p + \frac{\delta \sigs}{4 \pi} \phi_p
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN
@@ -474,7 +451,7 @@ Next, note that the cross section terms have double perturbations terms $\delta 
 that $\psi_p=\psi+\delta\psi$. In a first-order approximation, these doubly perturbed terms are ignored, yielding:
 \begin{equation}
 \label{snAdjQoIp}
-QoI_p \approx \braSN  \angSource + \angSourced - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
+QoI_p \approx \braSN  \frac{q+\delta q}{4\pi} - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \,.
 \end{equation}
 
@@ -487,7 +464,7 @@ form of the perturbation in the \qoi.
 \begin{equation}
 \label{snSens}
 \begin{split}
-\delta QoI &= \braSN \delta \angSource - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ketSN - \sbraSN \delta \psi, \psi^\dag \sketSN \\
+\delta QoI &= \braSN \frac{\delta q}{4\pi} - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi  , \psi^\dag  \ketSN - \sbraSN \delta \psi, \psi^\dag \sketSN \\
 &= \braSN \angSourced - \delta \sigt \psi + \frac{\delta\sigs}{4 \pi} \phi , \psi^\dag  \ketSN - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \\
 &= \bra \angSourced  + \frac{\delta\sigs}{4 \pi} \phi , \phi^\dag  \ket - \braSN  \delta \sigt \psi , \psi^\dag \ketSN - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \,.
 \end{split}

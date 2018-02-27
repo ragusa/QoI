@@ -481,9 +481,9 @@ form of the perturbation in the \qoi.
 %\subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
 While the transport adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
-flux data across 6-dimensions (space/energy/angle). For time independent systems, Hayes \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
-the forward steady-state transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a The Variable Eddington Tensor (VET) approach (which only requires
-storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this MS work,
+flux data across 6-dimensions (space/energy/angle). For time independent systems, Stripling \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
+the forward steady-state transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a Variable Eddington Tensor (VET) approach (which only requires
+storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this work,
 we investigate this question in the simpler setting a steady-state simulations.
 \jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire
 gist of the VET idea was to simplify sensitivity calculations for TD transport, so you need
@@ -550,7 +550,7 @@ Manipulating the second half-range integral yields:
 \end{equation}
 with $\vJ$ the net current and
 \begin{equation}
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} \quad , \vr \in \bound \,.
+\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} ,\ \vr \in \bound \,.
 \end{equation}
 $\vJ$ can substituted using \eqref{currentE} to get the final form of the VET forward boundary condition:
 \begin{equation}
@@ -565,6 +565,8 @@ Note that the Robin boundary conditions for diffusion is recovered when $\Edd = 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Adjoint VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
+\jcr{here, adding the graph you used in the presentation could be useful to give the larger picture of the approach you are about to explain}
+
 
 Since the VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. The typical adjoint process is followed in which the forward equation is multiplied by a test function and all operators are transferred to the test function using integration by parts. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
 and a tensor dot product $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$.

@@ -469,18 +469,24 @@ form of the perturbation in the \qoi.
 &= \bra \angSourced  + \frac{\delta\sigs}{4 \pi} \phi , \phi^\dag  \ket - \braSN  \delta \sigt \psi , \psi^\dag \ketSN - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- \,.
 \end{split}
 \end{equation}
+Note that in the final formula, only the forward and adjoint scalar fluxes
+are required to evaluate the first-order sensitivity due to perturbations in either the isotropic external source or the isotropic scattering source term. However, the flux angular fluxes are needed to evaluation sensitivities due to
+perturbations int he total cross section. Finally, the angular fluxes
+are also needed to assess sensitivity due to the boundary source, but these inner
+products concern only the domain boundary and the memory storage requirements for these are small compared to volumetric inner products.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase {Variable Eddington Tensor Formulations}}
+\chapter{\uppercase {Variable Eddington Tensor Formulations For Adjoint-based Uncertainty Quantification}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Variable Eddington Tensor Formulations}
+\section{Motivation for Sensitivity Analysis based on Variable Eddington Tensor Formulations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%----------------------------------------------------------------------------------------------
 %\subsection{Motivation} 
 %%%%%%%----------------------------------------------------------------------------------------------
-While the transport adjoint sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint system in space and angle must be stored at various time moments for retrieval later for use in the adjoint formulation of $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
+While the adjoint transport sensitivity formulation given by Eq.~\eqref{snSens} provides a first-order accurate method to determine the sensitivity to multiple perturbation scenarios using only one forward transport solve and one adjoint transport solve, it can quickly run into limitations for time-dependent systems, where the forward and adjoint systems in space, energy, and angle must be stored at various time moments for subsequent retrieval to compute the sensitivities $\delta \qoi$. For a 3-d geometry, this translates to storing the angular
 flux data across 6-dimensions (space/energy/angle). For time independent systems, Stripling \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
 the forward steady-state transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a Variable Eddington Tensor (VET) approach (which only requires
 storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this work,
@@ -497,7 +503,7 @@ to demonstrate/explain that the ideas you applied in SS were actually going to b
 \subsection{Forward VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 
-The VET formulation shows promise of reducing the memory requirements when using the adjoint method for sensitivity evaluations. To present the VET formulation, the zero-th and first angular moments of steady-state transport equation are computed by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
+A VET formulation will reduce the memory requirements when using the adjoint method for sensitivity evaluations. To present the VET formulation, the zero-th and first angular moments of steady-state transport equation are computed by application of the $\int d \Omega$ and $\int d \Omega \, \vO$ operators to Eq.~\eqref{1gTE}, respectively. Using the notation
 
 \begin{equation}
 \label{VETFormStart}
@@ -523,8 +529,8 @@ and
 The Eddington Tensor $\Edd$ is then introduced to relate the second angular moment term in equation \eqref{1am} to the scalar flux. The caveat to the Eddington Tensor is that it requires the angular flux solution be known.
 \begin{equation}
 \label{EddDef}
-\Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
-\end{equation}
+\Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)} \,.
+\end{equation}Note that the Eddington tensor is spatially dependent.
 The inclusion of the Eddington tensor allows Eq.~\eqref{1am} to be expressed as 
 \begin{equation}
 \label{currentE}
@@ -536,8 +542,8 @@ If $\psi(\vr,\vO)$ is a linear function in angle, then $\Edd(\vr)=\tfrac{1}{3}\m
 - \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \,.
 \end{equation}
 The known incident angular flux can be used to generate a suitable boundary conditions using a 
-``Boundary Eddington Factor'' $\BEdd$ \cite{Miften}. Multiplying the transport boundary condition,
-Eq.~\eqref{SS1GTE_bc} by $2 | \vO \cdot \vn |$, we obtain, for $\vr \in \bound$,
+``Boundary Eddington Factor'' $\BEdd(\vr)$ \cite{Miften}. Multiplying the transport boundary condition,
+Eq.~\eqref{SS1GTE_bc}, by $2 | \vO \cdot \vn |$, we obtain, for $\vr \in \bound$,
 \begin{equation}
 2 J^{\text{inc}}(\vr) \equiv  2 \int_{\vO \cdot \vn <0 }  d \Omega\, | \vO \cdot \vec{n} | \psi^{\text{inc}}(\vr,\vO) 
 = 2\int_{\vO \cdot \vn <0 } d \Omega\,  | \vO \cdot \vn |  \psi(\vr,\vO) \,.
@@ -546,11 +552,11 @@ $J^{\text{inc}}$ is the partial incoming current.
 Manipulating the second half-range integral yields:
 \begin{equation}
 2 J^{\text{inc}}(\vr) = \int_{4\pi} d \Omega\,  \left( | \vO \cdot \vn |- \vO\cdot\vn\right)  \psi(\vr,\vO) 
-= \BEdd(\vr) \phi(\vr) - \vn \cdot \vJ 
+= \BEdd(\vr) \phi(\vr) - \vn(\vr) \cdot \vJ(\vr)
 \end{equation}
-with $\vJ$ the net current and
+with $\vJ$ the net current. The boundary Eddington factor is defined as
 \begin{equation}
-\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} ,\ \vr \in \bound \,.
+\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\int_{4\pi} d\Omega \, \psi} ,\ \ \vr \in \bound \,.
 \end{equation}
 $\vJ$ can substituted using \eqref{currentE} to get the final form of the VET forward boundary condition:
 \begin{equation}
@@ -570,27 +576,23 @@ Note that the Robin boundary conditions for diffusion is recovered when $\Edd = 
 
 Since the VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. The typical adjoint process is followed in which the forward equation is multiplied by a test function and all operators are transferred to the test function using integration by parts. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
 and a tensor dot product $\mathbb{A} : \mathbb{B} = \sum_i \sum_j A_{ij}B_{ij}$.
-\jcr{
-The equation below is not right, as you have not defined the bracket notation for VET. Of course, the existing notation uses $\vO$ so you must define a new bracket notation for the boundary integral for VET. I  propose that you introduce the boundary bracket notation here and use either one of the following:
-%\[
-%\llfloor a \rrfloor \quad \lbrackubar a\rbrackubar 
-%\]
-In your definition, I believe $\vn \cdot$ will appear, hence making all of the vector quantities I see below become scalars.}
-Starting with the forward VET balance equation, Eq.~\eqref{VEFForm}
+Next, we compute $\bra \scalSource , \vefadj \ket$ and use the forward VET balance equation, Eq.~\eqref{VEFForm}:
 \begin{equation}
 \label{VEFadjFormDeriv}
 \begin{split}
 \bra \scalSource , \vefadj \ket &= - \bra \div \left( \frac{1}{\sigt}\div \Edd \phi \right), \vefadj \ket +  \bra \siga \phi, \vefadj \ket   \\
 &= \bra \frac{1}{\sigt}\div \Edd \phi, \grad \vefadj \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \vn \cdot \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket   \\
- &=  - \bra \phi, \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) \ket  +  \bra  \phi, \siga \vefadj \ket - \sbra \vn \cdot  \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \vn \cdot  \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
+ &=  - \bra \phi, \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) \ket  +  \bra  \phi, \siga \vefadj \ket \\
+ &\quad\quad  - \sbra \vn \cdot  \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \vn \cdot  \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket  \,,
 \end{split}
 \end{equation}
 where the new boundary inner product for use with VET is defined as
 \begin{equation}
-\sbra \phi(\vr) , g(\vr)  \sket = \int_{\partial V} dS \, \phi (\vr) g (\vr)  \quad .
+\sbra \phi(\vr) , g(\vr)  \sket = \int_{\partial V} dS \, \phi (\vr) g (\vr)  \,.
 \end{equation}
-
-This leads to the adjoint equation of the VET formulation, given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The VET adjoint solution is represented by $\vefadj$ to avoid confusion with $\phi^\dag$, which is the adjoint scalar flux from the SN method. 
+Note that we used the fact that the Eddington tensor is symmetric, $\Edd^T=\Edd$.
+\jcr{can you verified on the side, say for 2d $xy$ that the integration by parts does yield the boundary terms. I am worried about the successive $\cdot$'s.}
+This leads to the adjoint equation of the VET formulation, given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The VET adjoint solution is represented by $\vefadj$ to avoid confusion with $\phi^\dag$, which is the adjoint scalar flux from the SN transport  method. 
 
 \begin{equation}
 \label{adjForm}
@@ -606,19 +608,17 @@ Note that the Robin boundary conditions are recovered for the adjoint diffusion 
 \[
 2 J^{\dag,\text{out}} = \frac{\vefadj}{2} +\vn \cdot \frac{1}{3\sigt} \grad \vefadj \,.
 \]
-In contrast to the adjoint SN formulation, the VET adjoint equation does not take the form of the  
+In contrast to the adjoint SN transport formulation, the VET adjoint equation does not take the form of the  
 forward VET transport equation, therefore the forward VET solver 
 cannot necessarily be re-used to solve the adjoint equation. 
-\jcr{where will you explain how the adjoint VET equation is discretized and then solved?}
-\iwh{Between the derivations here and teh presentation of results, I am adding a new section that basically explains the solution method (for both Transport (SN) and VET)}
-To obtain the \qoi using this formulation substitute in the adjoint equation definition 
-into Eq.~\eqref{VEFadjFormDeriv} and apply boundary conditions of both the forward and adjoint.
+To obtain the \qoi using this formulation, we substitute the adjoint equation definition 
+into Eq.~\eqref{VEFadjFormDeriv} and use the forward and adjoint boundary conditions.
 \begin{equation}
 \label{VETQoIAdjUnpDeriv}
 \begin{split}
  \bra \scalSource , \vefadj \ket 
 &=   \bra \phi, \scalResp \ket - \sbra \vn \cdot \frac{1}{\sigt}\div \Edd \phi, \vefadj \sket + \sbra \phi, \vn \cdot \Edd \cdot \frac{1}{\sigt} \grad \vefadj \sket \\
-&=   \qoi - \sbra 2J^{\text{inc}} - B \phi, \vefadj \sket + \sbra \phi, 2J^{\dag,\text{out}} - B \vefadj \sket \\
+&=   \qoi - \sbra 2J^{\text{inc}} - B \phi, \vefadj \sket + \sbra \phi, 2J^{\dag,\text{out}} - B \vefadj \sket \,.
 \end{split}
 \end{equation}
 The $B$ terms negate and yield a relatively compact form for the \qoi
@@ -630,7 +630,7 @@ The $B$ terms negate and yield a relatively compact form for the \qoi
 In order to have a \qoi that can be expressed entirely in terms of the adjoint solution, it is advantageous to 
 set $J^{\dag,\text{out}}=0$ in the adjoint boundary condition, yielding the final expression
 \begin{equation}
-\qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket
+\qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket \,.
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------

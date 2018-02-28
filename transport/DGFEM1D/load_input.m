@@ -96,7 +96,7 @@ switch pb_ID
         
     case 7 % Reed (5-zone problem)
         % number of elements per zone
-        nel_zone = [ 20 10 20 10 20]*4;
+        nel_zone = [ 10 10 10 10 10]*40;
         % width of each zone
         width_zone = [ 2 1 2 1 2 ];
         % sigt/sigs per zone

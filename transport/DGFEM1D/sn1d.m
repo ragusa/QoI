@@ -86,8 +86,8 @@ displayUnpertQOI
 % [phiVEFa_alt]=solve_VEF(dat.adjoint_flux,Ea,Ebda);
 % do_plot(phiVEFa_alt,'VEF-alt',100,dat.adjoint_flux)
 
-singleSolve
-%multiSolve
+%singleSolve
+multiSolve
 %multiSurfaceSolve
 
 end

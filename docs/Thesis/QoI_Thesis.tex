@@ -97,7 +97,7 @@
 \newcommand{\angSource}{\frac{q}{4 \pi}}
 \newcommand{\angSourcep}{\frac{q_p}{4 \pi}}
 \newcommand{\angSourcepd}{\frac{q_p+\delta q_p}{4 \pi}}
-\newcommand{\angSourced}{\frac{\delta q_p}{4 \pi}}
+\newcommand{\angSourced}{\frac{\delta q}{4 \pi}}
 \newcommand{\scalSource}{q}
 \newcommand{\angResp}{q^\dag}
 \newcommand{\scalResp}{q^\dag}
@@ -198,36 +198,6 @@ Computational simulations have become important tools for engineers and scientis
 \item Uncertainty Quantification (UQ) -  How do the various sources of error and uncertainty feed into uncertainty in the model-based prediction of the quantity of interest?
 \end{itemize}
 
-
-Adjoint methods are particularly useful for UQ. In general, adjoint methods provide a mechanism for computing quantities
- of interest (\qoi) and sensitivity coefficients and, more generally, for propagating uncertainty in the 
- system variables to the error in the desired quantity of interest. They accomplish this in a particularly economical 
- way, requiring only two full system solves (one forward and one adjoint solve) in steady state in order to determine 
- first-order sensitivity coefficients for any combination of sources of uncertainty, as opposed to performing multiple 
- forward system solves to determine the sensitivity due to each individual uncertain parameter.
-
-Using operator notation to denote the forward and adjoint (linear\footnote{The forward problem may be nonlinear, i.e., 
-using $\mathbf{A}(u)$, but the adjoint problem is linear, evaluated at $u$ if the forward problem is nonlinear, i.e., 
-using $\mathbf{A}^\dag(u)$}) problems, $\mathbf{A}u=q$ and $\mathbf{A}^\dag u^\dag = q^\dag$, respectively, and the 
-bracket notation for inner products over the phase space, it is easy to note that a \qoi can be
-obtained using {\it either} the forward solution $u$ folded with the response function of interest 
-(which is also the adjoint source, $q^\dag$) {\it or} the adjoint solution folded with the forward source~:
-\[
-\qoi := \bra u, q^\dag \ket = \bra u, \mathbf{A}^\dag u^\dag \ket = 
-\bra \mathbf{A} u , u^\dag \ket = \bra q, u^\dag\ket \,.
-\]
-The sensitivity coefficient due to parameter $p$ can be obtained using two forward solves
-\[
-\delta_p \qoi = \frac{\qoi^\prime - \qoi}{\delta p} = \frac{ \bra (u^\prime - u), q^\dag \ket}{p^\prime - p}  \,,
-\]
-where the superscript $^\prime$ denotes a perturbed value. However, one may employ the unperturbed adjoint solution to obtain
-a {\it first-order} estimate of the sensitivity coefficient
-\[
-\delta_p \qoi = \bra u^\dag, \delta_p q - \delta_p \mathbf{A} u \ket  + \mathcal{O}(\delta^2)\,.
-\]
-The subsequent sections will provide derivations and additional details and will apply these formulations to neutron transport problems. However, it is already evident that if the forward source $q$ is uncertain and only a few \qoi are requested (i.e., only a few response functions $q^\dag$ are needed), then it is preferable to employ the adjoint formulation to compute the quantity of interest (one needs only one adjoint solution per response function $q^\dag$). Furthermore, the first-order sensitivity of the
-\qoi to many uncertain parameters is more advantageously computed using the adjoint formalism.
-
 \jcr{I did already point out that this was a repeat. Can you deal with this, blend what needs to be blended in and remove the rest. If this is where you mention previous work related to using an adjoint approach, the literature review needs to be seriously beefed-up. 2-3 citations are not a lot for a thesis. It seems that most of the UQ adjoint literature review happens in the introduction, so augment this. you are mentioning time-dependent problems and the need to save the adjoint at various times (checkpointing), there are clever algo for that too, reference them...}
 Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Adjoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. These adjoint methods have been applied across various complex and time dependent systems. An example of adjoint methods applied to hydrodynamic systems with shocks can be found in Wildey et al. \cite{Wildey}. A more relevant adjoint example to neutron transport occurs in Stripling et al. in the form of reactor burn-up equations \cite{Stripling}.
 
@@ -243,7 +213,7 @@ A potential solution to the memory requirement for the time-dependent transport 
 \jcr{at some point, you need to say: This Thesis is organized as follows: in Chapter xx, we discuss blabla. ...... FORESHADOW}
 
 
-In this work the typical transport adjoint method is formulated and the inner products required for sensitivity calculations are derived. Then a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. As a final method, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. After formulation, the methods are tested against each other on simple system to verify expected behavior and examine their accuracy.
+In Chapter 2 the typical transport adjoint method is demonstrated and the inner products required for sensitivity calculations are derived. Then in Chapter 3 a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. An alternate quasi-diffusion method is proposed in Chapter 4, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. In Chapter the methods are tested against each other on simple system to verify expected behavior and examine their accuracy.
 
 \begin{figure}[H]
 \centering
@@ -260,7 +230,9 @@ In this work the typical transport adjoint method is formulated and the inner pr
 
 \jcr{the first sentences actually need to go before the section. according to the section's title, this should be about the SS 1-g transport, not why you are looking at that model. that must come before. I am adding new lines to make it obvious where the break needs to be.}
 \jcr{is this the first time you use the term quasi-diffusion? if so, it clearly needs to be defined before, maybe in the introduction chapter}
-This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. \jcr{you must mention that the appendix xyz contains a derivation of the time-dependent version approach where we think VET could be useful}
+This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. In the following chapter, the forward steady-state one-group transport equation is presented, the corresponding adjoint equation is derived, then sensitivity inner products are derived using a first order approximation. 
+
+\jcr{you must mention that the appendix xyz contains a derivation of the time-dependent version approach where we think VET could be useful}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \section{Steady-state One-group Neutron Transport Equation}
@@ -352,8 +324,7 @@ adjoint solution $\psi^\dag $.
 = \braSN \mathbf{A} \psi, \psi^\dag \ketSN + BC
 = \braSN q , \psi^\dag \ketSN + BC
 \end{equation} 
-From the above \jcr{what? where? there was no actual rigorous derivation above}, it follows that a first-order approximation to the change in the quantity of interest ($\delta \qoi$)
-based on perturbations to the initial system, including perturbation to the forward 
+\jcr{what? where? there was no actual rigorous derivation above}Starting from the above \qoi representation it follows that a first-order approximation to the change in the quantity of interest ($\delta \qoi$) based on perturbations to the initial system, including perturbation to the forward 
 operator $\delta \mathbf{A}$ and forward source $\delta q$, can be expressed in the inner product form shown in Eq.~\eqref{genAdjSens} \cite{Marchuk}. Derivation of this begins with the perturbed system $\mathbf{A}_p \psi_p = q_p$ multiplied by the adjoint function $\psi^\dag$ defined above. After expressing the perturbations in a $\delta$ form a first order approximation of $\delta \mathbf{A} \delta \psi = 0$ is used. An integration by parts is used to transpose $\mathbf{A}$ to $\mathbf{A^\dag}$, resulting in boundary terms appearing. 
 \begin{equation}
 \begin{split}
@@ -421,8 +392,6 @@ which are handled by the forward and adjoint boundary conditions respectively. S
 \end{split}
 \end{equation}
 
-\jcr{in the thesis, remember to explain that the adjoint source is not to be divided by 2 even when the response is isotropic in angle}
-\todo{Go into detail about which source to use, angular vs scalar source. Looking forward, I think this has an impact when considering the different adjoint forms: VET of the adjoint vs adjoint of the VET.}
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Transport Adjoint Sensitivity}
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -507,7 +476,7 @@ While the adjoint transport sensitivity formulation given by Eq.~\eqref{snSens} 
 flux data across 6-dimensions (space/energy/angle). For time independent systems, Stripling \cite{Stripling} showed that a converged scattering source can be stored to reconstruct 
 the forward steady-state transport solution on the fly. For time-dependent problems, one possibility to circumvent the storage issues is to employ a Variable Eddington Tensor (VET) approach (which only requires
 storing a space/energy, hence 4-d, solution at various moments in time), provided that input parameter perturbations do not affect the values of the Eddington tensor. In this work,
-we investigate this question in the simpler setting a steady-state simulations.
+we investigate this question in the simpler setting of a steady-state system.
 \jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire
 gist of the VET idea was to simplify sensitivity calculations for TD transport, so you need
 to demonstrate/explain that the ideas you applied in SS were actually going to be useful as well for TD}
@@ -589,6 +558,7 @@ Note that the Robin boundary conditions for diffusion is recovered when $\Edd = 
 \subsection{Adjoint VET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
 \jcr{here, adding the graph you used in the presentation could be useful to give the larger picture of the approach you are about to explain}
+\iwh{I have placed a (better made) version of the graph earlier in the thesis, as to give a broad overview of the whole thesis's flow.}
 
 
 Since the VET formulation generates a new forward equation to describe the system, a new adjoint corresponding to Eq.~\eqref{VEFForm} must also be formulated. The typical adjoint process is followed in which the forward equation is multiplied by a test function and all operators are transferred to the test function using integration by parts. The following notation is used: $(\grad \grad u)_{ij} = \partial_{x_i} \partial_{x_j} u$
@@ -804,8 +774,19 @@ As a brief recap, two adjoint methods of determining sensitivity have been consi
 
 The second method is the VET formulation in which sensitivity is approximated by Eq.~\eqref{VETsens}. This method utilizes the forward solution $\phi$ as well as the VET adjoint solution $\vefadj$, in total this requires a forward SN solve to determine $\phi$ and the unperturbed Eddington $\Edd$ followed by a scalar VET solve for $\vefadj$, but importantly no angular flux solution $\psi$ is stored.
 
-The former method holds a clear advantage when dealing with source perturbations, both volumetric $\delta q$ and boundary $\delta \psi^\text{inc}$. Neither of these perturbations required a first order approximation, therefore the adjoint method is exact. Additionally neither requires storing the angular flux; only the scalar flux. 
+The former method holds a clear advantage when dealing with source perturbations, both volumetric $\delta q$ and boundary $\delta \psi^\text{inc}$. Neither of these perturbations required a first order approximation, therefore the adjoint method is exact. Additionally neither requires storing the angular flux; only the scalar flux. Three adjoint for volumetric and surface source perturbations only are given in Eq.~\eqref{sourceDeltaQoI}. The transport derivation gives the exact $\delta \qoi$ value. Given that source perturbation in general do cause perturbations in $\Edd$ and $\BEdd$, the two VET formulations below are not necessarily equal. In addition, there is a $4 \pi$ factor separating the $\delta q$ term between the transport and VET formulation. From here it is clear to see that $\varphi^\dag \neq \phi^\dag$.
 \jcr{It would be useful to just write this down in one equation for $\delta \qoi$ due to volumetric and boundary source perturbations only}. \jcr{it would also be useful to fully explain why the adjoint from transport is not the adjoint from VET}
+\begin{equation}
+\label{sourceDeltaQoI}
+\delta \qoi = 
+\begin{cases}
+\bra \angSourced   , \phi^\dag  \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_- , & \text{Transport}  \\
+\bra \delta \scalSource , \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket, & \text{VET with $\delta \Edd, \delta B=0$} \\
+\bra \delta \scalSource , \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket  & \text{VET with no $\delta \Edd,\delta B$ assumption} \\
+\quad - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket - \sbra \vefadj, \delta \BEdd \phi \sket,  \\
+\end{cases} 
+\end{equation}
+
 From this, a ``blended'' adjoint is proposed which uses the relevant transport inner products for source perturbation, and VET inner products for cross-section perturbation terms. Contrasted to the VET adjoint, this blended method requires an additional transport solve to determine $\phi^\dag$. In a scenario where only sources are perturbed or only cross sections are perturbed, the blended adjoint will match the results of the SN transport method or VET method. What is not clear is how the blended method fares when both sources an cross sections are perturbed.
 \begin{equation}
 \label{Blendsens}
@@ -815,8 +796,9 @@ From this, a ``blended'' adjoint is proposed which uses the relevant transport i
 \end{split}
 \end{equation}
 
+
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{Estimating $\delta \Edd$}
+\section{Estimating $\delta \Edd$}
 %%%%%%%----------------------------------------------------------------------------------------------
 Both the transport and VET adjoint methods require a first-order perturbation assumption to be made, but the VET method also introduces the additional assumption that the Eddington remains unperturbed. As such, it seems reasonable that methods to approximate the Eddington perturbation $\delta \Edd$ may allow for reduced error in Eddington derived sensitivity, ideally approaching that of transport adjoint. 
 
@@ -833,12 +815,16 @@ Since no algebraic analytical form is known for $\Edd ( \vp )$, the derivative m
 \end{equation}
 The need for an additional transport solve to find $\Edd(\vp_1)$ is the primary cost of performing this method, and a constraint in situations where this approximation is viable. An analogous process can be used to approximate $\delta \BEdd$. With approximations for $\delta \Edd$ and $\delta \BEdd$ in hand, Eq.~\eqref{EddErr} can be used to to refine the VET sensitivity calculation. For situations where many perturbation scenarios need to be considered, this approximation method could prove useful. 
 
+
+\chapter{Adjoint Variable Eddington Tensor Formulation}
+
 %%%%%%%----------------------------------------------------------------------------------------------
 %%%%%%%----------------------------------------------------------------------------------------------
 \section{An Alternate VET Method}
 %%%%%%%----------------------------------------------------------------------------------------------
+The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This method of transport adjoint derived VET will be termed aVET.
 %%%%%%%----------------------------------------------------------------------------------------------
-The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This VET formulation of the adjoint flux is analogous to the forward formulation shown above starting at Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
+The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This aVET formulation of the adjoint flux is analogous to the forward formulation shown above starting at Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
 
 \begin{equation}
 \label{snAdjAlt}
@@ -883,7 +869,7 @@ Since the above was directly derived from the transport adjoint equation, the \q
 \label{AdjQoIAlt}
 QoI = \braSN \psi , \scalResp\ketSN = \bra \phi^\dag , \angSource \ket - \sbraSN \psi^\dag,  \psi \sketSN 
 \end{equation}
-The above formulation also has a corresponding forward equation, with solution denoted by $\varphi$. Where as the forward-derived VET method retained the SN forward solution $\phi$ but generated an alternative adjoint $\varphi$, the adjoint-derived VET (aVET) method retains the SN transport adjoint solution $\phi$ and generates an alternate forward solution $\varphi$. The result is an alternate forward system that is isomorphic to the alternate adjoint system for $\varphi^\dag$ from earlier.
+The above formulation also has a corresponding forward equation, with solution denoted by $\varphi$. Where as the forward-derived VET method retained the SN forward solution $\phi$ but generated an alternative adjoint $\varphi$, the aVET method retains the SN transport adjoint solution $\phi$ and generates an alternate forward solution $\varphi$. The result is an alternate forward system that is isomorphic to the alternate adjoint system for $\varphi^\dag$ from earlier.
 \begin{subequations}
 \begin{equation}
 \label{ForwardVEFAlt}
@@ -907,7 +893,7 @@ QoI = \bra \phi , \scalResp \ket &= \bra \phi^\dag , \angSource \ket - \sbraSN \
 \end{equation}
 
 %%%%%%%----------------------------------------------------------------------------------------------
-\subsection{First-order Sensitivity Estimation Using the Alternate VET Form}
+\section{First-order Sensitivity Estimation Using the aVET Form}
 %%%%%%%----------------------------------------------------------------------------------------------
 For sensitivity, a perturbed adjoint $\phi^\dag_p$ is now considered. This is expanded to the first order using the $\delta$ notation, and the typical adjoint method is applied. A perturbation to the response is also introduced. For the previous methods, this was dealt with trivially by the product $\delta \qoi = \bra \phi , \delta q^\dag \ket$, however, since the value of $\phi$ isn't necessarily available in the aVET method, this type of perturbation requires additional attention. In addition $\delta q$ and $\delta \psi^{\text{inc}}$ perturbations may have occurred, but are not reflected in the perturbed adjoint equation below. As was done with the forward derived VET the assumption $\delta \Edd^\dag$ is made.
 \begin{subequations}
@@ -965,7 +951,7 @@ The above relation can be combined with the unperturbed \qoi form derived in Eq.
 - \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN_-
 \end{equation}
 
-\iwh{There is actually something really strange going on with the Vet adjoint ``forward''  $\varphi$ equation boundary condition. The most natural way is to base it off of of the true forward incident $J$, but unless I am missing something there is actually some form of freedom there. The ramifications for this are most present in Test case 3 below, where the Alternate VET method is particularly bad at dealing with incident flux scenarios when cross sections are perturbed. Its maybe worth discussing in person at some point}.
+\iwh{There is actually something really strange going on with the aVET ``forward''  $\varphi$ equation boundary condition. The most natural way is to base it off of of the true forward incident $J$, but unless I am missing something there is actually some form of freedom there. The ramifications for this are most present in Test case 3 below, where the Alternate VET method is particularly bad at dealing with incident flux scenarios when cross sections are perturbed. Its maybe worth discussing in person at some point}.
 
 \chapter{\uppercase {Results}}
 
@@ -997,14 +983,30 @@ the angular flux and scalar flux are unknowns is solved iteratively, using sourc
 \end{subequations}
 Iteration terminates once $\left|\phi^{(\ell+1)} - \phi^{(\ell)} \right| \leq \text{Tol}$, which was set to $1E-8$ for this work.
 
-Each of the $D$ spatially dependent SN equations in Eq.~\eqref{1gTE} is then solved using a discontinuous up-winding approach \cite{ReedHill}. For this work the angular descritization used is $D=8$ are used and the spatial domain is descritized into 2000 uniform elements.
+The test cases in this writing use a slab geometry however, so with that in mind the above can be slightly simplified. Namely, the angular flux no longer needs to be function of the full $\vO$ angular range, but can be represented using a cosine factor $\mu \in [-1,1]$. The main mathematical result of this is a factor of $2 \pi$ resulting from the relation 
+\begin{equation}
+\psi(\vr,\vO)=\frac{1}{2 \pi} \psi(\vr,\mu) \, .
+\end{equation} 
+The SN method then discretizes this $\mu$ range into ordinates, and the system takes the form
+\begin{subequations}
+\begin{equation}
+\label{1gTE}
+\vO_d \cdot \grad \psi_d^{(\ell+1)} + \sigt \psi_d^{(\ell+1)} = \frac{\sigs}{2} \phi^{(\ell)} + \frac{q}{2}\,,
+\end{equation}
+\begin{equation}
+\phi(\vr)^{(\ell+1)} = \sum_{d=1}^D w_d \psi_d^{(\ell+1)}(\vr) \,.
+\end{equation}
+\end{subequations}
+Within the VET formulations, this transform of $4 \pi \to 2$ holds, as the source terms $q$ and $q^\dag$ propagate this $2 \pi$ factor through the VET formulation.
+
+With the angular dependence handeled by the SN method for transport, each of the $D$ spatially dependent SN equations in Eq.~\eqref{1gTE} is then solved using a discontinuous up-wind approach \cite{ReedHill}. For this work the angular discretization used is $D=8$ are used and the spatial domain is discretized into 2000 uniform elements.
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VET Solution Method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Solution of the quasi-diffusion VET formulations are performed using a modified version of the Discontinuous Galerkin (DG) method with an interior-penalty laid out in Arnold \cite{Arnold}. The modifications are required to support quasi-diffusion using $\Edd$ as opposed to simple neutron diffusion. Linear basis functions are used as the finite element basis. As was the case for transport SN, the spatial domain is descritized into 2000 uniform elements for the results shown if the following sections.
+Solution of the quasi-diffusion VET formulations are performed using a modified version of the Discontinuous Galerkin (DG) method with an interior-penalty laid out in Arnold \cite{Arnold}. The modifications are required to support quasi-diffusion using $\Edd$ as opposed to simple neutron diffusion. Linear basis functions are used as the finite element basis. As was the case for transport SN, the spatial domain is discretized into 2000 uniform elements for the results shown if the following sections.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Trial Results}
@@ -1013,14 +1015,14 @@ Solution of the quasi-diffusion VET formulations are performed using a modified 
 At this point, 5 separate methods for unperturbed \qoi calculation have been discussed: 
 \begin{enumerate}
 \item forward and adjoint inner products for both SN and VET formulations (4 approaches), and,
-\item the alternate VET (adjoint VET) method in Eq.~\eqref{AdjQoIAltExpand}.
+\item the alternate aVET method in Eq.~\eqref{AdjQoIAltExpand}.
 \end{enumerate} 
 as well as 7 separate methods for $\delta$\qoi calculation: 
 \begin{enumerate}
 \item forward and adjoint inner products for both SN and VET formulations (4 approaches),
 \item the ``blended'' method presented in Eq.~\eqref{Blendsens},
 \item the method of approximating $\delta \Edd$ shown in Eq.~\eqref{Eddapprox}, and,
-\item the alternate VET inner product in  Eq.~\eqref{AltVETsens}.
+\item the aVET inner product in  Eq.~\eqref{AltVETsens}.
 \end{enumerate} 
 
 When dealing with sensitivity measurements, the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 

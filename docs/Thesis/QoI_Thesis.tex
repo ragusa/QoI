@@ -202,14 +202,18 @@ Computational simulations have become important tools for engineers and scientis
 Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Adjoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. These adjoint methods have been applied across various complex and time dependent systems. An example of adjoint methods applied to hydrodynamic systems with shocks can be found in Wildey et al. \cite{Wildey}. A more relevant adjoint example to neutron transport occurs in Stripling et al. in the form of reactor burn-up equations \cite{Stripling}.
 
 
-Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method applied to radiation transport requires storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. For the previously mentioned depletion reactor problem of Stripling, this limitation was not existent because a quasi-static approximation was used for the neutron transport equation and only isotopic concentrations were time-dependent. For time-independent radiation problems, only storing the converged scattering moments at defined checkpoints (in burnup) is sufficient to reconstruct the flux solution. If a flux solution is requested outside of the checkpointed burnups, the forward flux can be reconstructed by interpolation \cite{Stripling} \cite{Carey}.
-Using converged scattering source term, a single transport sweep is needed to recover the converged
-angular flux. However this method does not extend to time-dependent transport in general because
-the primary time-dependent variable, the angular flux, needs to be stored as well. Furthermore, while not in scope for this writing, even with a checkpointing method applied to the transport equation in a straightforward way, the adjoint solution which would solve in the reverse time direction as well as possibly the method to recompute the forward angular flux would typically require using an angular flux solver \cite{Carey}. Using some of the methods laid out in this thesis could allow for the angular flux solves to be replaced with a quasi-diffusion solver, which could provide increased performance or provide another method for balancing between computation and I/O.
+Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method applied to radiation transport requires storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. 
 
-A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The method examined in this work is termed  as a ``Variable Eddington Tensor'' formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
+Typically, a checkpointing method can be employed to alleviate some of the memory limitations of a time dependent adjoint system \cite{Carey} \cite{Griewank}. In this scheme the forward solution, angular flux for the case of transport, is stored at checkpoint timesteps when performing a forward solve from $t=0$ to $T$. The forward solution at the final time step $T$ is used to initialize the adjoint method which sweeps in the reverse time direction. At any point the forward solution is needed in the reverse sweep for a quantity of interest calculation the forward solution is reconstructed by performing a forward solve starting with the nearest checkpoint. Ultimately, this becomes a balancing act of memory usage for storing checkpoints and additional computation time for recomputing the forward solution from checkpoints. An efficient checkpointing scheme which chooses the checkpoints in a binomial fashion is presented by Griewank and Walther \cite{Griewank}. However this method still requires the storing of the primary time-dependent variable, the angular flux, at the checkpoint times. For highly discretized angular flux solution, this can severely limit the number of checkpoints that can be stored in memory, resulting in a increase in compute time for calculating the error propagation.
 
-This thesis is organized as follows. In Chapter \ref{chap:background} the typical transport adjoint method is demonstrated and the inner products required for sensitivity calculations are derived. Then in Chapter \ref{chap:VET} a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. An alternate quasi-diffusion method is proposed in Chapter \ref{chap:aVET}, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. In Chapter \ref{chap:results} the methods are tested against each other on simple system to verify expected behavior and examine their accuracy. Conclusions about the derived methods based on the test cases are presented in Chapter \ref{chap:conclusion}
+%For the previously mentioned depletion reactor problem of Stripling, this limitation was not existent because a quasi-static approximation was used for the neutron transport equation and only isotopic concentrations were %time-dependent. For time-independent radiation problems, only storing the converged scattering moments at defined checkpoints (in burnup) is sufficient to reconstruct the flux solution. If a flux solution is requested %outside of the checkpointed burnups, the forward flux can be reconstructed by interpolation \cite{Stripling} \cite{Carey}.
+%Using converged scattering source term, a single transport sweep is needed to recover the converged
+%angular flux. However this method does not extend to time-dependent transport in general because
+%the primary time-dependent variable, the angular flux, needs to be stored as well. Furthermore, while not in scope for this writing, even with a checkpointing method applied to the transport equation in a straightforward %way, the adjoint solution which would solve in the reverse time direction as well as possibly the method to recompute the forward angular flux would typically require using an angular flux solver \cite{Carey}. Using some of %the methods laid out in this thesis could allow for the angular flux solves to be replaced with a quasi-diffusion solver, which could provide increased performance or provide another method for balancing between computation %and I/O.
+
+Moreover, many quantities of interest in transport can be computed from the scalar flux, and do not require the angular flux. Having to store and recompute the angular flux only for it to be integrated over angle and converted to a scalar flux for use can be a computational burden. A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The method examined in this work is termed  as a ``Variable Eddington Tensor'' (VET) formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach. While not the focus of this thesis, in the VET formulation the primary time-dependent variable is the scalar flux. Therefore, with the proper adjoint formulation a checkpointing method could be applied to the VET formulation in which scalar flux are checkpointed as a method to further reduce memory requirements.
+
+This thesis is organized as follows. In Chapter \ref{chap:background} the typical transport adjoint method is demonstrated and the inner products required for sensitivity calculations are derived. Then in Chapter \ref{chap:VET} a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. An alternate quasi-diffusion method is proposed in Chapter \ref{chap:aVET}, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. In Chapter \ref{chap:results} the methods are tested against each other on simple system to verify expected behavior and examine their accuracy. Conclusions about the derived methods based on the test cases are presented in Chapter \ref{chap:conclusion}.
 
 \begin{figure}[H]
 \centering
@@ -357,7 +361,7 @@ $\angResp$ is
 
 \begin{subequations}
 \begin{equation}
-\label{anAdj}
+\label{transAdj}
 - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
 \end{equation}
 \begin{equation}
@@ -401,7 +405,7 @@ Now consider perturbations to our system. Specifically perturbations of $\delta 
 Any quantity with a subscript $p$ is to be understood as the perturbed value, that is, as 
 the sum of the unperturbed value and the perturbation amount: $a_p = a + \delta a$.
 
-This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Note that we assumed that the response function (adjoint source) was not affected by the perturbation. Using the {\it unperturbed} adjoint equation given in Eq.~\eqref{snAdj},
+This perturbation may result in a change to the \qoi, now given by $\qoi_p=\bra \psi_p , \angResp \ket$. Note that we assumed that the response function (adjoint source) was not affected by the perturbation. Using the {\it unperturbed} adjoint equation given in Eq.~\eqref{transAdj},
 the perturbed \qoi can be expressed as:
 \begin{equation}
 \label{snSensPart}
@@ -1460,7 +1464,7 @@ Additional graphs showing $\varphi$ and $\varphi^\dag$ scaled by a factor of 2, 
   \includegraphics[width=.98\linewidth]{figures2/22phia2.png}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the homogeneous system, including $2\varphi$ and $2\varphi^\dag$ }
-\label{fig:Flux1}
+\label{fig:2Flux1}
 \end{figure}
 
 \begin{figure}[H]
@@ -1474,7 +1478,7 @@ Additional graphs showing $\varphi$ and $\varphi^\dag$ scaled by a factor of 2, 
   \includegraphics[width=.98\linewidth]{figures2/24phia2.png}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the shielding system, including $2\varphi$ and $2\varphi^\dag$ }
-\label{fig:Flux1}
+\label{fig:2Flux2}
 \end{figure}
 
 \begin{figure}[H]
@@ -1488,7 +1492,7 @@ Additional graphs showing $\varphi$ and $\varphi^\dag$ scaled by a factor of 2, 
   \includegraphics[width=.98\linewidth]{figures2/7phia2.png}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the Reed system, including $2\varphi$ and $2\varphi^\dag$ }
-\label{fig:Flux1}
+\label{fig:2Flux3}
 \end{figure}
 
 

@@ -264,8 +264,6 @@ Frequently, the solution to the transport equation is not the sought after value
 \end{equation}
 The response function $R$ can take on physically defined forms, such as the cross section of a detector; or it may take a form of a mathematical construct, such as $R(\vr, \vO)=1/v$ to return the total number of neutrons present in the system. Another example is to let $R(\vr, \vO)=\sigma \chi(\vr)$ to obtain the total reaction rate in a portion of the domain ($\chi(\vr)=1$ if $\vr \in$ region of interest, and 0 otherwise). Note that the response function will frequently be expressed as $q^\dag$, the adjoint source, as we have already noted that there is a relationship between the solution, the adjoint solution, and their respective source terms. 
 
-\iwh{I didn't understand the single comment above, I this is was a weird typo that ended up a comment.}
-
 Two volumetric inner products are defined using  the $\braSN \bullet , \bullet \ketSN$ and $\bra \bullet , \bullet \ket$ notations. These two inner-products are for use with angular and scalar fluxes, respectively. 
 \begin{subequations}
 \begin{equation}
@@ -1036,13 +1034,47 @@ The six methods were implemented in a MATLAB finite element method (FEM) solver.
 \text{$p$ \% change}=\frac{\delta p}{p} \,.
 \end{equation}    
 \end{subequations}
-
+Any referenes to an ``exact'' solution for a method means that it agrees with the $\delta \qoi$ value found by subtracting two full forward SN solves.
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous System, Homogeneous Perturbation}
-The first test case is a homogeneous material with a volumetric source throughout, and no incident flux. Assuming the system is sufficiently thick, the scalar flux tends to be flat towards the center and takes a value of $\phi=\frac{q}{\sigma_a}$. For this scenario, the system was first perturbed uniformly and individually in $q$, $\sigma_a$, and $\sigma_a$. Then a perturbation of both $q$ and $\sigma_a$ was considered. The width of the system was 10 (arbitrary units). Solutions were obtained using a 200 element mesh.
+To start, a test case consisting of a relatively simple system is chosen. The system is a homogeneous material with a volumetric source throughout and no incident flux. The response function is the center of the region sufficiently far from the boundaries. Towards the center of this region the infinite medium solution is approached, and $\phi \approx \frac{q}{\siga}$. Note that this system should not show any significant response to perturbations in the scattering cross section. The following values are chosen for the entire region $x \in [0,10]$: $q=2$, $\siga=1$, and $\sigs=1$. For the response function $q^\dag=1$ for $x\in[4,6]$ and $0$ elsewhere. Therefore the predicted \qoi for this, using the infinite medium approximation is
+\begin{equation}
+\qoi \approx \bra q^\dag , \phi \ket = \int_4^6 dx \, \frac{q}{\siga} = 4
+\end{equation}
+The unperturbed scalar fluxes are shown in Figure~\ref{fig:Flux1}. These plots show both the true scalar flux $\phi$ found by both SN and VET (which should be equal), as well as the ``forward like'' flux $\varphi$ obtained as the adjoint of the aVET method. Similarly, both methods of $\phi^\dag$ are shown on the same plot as the adjoint like $\varphi^\dag$ from the VET formulation. Looking at the graphs it becomes clear that $\phi^\dag \neq \varphi^\dag$ and $\phi \neq \varphi$.
+
+For perturbations, the entire system is perturbed uniformly, resulting in another homogeneous system, so therefore the perturbed \qoi can be easily predicted as $\qoi \approx 2 \phi = \frac{q_p}{\sigma_{a,p}}$. Given the simple form of the expected flux in the center, the derivatives can be taken to get an expected sensitivity.
+\begin{subequations}
+\begin{equation}
+ \frac{\partial \phi}{\partial q} = \frac{1}{\siga}   
+\end{equation}
+\begin{equation}
+ \frac{\partial \phi}{\partial \siga} = - \frac{q}{\sigs^2}   
+\end{equation}
+\begin{equation}
+ \frac{\partial \phi}{\partial \sigs} = 0  
+\end{equation}
+\end{subequations}
+
+The methods of $\delta \qoi$ were tested on this system. Perturbation in the system parameters were taken in the range of $\pm 10 \%$. The \% response results over this range are plotted in Figure~\ref{fig:Trial1}. $\delta \qoi$ values for selected perturbations are given in Table~\ref{TableT1}.
 
 \begin{figure}[H]
-\label{Trial1}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phi.png}
+  \label{T1:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the homogeneous system. This include ``forward'' fluxes $\phi$ and $\varphi$ show on the left, and ``adjoint'' fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
+\label{Flux1}
+\end{figure}
+
+\begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -1066,9 +1098,10 @@ The first test case is a homogeneous material with a volumetric source throughou
   \label{T1:sfig4}
 \end{subfigure}
 \caption{\qoi response to various perturbation scenarios for the homogeneous system under various homogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
+\label{fig:Trial1}
 \end{figure}
 
-In both the unperturbed and perturbed state, the Eddington is essentially at the infinite medium limit, so the unperturbed Eddington approximation should be a safe assumption to make in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first order approximation is needed, so all methods appear to give the same result. The $\siga$ perturbations begin to show the affects of the first order approximation, adjoint methods diverge from the exact forward methods. As would be expected, the system does not show strong sensitivity to $\sigs$ perturbations.
+The unperturbed \qoi value was the same for all methods, agreeing with the prediction. In both the unperturbed and perturbed state, the Eddington is essentially at the infinite medium limit, so the unperturbed Eddington approximation should be a safe assumption to make in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first order approximation is needed, so all methods appear to give the same result, which is exact. The $\siga$ perturbations begin to show the effects of the first order approximation, where both the transport and VET adjoint methods diverge from the exact forward found $\delta \qoi$. As was be expected, the system does not show strong sensitivity to $\sigs$ perturbations.
 
 \begin{table}[H]
 \label{TableT1}
@@ -1090,10 +1123,10 @@ In both the unperturbed and perturbed state, the Eddington is essentially at the
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous System, Inhomogeneous Perturbation}
-The initial homogeneous unperturbed system is retained from the previous trial. Now the system is subjected to inhomogeneous perturbations. To accomplish this, only the left $3/5$th of the system experiences the perturbation. This creates generates a material boundary which tends to generate perturbations in $\delta E$.
+
+For the next trial, the same initial homogeneous system is used for the unperturbed state. However, we attempt to introduce Eddington perturbations by making perturbing the system to an inhomogeneous state, there by introducing a boundary layer into the system. This is done by only perturbing the $q$, $\siga$, $\sigs$ terms on the region $x \in [0,6]$, so that the response function is within the perturbed region, but on the perturbation boundary. In this perturbed state, the infinite medium limit can no longer be applied. By introducing a $\delta \Edd$, we hope to begin differentiating the transport and VET adjoint methods, as the $\delta \Edd=0$ was the major assumption that had to be made in VET. Response plots are shown in Figure~\ref{fig:Trial2} and selected $\delta \qoi$ values in Table~\ref{TableT2}.
 
 \begin{figure}[H]
-\label{Trial2}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -1117,12 +1150,14 @@ The initial homogeneous unperturbed system is retained from the previous trial. 
   \label{T2:sfig4}
 \end{subfigure}
 \caption{\qoi response to various perturbation scenarios for the homogeneous system under various inhomogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
+\label{fig:Trial2}
 \end{figure}
 
-The introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the adjoint VET method, however the found value still lies closer to the VET value than the SN adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact SN adjoint. The alternate VET method shows its exact nature for the source perturbation, as well as being the VET method with the closest value to the SN adjoint for $\siga$ perturbations. 
+As expected, the introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the transport and VET adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the VET method, however the found value still lies closer to the VET value than the transport adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact transport adjoint. The aVET method shows its exact nature for the source perturbation, as well as being the Eddington method with the closest value to the transport adjoint for $\siga$ perturbations, beating out even the $\delta \Edd$ approximation method which is leveraging an additional transport solve. 
 
 
 \begin{table}[H]
+\label{TableT2}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1133,18 +1168,33 @@ The introduction of the boundary layer in the perturbed state begins to show dif
      VET Adj 			&3.99976	&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
      Blended 			&-			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
      VET $\delta \Edd$ 	&-			&0.36287 &0.36290 &3.0640e-05 &0.72586\\ \hline
-     VET Alt			&3.99976	&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
+     aVET			&3.99976	&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the homogeneous system under inhomogeneous perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Shielded Incident Flux}
-To observe the response to perturbations in the incident flux, a simple shielding system is tested. Flux is incident on the left side of the system. The incident flux passes though a shield of width 1 with $\siga=0.5$ and $\sigs=0.5$. The response is taken on the right side of the shield.
 
+Next is a simple shielding case to test how the methods deals with a surface source as opposed to the volumetric source of the previous test cases. An isotropic flux is incident on the left boundary $x=0$ of the system with no incident on the right boundary, no volumetric source is present. The incident flux passes though a shield from $x=[1,2]$ with $\siga=0.5$ and $\sigs=0.5$. The response is taken on the right side of the shield using a response $q^\dag=1$ for $x \in [3,4]$ and $0$ else. Response plots shown in Figure~\ref{fig:Trial3} and $\delta \qoi$ values in Table~\ref{TableT3}. Also, this test case introduces streaming regions into the problem. For the VET formulations, there is a factor of $\frac{1}{\sigt}$ that is undefined for streaming. To avoid this, a value of $\sigt=1E-8$ was used to signify a streaming region. Cross section perturbations occur in the shielding material, while incident flux perturbations occur only for the flux incident at $x=0$.
 
 \begin{figure}[H]
-\label{Trial3}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phi.png}
+  \label{T1:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the incident shielding system. Forward fluxes $\phi$ and $\varphi$ show on the left, and adjoint fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
+\label{Flux3}
+\end{figure}
+
+\begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
@@ -1168,11 +1218,13 @@ To observe the response to perturbations in the incident flux, a simple shieldin
   \label{T3:sfig4}
 \end{subfigure}
 \caption{\qoi response to various perturbation scenarios for the.}
+\label{fig:Trial3}
 \end{figure}
 
-Response to perturbation in the incident flux behaves as expected, in that adjoint methods match their respective forward found values. The $\delta E$ approximation method helps approach the SN value in most cases, however when dealing with scattering perturbations, the $\delta E$ method actually results in a $\delta \qoi$ value further from the SN value than the basic VET method. The alternate VET method is as expected exact for the incident flux perturbations, but shows issues with cross-section perturbations in this test case.
+Response to perturbation in the incident flux behaves as expected, with transport adjoint, blended, and aVET all retrieving the exact $\delta \qoi$. Cross section perturbations begin show dome behavior that differs from that seen in the previous cases. Most notable is the aVET method, which shows to be the worst approximation method for both $\siga$ and $\sigs$ perturbations, which $\delta \qoi$ values that are approaching twice the value found in other methods, this effect is also seen when both the incident flux and the absorption are perturbed. Response to $\sigs$ perturbations are a bit more pronounced here, but still fairly weak. In a higher dimensional system, scattering could be particularly important for shielding problems, as neutrons could scatter around the shield in some way. However, in the tested geometry this is not possible.
 
 \begin{table}[H]
+\label{TableT3}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1183,24 +1235,39 @@ Response to perturbation in the incident flux behaves as expected, in that adjoi
      VET Adj 			&0.231698 	&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
      Blended 			&-			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
      VET $\delta \Edd$ 	&-			&0.023181 &0.020070 &-0.0065156 &0.043251\\ \hline
-     VET Alt			&0.234008 	&0.023401 &0.035869 &-0.012563	&0.059270\\ \hline
+     aVET				&0.234008 	&0.023401 &0.035869 &-0.012563	&0.059270\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the shielding system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Reed Problem}
-As a final test, a more varied and complex system is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, $\siga$ experiences perturbations in regions 1 and 4, $\sigs$ is perturbed in regions 4 and 5, and $q$ is perturbed in regions 1 and 4. The system has no incident flux.
+As a final test, a more varied and complex Reed system is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, $\siga$ experiences perturbations in regions 1 and 4, $\sigs$ is perturbed in regions 4 and 5, and $q$ is perturbed in regions 1 and 4. The system has no incident flux. Response is taken in the right most region of the system.
 \begin{equation*}
 \begin{split}
-&\text{Region 1: } x \in (0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 \\
-&\text{Region 2: } x \in (2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0 \\
-&\text{Region 3: } x \in (3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, q^\dag=0 \\
-&\text{Region 4: } x \in (5,6), \quad \siga=0.1, \, 		\sigs=0.9, \, q=1, \, q^\dag=0 \\
-&\text{Region 5: } x \in (6,8), \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, q^\dag=1 \\
+&\text{Region 1: } x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 \\
+&\text{Region 2: } x \in [2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0 \\
+&\text{Region 3: } x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, q^\dag=0 \\
+&\text{Region 4: } x \in [5,6), \quad \siga=0.1, \, 		\sigs=0.9, \, q=1, \, q^\dag=0 \\
+&\text{Region 5: } x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, q^\dag=1 \\
 \end{split}
 \end{equation*}
 
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phi.png}
+  \label{T1:sfig1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phia.png}
+  \label{T1:sfig2}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the Reed problem. Forward fluxes $\phi$ and $\varphi$ show on the left, and adjoint fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
+\label{Flux4}
+\end{figure}
 
 \begin{figure}[H]
 \label{Trial4}
@@ -1229,9 +1296,10 @@ As a final test, a more varied and complex system is tested. The system is split
 \caption{\qoi response to various perturbation scenarios for the Reed Problem.}
 \end{figure}
 
-The effect of scattering perturbations is more pronounced in the Reed problem, along with the error between the SN and VET derived methods. The $\delta \Edd$ approximation method proves quite valuable in this problem however, and moves the response much closer to the SN adjoint found sensitivity for cross-section perturbations. For cross-section perturbations, the alternate VET method appears closer to VET sensitivity values than SN sensitivity for this test case.
+The effect of scattering perturbations is more pronounced in the Reed problem. The response these scattering perturbations is also where the greatest differentiation between the transport and VET appears. The $\delta \Edd$ approximation method proves quite valuable for resolving difference the transport and VET methods due to scattering perturbations. For perturbations in the other system parameters, the VET method is within $10\%$ of those found by transport adjoint, and even the standard VET adjoint method is close for source perturbations.
 
 \begin{table}[H]
+\label{TableT4}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1242,7 +1310,7 @@ The effect of scattering perturbations is more pronounced in the Reed problem, a
      VET Adj 			&1.75602  	&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
      Blended 			&-	 		&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
      VET $\delta \Edd$ 	&-		 	&0.17561 &0.030291 &0.028388 &0.20590\\ \hline
-     VET Alt		 	&1.75601 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
+     aVET		 		&1.75601 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the Reed system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
 \end{table}
@@ -1253,7 +1321,7 @@ For the systems tested, the VET method shows promise for use in sensitivity calc
 
 Scattering perturbations showed possibly the most interesting behavior. The deviation of the VET and SN methods is stronger (relative to the SN sensitivity) in most of the test case when $\sigs$ is perturbed. Additionally, the shielding system presented a scenario where the $\delta \Edd$ approach appeared to introduce more error. Unfortunately, the testing of heavy scatting systems in one spacial dimension can be a bit limited. In a two or three dimensions, the ability for particles to scatter around objects exists in general, while this is not present in one dimension. Expanding the discussed concepts to higher spacial dimensions would be a worthwhile next step, particularly in observing the effects of scattering on the VET method.
 
-For the homogeneous test cases, the alternate VET method utilizing $\varphi$ showed obvious advantages by way of it's exact nature for source perturbations and closest values to SN adjoint formulation for $\sigma_a$ perturbations. This method however appeared to have difficulties with the incident flux scenario, returning response values significantly higher than any other method. For the Reed problem, the alternate VET method appeared to return values most similar to the standard VET method, but with the source perturbation response values exact. 
+For the test cases with only a volumetric source, the aVET method utilizing $\varphi$ showed obvious advantages by way of its exact nature for source perturbations and while having similar accuracy to VET for cross section perturbations. This method however appeared to have difficulties with the incident flux scenario, returning cross section response values significantly higher than any other method. It was able to get incident flux response exact for the incident scenario however.
 
 \newpage
 \chapter{\uppercase{Appendices}}

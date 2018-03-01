@@ -1,7 +1,7 @@
 function [dEdq, dEdsa, dEdss,dEdinc,dBdq, dBdsa, dBdss,dBdinc]=getEslopes
 global dat results
 dat_saved=dat;
-factor=0.1;
+factor=0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Try to estimate Ep
 dat.sourcePert =dat.sourcePertRegion.*dat.qv_forward*factor;

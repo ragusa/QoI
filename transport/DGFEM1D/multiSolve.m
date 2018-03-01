@@ -265,7 +265,7 @@ plot(sourcePertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'qsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -320,7 +320,7 @@ plot(incPertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'incsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -342,7 +342,7 @@ plot(sigaPertFactor,sigaSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigaPertFactor,sigaSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigaPertFactor,sigaSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigaPertFactor,sigaSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -362,7 +362,7 @@ plot(sigsPertFactor,sigsSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigsPertFactor,sigsSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigsPertFactor,sigsSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigsPertFactor,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -382,7 +382,7 @@ plot(sourcePertFactor,qSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,qSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,qSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor,qSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
 dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -402,7 +402,7 @@ plot(incPertFactor,incSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,incSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,incSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor,incSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','Alt-VET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incSens'];
 dataFile=['data\',int2str(dat.pb_ID),'inc.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -427,4 +427,21 @@ figureFile=[int2str(dat.pb_ID),'phia'];
 figureName=fullfile(figurePath,figureFile);
 print(figureName,'-dpng');
 
+do_plot(results.phi,'$$\phi$$ Sn',612,dat.forward_flux)
+do_plot(results.phiVEF,'$$\phi$$ VET',612,dat.forward_flux)
+do_plot(results.phiAltVEF,'$$\varphi$$ aVET',612,dat.forward_flux)
+do_plot(2*results.phiAltVEF,'$$2\varphi$$ aVET',612,dat.forward_flux)
+figure(613)
+figureFile=[int2str(dat.pb_ID),'phi2'];
+figureName=fullfile(figurePath,figureFile);
+print(figureName,'-dpng');
+
+do_plot(results.phia,'$$\phi^\dag$$ Sn',613,dat.adjoint_flux)
+do_plot(results.phiVEFa,'$$\varphi^\dag$$ VET',613,dat.adjoint_flux)
+do_plot(results.phiAltVEFa,'$$\phi^\dag$$ aVET',613,dat.adjoint_flux)
+do_plot(2*results.phiVEFa,'$$2\varphi^\dag$$ VET',613,dat.adjoint_flux)
+figure(614)
+figureFile=[int2str(dat.pb_ID),'phia2'];
+figureName=fullfile(figurePath,figureFile);
+print(figureName,'-dpng');
 end

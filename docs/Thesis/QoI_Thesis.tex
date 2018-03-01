@@ -202,18 +202,14 @@ Computational simulations have become important tools for engineers and scientis
 Adjoint methods are of particular interest for UQ. In general, adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the error in the desired quantity of interest. Adjoint methods accomplish this in a particularly economical way, sometimes requiring only two differential system solves which can then be used for any combination of sources of error, as opposed to performing an independent solve for each individual error scenario. These adjoint methods have been applied across various complex and time dependent systems. An example of adjoint methods applied to hydrodynamic systems with shocks can be found in Wildey et al. \cite{Wildey}. A more relevant adjoint example to neutron transport occurs in Stripling et al. in the form of reactor burn-up equations \cite{Stripling}.
 
 
-Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method applied to radiation transport requires storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. For the previously mentioned depletion reactor problem of Stripling, this limitation was not existent because a quasi-static approximation was used for the neutron transport equation and only isotopic concentrations were time-dependent. For time-independent radiation problems, only storing the converged scattering moments at defined checkpoints (in burnup) is sufficient to reconstruct the flux solution. If a flux solution is requested outside of the checkpointed burnups, the forward flux can be reconstructed by interpolation \cite{Stripling}.
+Application of the adjoint method to time-dependent transport can pose a major technical limitation. In general, the adjoint method applied to radiation transport requires storing six-dimensional data (the forward angular flux) at each time step. When dealing with high resolution in these six dimensions and many time steps, this can potentially require an unreasonable amount of memory for data storage, rendering the method functionally unusable. For the previously mentioned depletion reactor problem of Stripling, this limitation was not existent because a quasi-static approximation was used for the neutron transport equation and only isotopic concentrations were time-dependent. For time-independent radiation problems, only storing the converged scattering moments at defined checkpoints (in burnup) is sufficient to reconstruct the flux solution. If a flux solution is requested outside of the checkpointed burnups, the forward flux can be reconstructed by interpolation \cite{Stripling} \cite{Carey}.
 Using converged scattering source term, a single transport sweep is needed to recover the converged
 angular flux. However this method does not extend to time-dependent transport in general because
-the primary time-dependent variable, the angular flux, needs to be stored as well. 
+the primary time-dependent variable, the angular flux, needs to be stored as well. Furthermore, while not in scope for this writing, even with a checkpointing method applied to the transport equation in a straightforward way, the adjoint solution which would solve in the reverse time direction as well as possibly the method to recompute the forward angular flux would typically require using an angular flux solver \cite{Carey}. Using some of the methods laid out in this thesis could allow for the angular flux solves to be replaced with a quasi-diffusion solver, which could provide increased performance or provide another method for balancing between computation and I/O.
 
 A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The method examined in this work is termed  as a ``Variable Eddington Tensor'' formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach.
 
-
-\jcr{at some point, you need to say: This Thesis is organized as follows: in Chapter xx, we discuss blabla. ...... FORESHADOW}
-
-\jcr{PLEASE put a label marker in the chapter title and use them here. That's what latex is for ...}
-In Chapter \ref{chap:background} the typical transport adjoint method is demonstrated and the inner products required for sensitivity calculations are derived. Then in Chapter \tcr{3} a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. An alternate quasi-diffusion method is proposed in Chapter \tcr{4}, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. In Chapter \tcr{no ref} the methods are tested against each other on simple system to verify expected behavior and examine their accuracy.
+This thesis is organized as follows. In Chapter \ref{chap:background} the typical transport adjoint method is demonstrated and the inner products required for sensitivity calculations are derived. Then in Chapter \ref{chap:VET} a quasi-diffusion formulation is taken of the transport equation. This quasi-diffusion approach then undergoes an adjoint treatment to derive sensitivity inner products that do not require storing any angular fluxes. An alternate quasi-diffusion method is proposed in Chapter \ref{chap:aVET}, a quasi-diffusion formulation is taken of the adjoint transport equation and a similar approach is taken in an attempt to derive another set of inner products to use for sensitivity. The three methods and the relation between them are shown in Figure~\ref{fig:roadmap}. In Chapter \ref{chap:results} the methods are tested against each other on simple system to verify expected behavior and examine their accuracy. Conclusions about the derived methods based on the test cases are presented in Chapter \ref{chap:conclusion}
 
 \begin{figure}[H]
 \centering
@@ -230,7 +226,7 @@ In Chapter \ref{chap:background} the typical transport adjoint method is demonst
 
 \jcr{the first sentences actually need to go before the section. according to the section's title, this should be about the SS 1-g transport, not why you are looking at that model. that must come before. I am adding new lines to make it obvious where the break needs to be.}
 \jcr{is this the first time you use the term quasi-diffusion? if so, it clearly needs to be defined before, maybe in the introduction chapter}
-This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. In the following chapter, the forward steady-state one-group transport equation is presented, the corresponding adjoint equation is derived, then sensitivity inner products are derived using a first order approximation. 
+This work will focus on a relatively simple transport equation form, the one-group steady-state transport equation. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation. A cursory formulation of the one-group time-dependent quasi-diffusion equation can be found in Appendix~\ref{chap:appx1}, which shows some terms shared with the steady state formulation. In the following chapter, the forward steady-state one-group transport equation is presented, the corresponding adjoint equation is derived, then sensitivity inner products are derived using a first order approximation. 
 
 \jcr{you must mention that the appendix xyz contains a derivation of the time-dependent version approach where we think VET could be useful}
 
@@ -459,8 +455,8 @@ perturbations int he total cross section. Finally, the angular fluxes
 are also needed to assess sensitivity due to the boundary source, but these inner
 products concern only the domain boundary and the memory storage requirements for these are small compared to volumetric inner products.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase {Variable Eddington Tensor Formulations For Adjoint-based Uncertainty Quantification}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{\uppercase {Variable Eddington Tensor Formulations For Adjoint-based Uncertainty Quantification}} \label{chap:VET}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -573,7 +569,7 @@ where the new boundary inner product for use with VET is defined as
 \begin{equation}
 \sbra \phi(\vr) , g(\vr)  \sket = \int_{\partial V} dS \, \phi (\vr) g (\vr)  \,.
 \end{equation}
-A more detailed derivation of the boundary terms is given in appendix B. Note that we used the fact that the Eddington tensor is symmetric, $\Edd^T=\Edd$.
+A more detailed derivation of the boundary terms along with the double gradient term is given in appendix \ref{chap:appx2}. Note that we used the fact that the Eddington tensor is symmetric, $\Edd^T=\Edd$.
 \jcr{can you verified on the side, say for 2d $xy$ that the integration by parts does yield the boundary terms. I am worried about the successive $\cdot$'s.}
 \iwh{OK, I threw it in an appendix, I can just remove it if you think it is too extraneous} 
 This leads to the adjoint equation of the VET formulation, given in Eq.~\eqref{adjForm}. Of particular note is that the double divergence term present in the forward equation contributes to a double gradient term in the adjoint equation below. The VET adjoint solution is represented by $\vefadj$ to avoid confusion with $\phi^\dag$, which is the adjoint scalar flux from the SN transport  method. 
@@ -810,20 +806,19 @@ Since no algebraic analytical form is known for $\Edd ( \vp )$, the derivative m
 The need for an additional transport solve to find $\Edd(\vp_1)$ is the primary cost of performing this method, and a constraint in situations where this approximation is viable. An analogous process can be used to approximate $\delta \BEdd$. With approximations for $\delta \Edd$ and $\delta \BEdd$ in hand, Eq.~\eqref{EddErr} can be used to to refine the VET sensitivity calculation. For situations where many perturbation scenarios need to be considered, this approximation method could prove useful. 
 
 
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-\chapter{\uppercase {Adjoint Variable Eddington Tensor Formulation}}
-%%%%%%%----------------------------------------------------------------------------------------------
-%%%%%%%----------------------------------------------------------------------------------------------
-\jcr{title does not seem descriptive enough. is this exclusively about the 'alternate' form? if so, the title should reflect this}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{\uppercase {ALternate Variable Eddington Tensor Formulation Using Adjoint Transport Eddington}} \label{chap:aVET}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This method of transport adjoint derived VET will be termed aVET.
 
 %%%%%%%----------------------------------------------------------------------------------------------
 %%%%%%%----------------------------------------------------------------------------------------------
-\section{An Alternate VET Method}
+\section{The aVET Formulation}
 %%%%%%%----------------------------------------------------------------------------------------------
-The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This method of transport adjoint derived VET will be termed aVET.
 %%%%%%%----------------------------------------------------------------------------------------------
-The process by which the VET adjoint equation was formulated involved first converting the angular dependent transport equation to the VET form, then taking the adjoint of the resulting VET quasi-diffusion equation. It is worth considering if performing the operations in a switched order would yield the same result, which is to say, first derive the adjoint  angular flux and then apply the VET treatment. This aVET formulation of the adjoint flux is analogous to the forward formulation shown above starting at Eq.~\eqref{VETFormStart}. The form of this new adjoint system is
+The aVET formulation of the adjoint flux is analogous to the forward formulation shown above starting at Eq.~\eqref{VETFormStart}, but starts with the adjoint transport formulation. 
 
 \begin{equation}
 \label{snAdjAlt}
@@ -954,12 +949,12 @@ The above relation can be combined with the unperturbed \qoi form derived in Eq.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase {Results}}
+\chapter{\uppercase {Results}} \label{chap:results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Transport Solution Method}
+\section{Transport Solution Method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 A discrete ordinates (SN) method can be used to solve the one-group steady-state transport 
 equation (Eq.~\eqref{SS1GTE}). In the SN method, a discrete angular quadrature is used to represent
@@ -995,7 +990,7 @@ The test cases in this writing use a slab geometry however, so with that in mind
 The SN method then discretizes this $\mu$ range into ordinates, and the system takes the form
 \begin{subequations}
 \begin{equation}
-\label{1gTE}
+\label{1gTEmu}
 \vO_d \cdot \grad \psi_d^{(\ell+1)} + \sigt \psi_d^{(\ell+1)} = \frac{\sigs}{2} \phi^{(\ell)} + \frac{q}{2}\,,
 \end{equation}
 \begin{equation}
@@ -1011,15 +1006,14 @@ With the angular dependence handeled by the SN method for transport, each of the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{VET Solution Method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Solution of the quasi-diffusion VET formulations are performed using a Discontinuous Galerkin (DG) method with an interior-penalty approach; see Arnold \cite{Arnold}, for instance. The modifications are required to support quasi-diffusion using $\Edd$ as opposed to simple neutron diffusion. Linear basis functions are used as the finite element basis. As was the case for SN transport, the spatial domain is discretized into 2,000 uniform elements for the results shown in the following sections.
+Solution of the quasi-diffusion VET formulations are performed using a Discontinuous Galerkin (DG) method with an interior-penalty approach; see Arnold \cite{Arnold}, for instance. Compared to a standard diffusion approach, slight modifications to the interior penalty terms are required to support quasi-diffusion. For standard diffusion the current terms used at the mesh interface would take the form $\frac{1}{3 \sigt} \grad \phi$ but for the Eddington approach the current terms take the form $\frac{1}{\sigt} \div ( \Edd \phi)$. Linear basis functions are used as the finite element basis. As was the case for SN transport, the spatial domain is discretized into 2,000 uniform elements for the results shown in the following sections.
 \jcr{``The'' modifications are required. ? This makes people curious. What are they?}
-
+\iwh{sufficient, or do I need to get more rigorous with this? I may have a question or two about using the this method on this form when we can get to a whiteboard and have a free moment. More about theory than anything}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Trial Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\jcr{At this point? Will there be more later? Where? The document should be complete. This does not read as complete. How about something simpler: Thus far, we have presented ....}
 
-At this point, 5 separate methods for unperturbed \qoi calculation have been discussed: 
+We have presented 5 separate methods for unperturbed \qoi calculation have been discussed: 
 \begin{enumerate}
 \item forward and adjoint inner products for both SN and VET formulations (yielding a total of 4 different approaches), and,
 \item the alternate aVET method in Eq.~\eqref{AdjQoIAltExpand}.
@@ -1034,7 +1028,7 @@ as well as 7 separate methods for $\delta$\qoi calculation:
 
 When dealing with sensitivity calculations, techniques based on the forward solutions are expected to give the most exact answer simply because it involves an additional forward solve of the perturbed system for each perturbation case. The adjoint methods for sensitivity are relying on a first-order approximation (we dropped the double $\delta$ terms), however they only require a single forward solve and a single adjoint for use with all perturbation cases. 
 
-The six \jcr{6? you just said 7} methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced a perturbation and the magnitude of that perturbation. The results of the four \jcr{4? I thought there were 5 VET-based methods. I am trying to follow but I am confused} different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
+The seven methods were implemented in a MATLAB finite element method (FEM) solver. One-dimensional test cases were run, varying which parameter experienced a perturbation and the magnitude of that perturbation. The results of the five different sensitivity methods were analyzed to identify cases where the efficient VET adjoint showed promise as a time and memory efficient method for computing sensitivity. As a representation of this, the \% \qoi response is plotted against the \% change in a given parameter $p$, which are defined as
 \begin{subequations}
 \begin{equation}
 \text{\qoi \% response}=\frac{\delta \qoi}{\qoi} \,,
@@ -1051,39 +1045,37 @@ To start, a test case consisting of a relatively simple system is chosen. The sy
 \begin{equation}
 \qoi \approx \bra q^\dag , \phi \ket = \int_4^6 dx \, \frac{q}{\siga} = 4
 \end{equation}
-The unperturbed scalar fluxes are shown in Figure~\ref{fig:Flux1}. These plots show both the true scalar flux $\phi$ found by both SN and VET \jcr{obtained using the SN and VET methods} (which should be equal), as well as the ``forward-like'' flux $\varphi$ obtained as the adjoint of the aVET method. Similarly, both methods of $\phi^\dag$ \jcr{both methods of ... what does that mean?} are shown on the same plot as the adjoint-like $\varphi^\dag$ from the VET formulation. Looking at the graphs it becomes clear that $\phi^\dag \neq \varphi^\dag$ and $\phi \neq \varphi$. 
+The unperturbed scalar fluxes are shown in Figure~\ref{fig:Flux1}. These plots show both the true scalar flux $\phi$ obtained using the SN and VET methods (which should be equal), as well as the ``forward-like'' flux $\varphi$ obtained as the adjoint of the aVET method. Similarly, the scalar adjoint flux $\phi^\dag$ obtained using SN and aVET are shown on the same plot as the ``adjoint-like'' $\varphi^\dag$ from the VET formulation. Looking at the graphs it becomes clear that $\phi^\dag \neq \varphi^\dag$ and $\phi \neq \varphi$, providing a succinct confirmation that the solution of the adjoint of the VET formulation is not the same as the solution to the VET formulation of the transport adjoint. At a glance it may appear that the difference between the scalar flux solutions $\phi$, $\phi^\dag$ and the flux-like $\varphi$, $\varphi^\dag$ is a simple factor of 2 due to source normalization, but that is not the case and plots which take the factor of 2 into account are presented in \ref{chap:appx3}
 \jcr{what point do you want to make. They only looked different by a factor 2, which one may argue may be changed appropriate by changing the source normalization. So what are you trying to show here?}
+\iwh{I tried to clarify this, and added a few additional images to an appendix to prevent overcrowding the main images. I think the point is I just wanted to present a visual confirmation that the adjont of the VET isn't the VET of the adjoint, which is something that wasn't explicitly obvious when I first started working on this. That the solutions we are getting from taking adjoints of VET/aVET are not true "scalar flux" in the transport sense. If this seems extraneous I am willing to drop it and the additional images in the appendix.}
 
-For perturbations, the entire system is perturbed uniformly, resulting in another homogeneous system, so therefore the perturbed \qoi can be easily predicted as $\qoi \approx 2 \phi = \frac{q_p}{\sigma_{a,p}}$. \jcr{my version: $\qoi_p \approx (6-4) \phi^\infty_p = 2 \frac{q_p}{\sigma_{a,p}}$}Given the simple form of the expected flux in the center, the derivatives can be taken to get an expected sensitivity.
+For perturbations, the entire system is perturbed uniformly, resulting in another homogeneous system, so therefore the perturbed \qoi can be easily predicted as $\qoi_p \approx (6-4) \phi^\infty_p = 2 \frac{q_p}{\sigma_{a,p}}$. Given the simple form of the expected flux in the center, the derivatives can be taken to get an expected sensitivity.
 \begin{subequations}
 \begin{equation}
  \frac{\partial \phi}{\partial q} = \frac{1}{\siga}   
 \end{equation}
 \begin{equation}
- \frac{\partial \phi}{\partial \siga} = - \frac{q}{\sigs^2}   
+ \frac{\partial \phi}{\partial \siga} = - \frac{q}{\siga^2}   
 \end{equation}
-\jcr{wrong sigma}
 \begin{equation}
  \frac{\partial \phi}{\partial \sigs} = 0  
 \end{equation}
 \end{subequations}
 
-The methods of $\delta \qoi$ \jcr{use full English sentences/word.} were tested on this system. Perturbation in the system parameters were taken in the range of $\pm 10 \%$. The \% response results over this range are plotted in Figure~\ref{fig:Trial1}. $\delta \qoi$ values for selected perturbations are given in Table~\ref{TableT1}.
+The seven methods of $\qoi$ perturbation calculation were applied to this system for perturbations in $q$, $\sigs$, and $\sigt$. Perturbation in the system parameters were taken in the range of $\pm 10 \%$. The \% response results over this range are plotted in Figure~\ref{fig:Trial1}. $\delta \qoi$ values for selected perturbations are given in Table~\ref{TableT1}.
 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22phi.png}
-  \label{T1:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22phia.png}
-  \label{T1:sfig2}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the homogeneous system. This include ``forward'' fluxes $\phi$ and $\varphi$ show on the left, and ``adjoint'' fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
-\label{Flux1}
+\label{fig:Flux1}
 \end{figure}
 
 \begin{figure}[H]
@@ -1091,32 +1083,27 @@ The methods of $\delta \qoi$ \jcr{use full English sentences/word.} were tested 
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22qSens.png}
-  \label{T1:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22sigaSens.png}
-  \label{T1:sfig2}
 \end{subfigure}
 %
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22sigsSens.png}
-  \label{T1:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/22qsigaSens.png}
-  \label{T1:sfig4}
 \end{subfigure}
-\caption{\qoi response to various perturbation scenarios for the homogeneous system under various homogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.\tcr{I doubt this. wrong sigma}}
+\caption{\qoi response to various perturbation scenarios for the homogeneous system under various homogeneous perturbations. For the unperturbed system $q=2$, $\siga=1$, and $\sigs=1$.}
 \label{fig:Trial1}
 \end{figure}
 
 The unperturbed \qoi value was the same for all methods, agreeing with the prediction. In both the unperturbed and perturbed state, the Eddington is essentially at the infinite medium limit, so the unperturbed Eddington approximation should be a safe assumption in this scenario. The results of the $q$ and $\siga$ perturbations seem to support this. For the source perturbations, no first-order approximation is needed, so all methods appear to give the same result, which is exact. The $\siga$ perturbations begin to show the effects of the first-order approximation, where both the transport and VET adjoint methods depart from the exact forward found $\delta \qoi$. As expected, the system does not show strong sensitivity to $\sigs$ perturbations.
 
 \begin{table}[H]
-\label{TableT1}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1126,50 +1113,45 @@ The unperturbed \qoi value was the same for all methods, agreeing with the predi
      SN Adj			    &3.99976	&0.39998 &0.39983 &6.6307e-05 &0.79980\\ \hline
      VET Adj 			&3.99976	&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
      Blended 			&-			&0.39998 &0.39988 &2.8534e-05 &0.79986\\ \hline
-     VET $\delta \Edd$ 	&-			&0.39998 &0.39983 &5.9537e-05 &0.79981\\ \hline
-     aVET				&3.99976 	&0.39998 &0.39980  &4.986e-05	 &0.79978\\ \hline
+     VET $\delta \Edd$ 	&-			&0.39998 &0.39983 &6.124e-05 &0.79980\\ \hline
+     aVET				&3.99976 	&0.39998 &0.39980 &4.986e-05	 &0.79978\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the homogeneous system under homogeneous perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
+  \label{TableT1}
 \end{table}
 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Homogeneous System, Inhomogeneous Perturbation}
 
-For the next trial \tcr{test case}, the same initial homogeneous system is used for the unperturbed state. However, we attempt to introduce Eddington perturbations by \tcr{making perturbing} the system to an inhomogeneous state, there by introducing a boundary layer into the system. This is done by only perturbing the $q$, $\siga$, $\sigs$ terms on the region $x \in [0,6]$, so that the region of interest is within the perturbed region, but on one of its boundaries. In this perturbed state, the infinite medium limit can no longer be applied. By introducing a $\delta \Edd$, we hope to begin differentiating the transport and VET adjoint methods, as the $\delta \Edd=0$ was the major assumption that had to be made in VET. Response plots are shown in Figure~\ref{fig:Trial2} and selected $\delta \qoi$ values in Table~\ref{TableT2}.
+For the next test case, the same initial homogeneous system is used for the unperturbed state. However, we attempt to introduce Eddington perturbations by perturbing the system to an inhomogeneous state, there by introducing a boundary layer into the system. This is done by only perturbing the $q$, $\siga$, $\sigs$ terms on the region $x \in [0,6]$, so that the region of interest is within the perturbed region, but on one of its boundaries. In this perturbed state, the infinite medium limit can no longer be applied. By introducing a $\delta \Edd$, we hope to begin differentiating the transport and VET adjoint methods, as the $\delta \Edd=0$ was the major assumption that had to be made in VET. Response plots are shown in Figure~\ref{fig:Trial2} and selected $\delta \qoi$ values in Table~\ref{TableT2}. Refer to Figure~\ref{fig:Flux1} for the unperturbed fluxes.
 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23qSens.png}
-  \label{T2:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23sigaSens.png}
-  \label{T2:sfig2}
 \end{subfigure}
 %
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23sigsSens.png}
-  \label{T2:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23qsigaSens.png}
-  \label{T2:sfig4}
 \end{subfigure}
-\caption{\qoi response to various perturbation scenarios for the homogeneous system under various inhomogeneous perturbations. For the unperturbed system $q=2$, $\sigt=1$, and $\sigs=1$.}
+\caption{\qoi response to various perturbation scenarios for the homogeneous system under various inhomogeneous perturbations. For the unperturbed system $q=2$, $\siga=1$, and $\sigs=1$.}
 \label{fig:Trial2}
 \end{figure}
 
-As expected, the introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. \tcr{wouldn't it make sense to show the fluxes and adjoint fluxes for this problem as well???} For source perturbations the transport and VET adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the VET method, however the found value still lies closer to the VET value than the transport adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact transport adjoint. The aVET method shows its exact nature for the source perturbation, as well as being the Eddington method with the closest value to the transport adjoint for $\siga$ perturbations, \tcr{beating out (reformulate)} even the $\delta \Edd$ approximation method which is leveraging an additional transport solve. 
-\tcr{the improvement is minuscule. your sentence seems to indicate it is great. that's not right}
+As expected, the introduction of the boundary layer in the perturbed state begins to show differentiation in the selected methods. For source perturbations the transport and VET adjoint methods match their respective forward found values. The blended method matches the SN values for source perturbations and the VET values for cross-section perturbations as designed. The behavior of the blended method with both source and cross-section perturbations shows that it does provide an improvement over the VET method, however the found value still lies closer to the VET value than the transport adjoint value. The $\delta \Edd$ method shows more promise in this trial, as the addition of the $\delta \Edd$ terms begins to reconcile the VET adjoint method with the more exact transport adjoint. The aVET method shows its exact nature for the source perturbation, as well as providing a $\delta \qoi$ value similar to the $\delta \Edd$ approximation method for $\siga$ perturbations, despite the latter leveraging an additional transport solve. 
 
 \begin{table}[H]
-\label{TableT2}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1179,10 +1161,11 @@ As expected, the introduction of the boundary layer in the perturbed state begin
      SN Adj  			&3.99976	&0.36309 &0.36301 &3.4051e-05 &0.72610\\ \hline
      VET Adj 			&3.99976	&0.35947 &0.35941 &1.5733e-05 &0.71888\\ \hline
      Blended 			&-			&0.36309 &0.35941 &1.5733e-05 &0.72250\\ \hline
-     VET $\delta \Edd$ 	&-			&0.36287 &0.36290 &3.0640e-05 &0.72586\\ \hline
-     aVET			&3.99976	&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
+     VET $\delta \Edd$ 	&-			&0.36295 &0.36298 &3.1479e-05 &0.72603\\ \hline
+     aVET				&3.99976	&0.36309 &0.36299 &2.6234e-05 &0.72609\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the homogeneous system under inhomogeneous perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
+  \label{TableT2}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
@@ -1195,12 +1178,10 @@ Next is a simple shielding case to test how the methods deals with a surface sou
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24phi.png}
-  \label{T1:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24phia.png}
-  \label{T1:sfig2}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the incident shielding system. Forward fluxes $\phi$ and $\varphi$ show on the left, and adjoint fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
 \label{Flux3}
@@ -1211,23 +1192,19 @@ Next is a simple shielding case to test how the methods deals with a surface sou
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24incSens.png}
-  \label{T3:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24sigaSens.png}
-  \label{T3:sfig2}
 \end{subfigure}
 %
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24sigsSens.png}
-  \label{T3:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/24incsigaSens.png}
-  \label{T3:sfig4}
 \end{subfigure}
 \caption{\qoi response to various perturbation scenarios for the.}
 \label{fig:Trial3}
@@ -1236,7 +1213,6 @@ Next is a simple shielding case to test how the methods deals with a surface sou
 Response to perturbation in the incident flux behaves as expected, with transport adjoint, blended, and aVET all retrieving the exact $\delta \qoi$. Cross section perturbations begin show dome behavior that differs from that seen in the previous cases. Most notable is the aVET method, which shows to be the worst approximation method for both $\siga$ and $\sigs$ perturbations, which $\delta \qoi$ values that are approaching twice the value found in other methods, this effect is also seen when both the incident flux and the absorption are perturbed. Response to $\sigs$ perturbations are a bit more pronounced here, but still fairly weak. In a higher dimensional system, scattering could be particularly important for shielding problems, as neutrons could scatter around the shield in some way. However, in the tested geometry this is not possible.
 
 \begin{table}[H]
-\label{TableT3}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1246,15 +1222,16 @@ Response to perturbation in the incident flux behaves as expected, with transpor
      SN Adj  			&0.231931 	&0.023401 &0.019975 &-0.0068956 &0.043376\\ \hline
      VET Adj 			&0.231698 	&0.023181 &0.018981 &-0.0067751 &0.042162\\ \hline
      Blended 			&-			&0.023401 &0.018981 &-0.0067751 &0.042381\\ \hline
-     VET $\delta \Edd$ 	&-			&0.023181 &0.020070 &-0.0065156 &0.043251\\ \hline
+     VET $\delta \Edd$ 	&-			&0.023170 &0.020079 &-0.0065100 &0.043249\\ \hline
      aVET				&0.234008 	&0.023401 &0.035869 &-0.012563	&0.059270\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the shielding system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
+  \label{TableT3}
 \end{table}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Reed Problem}
-As a final test, a more varied and complex Reed system is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, $\siga$ experiences perturbations in regions 1 and 4, $\sigs$ is perturbed in regions 4 and 5, and $q$ is perturbed in regions 1 and 4. The system has no incident flux. Response is taken in the right most region of the system \tcr{where exactly?}.
+As a final test, a more varied and complex Reed system is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, $\siga$ experiences perturbations in regions 1 and 4, $\sigs$ is perturbed in regions 4 and 5, and $q$ is perturbed in regions 1 and 4. The system has no incident flux. Response is taken in the right most region of the system $x \in [6,8]$.
 \begin{equation*}
 \begin{split}
 &\text{Region 1: } x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 \\
@@ -1270,12 +1247,10 @@ As a final test, a more varied and complex Reed system is tested. The system is 
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7phi.png}
-  \label{T1:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7phia.png}
-  \label{T1:sfig2}
 \end{subfigure}
 \caption{Plots of unperturbed scalar fluxes for the Reed problem. Forward fluxes $\phi$ and $\varphi$ show on the left, and adjoint fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
 \label{Flux4}
@@ -1287,23 +1262,19 @@ As a final test, a more varied and complex Reed system is tested. The system is 
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7qSens.png}
-  \label{T4:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7sigaSens.png}
-  \label{T4:sfig2}
 \end{subfigure}
 %
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7sigsSens.png}
-  \label{T4:sfig3}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7qsigaSens.png}
-  \label{T4:sfig4}
 \end{subfigure}
 \caption{\qoi response to various perturbation scenarios for the Reed Problem.}
 \end{figure}
@@ -1311,7 +1282,6 @@ As a final test, a more varied and complex Reed system is tested. The system is 
 The effect of scattering perturbations is more pronounced in the Reed problem. The response these scattering perturbations is also where the greatest differentiation between the transport and VET appears. The $\delta \Edd$ approximation method proves quite valuable for resolving difference the transport and VET methods due to scattering perturbations. For perturbations in the other system parameters, the VET method is within $10\%$ of those found by transport adjoint, and even the standard VET adjoint method is close for source perturbations.
 
 \begin{table}[H]
-\label{TableT4}
 \centering
   \begin{tabular}{| l | r || r | r | r | r |}
     \hline
@@ -1321,121 +1291,24 @@ The effect of scattering perturbations is more pronounced in the Reed problem. T
      SN Adj 			&1.75603  	&0.17580 &0.030401 &0.030450 &0.20620\\ \hline
      VET Adj 			&1.75602  	&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
      Blended 			&-	 		&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
-     VET $\delta \Edd$ 	&-		 	&0.17561 &0.030291 &0.028388 &0.20590\\ \hline
+     VET $\delta \Edd$ 	&-		 	&0.17573 &0.030348 &0.027743 &0.20608\\ \hline
      aVET		 		&1.75601 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
     \end{tabular}
   \caption{Table of selected $\delta \qoi$ values for the Reed system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
+  \label{TableT4}
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase {Conclusions and Outlook}}
+\chapter{\uppercase {Conclusions and Outlook}} \label{chap:conclusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 For the systems tested, the VET method shows promise for use in sensitivity calculations. For the majority of the trials the error between the VET and SN adjoint sensitivities was $<10\%$ of the SN sensitivity, and $<1\%$ of the unperturbed QoI. The blended method demonstrated an approach to increase the accuracy, particularly for source perturbations, at the cost of an additional SN solve to obtain $\phi$. The $\delta \Edd$ approximation approach was even more accurate in most cases, but requires at least 1 extra SN solve for each perturbed system property, making it viable in scenarios where many perturbation scenarios must be tested. 
 
-Scattering perturbations showed possibly the most interesting behavior. The deviation of the VET and SN methods is stronger (relative to the SN sensitivity) in most of the test case when $\sigs$ is perturbed. Additionally, the shielding system presented a scenario where the $\delta \Edd$ approach appeared to introduce more error. Unfortunately, the testing of heavy scatting systems in one spacial dimension can be a bit limited. In a two or three dimensions, the ability for particles to scatter around objects exists in general, while this is not present in one dimension. Expanding the discussed concepts to higher \tcr{spacial} dimensions would be a worthwhile next step, particularly in observing the effects of scattering on the VET method.
+Scattering perturbations showed possibly the most interesting behavior. The deviation of the VET and SN methods is stronger (relative to the SN sensitivity) in most of the test case when $\sigs$ is perturbed. Additionally, the shielding system presented a scenario where the $\delta \Edd$ approach appeared to introduce more error. Unfortunately, the testing of heavy scatting systems in one spacial dimension can be a bit limited. In a two or three dimensions, the ability for particles to scatter around objects exists in general, while this is not present in one dimension. Expanding the discussed concepts to higher spatial dimensions would be a worthwhile next step, particularly in observing the effects of scattering on the VET method.
 
-For the test cases with only a volumetric source, the aVET method utilizing $\varphi$ showed obvious advantages by way of its exact nature for source perturbations and while having similar accuracy to VET for cross section perturbations. This method however appeared to have difficulties with the incident flux scenario, returning cross section response values significantly higher than any other method. It was able to get incident flux response exact for the incident scenario however.
-
-\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase{Appendices}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{APPENDIX A: Time Dependent VET}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-While out of scope for this writing, a major goal of this method is the application towards time-dependent systems. As such, it is worth taking a brief look at how the VET formulation would look in a time dependent system. As with the steady state, the starting point is the one-group transport equation, now with the time derivative factor.
-\begin{equation}
-\label{Trans1GTE}
-\frac{1}{v} \frac{\partial}{\partial t} \psi(\vr,\vO,t)+ \vO \cdot \grad \psi(\vr,\vO,t) + \sigt(\vr) \psi(\vr,\vO,t) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO,t), \quad \forall \vr \in V,t \geq 0
-\end{equation}
-\begin{equation}
-\label{Trans1GTE_bc}
-\psi(\vr,\vO,t) = \psi^{\text{inc}}(\vr,\vO,t) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
-\end{equation}
-\begin{equation}
-\label{Trans1GTE_t0}
-\psi(\vr,\vO,0) = \psi_0(\vr,\vO)
-\end{equation}
-The zero-th and first angular moments are taken of the time dependent system. The Eddington Tensor is used in the 1st order equation.
-\begin{subequations}
-%
-\begin{equation}
-\label{0amTrans}
-\frac{1}{v} \frac{\partial}{\partial t}\phi + \div \vec{J} + (\siga) \phi = \scalSource \,,
-\end{equation}
-%
-\begin{equation}
-\label{1amTrans}
-\frac{1}{v} \frac{\partial}{\partial t}\vec{J}  + \div \left( \Edd \phi \right) + \sigt \vec{J} = 0 \,.
-\end{equation}
-%
-\end{subequations}
-The moments are then combined in the same fashion used in the steady-state case
-\begin{equation}
-\label{VETTrans}
-\frac{1}{v} \frac{\partial}{\partial t}\phi - \div \left( \frac{1}{v \sigt} \frac{\partial}{\partial t}\vec{J} \right)   - \div \left( \frac{1}{\sigt} \div \left( \Edd \phi \right) \right)  + (\siga) \phi = \scalSource.
-\end{equation}
-\iwh{Not sure on the exact next step to take. The second term is the ugly one. I can define the residual 
-\begin{equation}
-f=- \div \left( \frac{1}{\sigt} \div \left( \Edd \phi \right) \right)  + (\siga) \phi - \scalSource
-\end{equation}
-which is the steady state equation, and muse about how that term must be dealt with accurately to produce time evolution. 
-Doing sensitivity we want an operator $A \phi = b$ which the above isn't exactly due to the $\vec{J}$. In addition to $\Edd$ is is reasonable to store some vector value like $\vec{g}=\frac{\vec{J}}{\phi}$? That way there is a well defined $A$ operator to perform the adjoint process on.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{APPENDIX B: Detailed VET Boundary Term Derivation}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Represent the value $\isigt \div \Edd \phi$ by some vector $\vec{v}$. 
-\begin{equation}
-\begin{split}
-- \bra \div \left( \isigt \div \Edd \phi \right), \vefadj \ket
-&= - \int_V dV \, \vefadj  \left( \div \left( \isigt \div \Edd \phi \right) \right) \\
-&= - \int_V dV \, \vefadj  \left( \div \vec{v}\right)
-\end{split}
-\end{equation}
-Then use a product rule $\div (\vec{v} \varphi^\dag) = \varphi^\dag (\div \vec{v}) + \vec{v} \cdot (\grad \varphi^\dag)  $. Use the divergence theorem on the $\div (\vec{v} \varphi^\dag)$ term to convert to a surface integral
-\begin{equation}
-\begin{split}
-- \int_V dV \, \vefadj  \left( \div \vec{v}\right) &= - \int_V dV \, \div (\vec{v} \varphi^\dag) + \int_V dV \, \vec{v} \cdot (\grad \varphi^\dag) \\
-&= - \oint_{\bound} dS \, (\vec{v} \varphi^\dag) \cdot \vn + \int_V dV \, \vec{v} \cdot (\grad \varphi^\dag) \\
-&= - \oint_{\bound} dS \, \left( \left( \isigt \div \Edd \phi \right) \varphi^\dag \right) \cdot \vn + \int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) \\
-&= - \sbra \left(  \isigt \div \Edd \phi \right)  \cdot \vn , \varphi^\dag\sket + \int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) \\
-\end{split}
-\end{equation}
-Turn focus to the remaining volume integral. Define the vector $\vec{u} = \isigt \grad \varphi^\dag$. Breakout $\Edd$ into component vectors $\vec{E}$ 
-\begin{equation}
-\begin{split}
-\int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) 
-& = \int_V dV \, \left( \div \Edd \phi \right) \cdot \vec{u} \\
-& = \int_V dV \, \sum_{n=x,y,z} \left( \div \vec{E}_n \phi \right) u_{n} \\
-& = \sum_{n=x,y,z} \int_V dV \, \left( \div \vec{E}_n \phi \right) u_{n} \\
-& = \sum_{n=x,y,z} \left[ \int_V dV \,  \div \left( \vec{E}_n \phi u_n \right) - \int_V dV (\vec{E}_n \phi) \cdot \grad u_n  \right] \\
-& = \sum_{n=x,y,z} \left[ \oint_{\bound} dS \,  \vec{E}_n \phi u_n \cdot \vn - \int_V dV (\vec{E}_n \phi) \cdot \grad u_n  \right] \\
-& = \oint_{\bound} dS \,  \phi \left( \vec{E} \cdot \vec{u} \right) \cdot \vn - \int_V dV \phi \left( \Edd : \grad \vec{u} \right) \\
-& = \oint_{\bound} dS \,  \phi \left( \vec{E} \cdot \isigt \grad \varphi^\dag \right) \cdot \vn - \int_V dV \phi \left( \Edd : \grad \isigt \grad \varphi^\dag \right) \\
-& = \sbra \phi , \vec{E} \cdot \isigt \grad \varphi^\dag \cdot \vn \sket - \bra \phi , \Edd : \grad \isigt \grad \varphi^\dag \ket \\
-\end{split}
-\end{equation}
-Putting everything together
-\begin{equation}
-\begin{split}
-- \bra \div \left( \isigt \div \Edd \phi \right), \vefadj \ket
-=& - \bra \phi , \Edd : \grad \isigt \grad \varphi^\dag \ket  
-+ \sbra \phi , \vec{E} \cdot \isigt \grad \varphi^\dag \cdot \vn \sket  \\
-&- \sbra \left(  \isigt \div \Edd \phi \right)  \cdot \vn , \varphi^\dag \sket\\
-\end{split}
-\end{equation}
-
-%The next line is the format for inserting new sections.
-%Replace the name "newsection"  with the name of your
-%new section file.
-%\include{data/newsection}
+For the test cases with only a volumetric source, the aVET method utilizing $\varphi$ showed obvious advantages by way of its exact nature for source perturbations and while having similar accuracy to VET for cross section perturbations. This method however appeared to have difficulties with the incident flux scenario, returning cross section response values significantly higher than any other method. It was able to compute $\delta \qoi$ exact for the incident flux perturbation in the shielding scenario however.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1479,6 +1352,153 @@ Putting everything together
 %Leave this commented if you will not need
 %appendix material.
 %\include{data/appendices}
+
+\newpage
+\begin{appendices}
+\titleformat{\chapter}{\centering\normalsize}{APPENDIX \thechapter}{0em}{\vskip .5\baselineskip\centering}
+\renewcommand{\appendixname}{APPENDIX}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{ \uppercase{APPENDIX: Time Dependent VET} } \label{chap:appx1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+While out of scope for this writing, a major goal of this method is the application towards time-dependent systems. As such, it is worth taking a brief look at how the VET formulation would look in a time dependent system. As with the steady state, the starting point is the one-group transport equation, now with the time derivative factor.
+\begin{equation}
+\label{Trans1GTE}
+\frac{1}{v} \frac{\partial}{\partial t} \psi(\vr,\vO,t)+ \vO \cdot \grad \psi(\vr,\vO,t) + \sigt(\vr) \psi(\vr,\vO,t) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO,t), \quad \forall \vr \in V,t \geq 0
+\end{equation}
+\begin{equation}
+\label{Trans1GTE_bc}
+\psi(\vr,\vO,t) = \psi^{\text{inc}}(\vr,\vO,t) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}
+\end{equation}
+\begin{equation}
+\label{Trans1GTE_t0}
+\psi(\vr,\vO,0) = \psi_0(\vr,\vO)
+\end{equation}
+The zero-th and first angular moments are taken of the time dependent system. The Eddington Tensor is used in the 1st order equation.
+\begin{subequations}
+%
+\begin{equation}
+\label{0amTrans}
+\frac{1}{v} \frac{\partial}{\partial t}\phi + \div \vec{J} + (\siga) \phi = \scalSource \,,
+\end{equation}
+%
+\begin{equation}
+\label{1amTrans}
+\frac{1}{v} \frac{\partial}{\partial t}\vec{J}  + \div \left( \Edd \phi \right) + \sigt \vec{J} = 0 \,.
+\end{equation}
+%
+\end{subequations}
+The moments are then combined in the same fashion used in the steady-state case
+\begin{equation}
+\label{VETTrans}
+\frac{1}{v} \frac{\partial}{\partial t}\phi - \div \left( \frac{1}{v \sigt} \frac{\partial}{\partial t}\vec{J} \right)   - \div \left( \frac{1}{\sigt} \div \left( \Edd \phi \right) \right)  + (\siga) \phi = \scalSource.
+\end{equation}
+Note that the same double divergence term shows up the the time dependent equation as it does in the steady state formulation. So it is conceivable that insight gained from the steady state treatment will carry over to the time-dependent problem. 
+\iwh{Not sure on the exact next step to take. The second term is the ugly one. I can define the residual 
+\begin{equation}
+f=- \div \left( \frac{1}{\sigt} \div \left( \Edd \phi \right) \right)  + (\siga) \phi - \scalSource
+\end{equation}
+which is the steady state equation, and muse about how that term must be dealt with accurately to produce time evolution. 
+Doing sensitivity we want an operator $A \phi = b$ which the above isn't exactly due to the $\vec{J}$. In addition to $\Edd$ is is reasonable to store some vector value like $\vec{g}=\frac{\vec{J}}{\phi}$? That way there is a well defined $A$ operator to perform the adjoint process on.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{\uppercase{APPENDIX: Detailed VET Boundary Term Derivation}} \label{chap:appx2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Represent the value $\isigt \div \Edd \phi$ by some vector $\vec{v}$. 
+\begin{equation}
+\begin{split}
+- \bra \div \left( \isigt \div \Edd \phi \right), \vefadj \ket
+&= - \int_V dV \, \vefadj  \left( \div \left( \isigt \div \Edd \phi \right) \right) \\
+&= - \int_V dV \, \vefadj  \left( \div \vec{v}\right)
+\end{split}
+\end{equation}
+Then use a product rule $\div (\vec{v} \varphi^\dag) = \varphi^\dag (\div \vec{v}) + \vec{v} \cdot (\grad \varphi^\dag)  $. Use the divergence theorem on the $\div (\vec{v} \varphi^\dag)$ term to convert to a surface integral
+\begin{equation}
+\begin{split}
+- \int_V dV \, \vefadj  \left( \div \vec{v}\right) &= - \int_V dV \, \div (\vec{v} \varphi^\dag) + \int_V dV \, \vec{v} \cdot (\grad \varphi^\dag) \\
+&= - \oint_{\bound} dS \, (\vec{v} \varphi^\dag) \cdot \vn + \int_V dV \, \vec{v} \cdot (\grad \varphi^\dag) \\
+&= - \oint_{\bound} dS \, \left( \left( \isigt \div \Edd \phi \right) \varphi^\dag \right) \cdot \vn + \int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) \\
+&= - \sbra \left(  \isigt \div \Edd \phi \right)  \cdot \vn , \varphi^\dag\sket + \int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) \\
+\end{split}
+\end{equation}
+Turn focus to the remaining volume integral. Define the vector $\vec{u} = \isigt \grad \varphi^\dag$. Breakout $\Edd$ into component vectors $\vec{E}$ 
+\begin{equation}
+\begin{split}
+\int_V dV \, \left( \isigt \div \Edd \phi \right) \cdot (\grad \varphi^\dag) 
+& = \int_V dV \, \left( \div \Edd \phi \right) \cdot \vec{u} \\
+& = \int_V dV \, \sum_{n=x,y,z} \left( \div \vec{E}_n \phi \right) u_{n} \\
+& = \sum_{n=x,y,z} \int_V dV \, \left( \div \vec{E}_n \phi \right) u_{n} \\
+& = \sum_{n=x,y,z} \left[ \int_V dV \,  \div \left( \vec{E}_n \phi u_n \right) - \int_V dV (\vec{E}_n \phi) \cdot \grad u_n  \right] \\
+& = \sum_{n=x,y,z} \left[ \oint_{\bound} dS \,  \vec{E}_n \phi u_n \cdot \vn - \int_V dV (\vec{E}_n \phi) \cdot \grad u_n  \right] \\
+& = \oint_{\bound} dS \,  \phi \left( \vec{E} \cdot \vec{u} \right) \cdot \vn - \int_V dV \phi \left( \Edd : \grad \vec{u} \right) \\
+& = \oint_{\bound} dS \,  \phi \left( \vec{E} \cdot \isigt \grad \varphi^\dag \right) \cdot \vn - \int_V dV \phi \left( \Edd : \grad \isigt \grad \varphi^\dag \right) \\
+& = \sbra \phi , \vec{E} \cdot \isigt \grad \varphi^\dag \cdot \vn \sket - \bra \phi , \Edd : \grad \isigt \grad \varphi^\dag \ket \\
+\end{split}
+\end{equation}
+Putting everything together
+\begin{equation}
+\begin{split}
+- \bra \div \left( \isigt \div \Edd \phi \right), \vefadj \ket
+=& - \bra \phi , \Edd : \grad \isigt \grad \varphi^\dag \ket  
++ \sbra \phi , \vec{E} \cdot \isigt \grad \varphi^\dag \cdot \vn \sket  \\
+&- \sbra \left(  \isigt \div \Edd \phi \right)  \cdot \vn , \varphi^\dag \sket\\
+\end{split}
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{ \uppercase{ APPENDIX: Additional Flux Graphs showing 2$\varphi$ and 2$\varphi^\dag$}} \label{chap:appx3}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Additional graphs showing $\varphi$ and $\varphi^\dag$ scaled by a factor of 2, showing the difference between $\phi$ and $\varphi$ values is more than just the apparent factor of two
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phi2.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/22phia2.png}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the homogeneous system, including $2\varphi$ and $2\varphi^\dag$ }
+\label{fig:Flux1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phi2.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/24phia2.png}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the shielding system, including $2\varphi$ and $2\varphi^\dag$ }
+\label{fig:Flux1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phi2.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phia2.png}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the Reed system, including $2\varphi$ and $2\varphi^\dag$ }
+\label{fig:Flux1}
+\end{figure}
+
+
+
+\end{appendices}
+
+%The next line is the format for inserting new sections.
+%Replace the name "newsection"  with the name of your
+%new section file.
+%\include{data/newsection}
 
 
 \end{document}

@@ -1,4 +1,4 @@
-function d_qoi = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E,snphia,snpsia)
+function [d_qoi ,parts] = compute_perturbed_qoi_VEF(use_forward_flux,phia,phi_unpert,E,snphia,snpsia)
 
 global npar dat snq IO_opts
 
@@ -9,6 +9,8 @@ end
 if nargin>5
     blended=2;
 end
+
+parts=zeros(4,1);
 
 % source data (volumetric)
 if use_forward_flux
@@ -53,6 +55,7 @@ for i=1:porder+1
     end
 end
 d_qoi=0;
+val=0;
 
 % loop over elements
 for iel=1:npar.nel
@@ -68,19 +71,27 @@ for iel=1:npar.nel
     delta_qext = dat.sourcePert(my_zone);
     Jac   = npar.dx(iel)/2;
     % assemble
+    %Source Perturbation terms
     if blended>0
-        d_qoi = d_qoi + Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/ snq.sw) ;
+        val=Jac*dot(snphia(:,iel), m*ones(2,1)*delta_qext/ snq.sw);
     else
-        d_qoi = d_qoi + Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext) ;
+        val=Jac*dot(phia(:,iel), m*ones(2,1)*delta_qext); 
     end
-    d_qoi = d_qoi - Jac*delta_siga*dot(phia(:,iel), m*phi_unpert(:,iel));
+    parts(1)=parts(1)+val;
+    d_qoi = d_qoi + val;
+    %Absorption dQoI  Terms
+    val = - Jac*delta_siga*dot(phia(:,iel), m*phi_unpert(:,iel));
+    parts(2)=parts(2)+val;
+    d_qoi = d_qoi +val;
     %%Think I need to redo the below, once I figure out the
     for i=1:porder+1
         for j=1:porder+1
             k(i,j)= dot(wq.*dbdx(:,i) , Eloc.*dbdx(:,j)+dEdx*b(:,j));
         end
     end
-    d_qoi = d_qoi - delta_isigtr/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
+    val= - delta_isigtr/Jac*dot(phia(:,iel), k*phi_unpert(:,iel));
+    parts(3)=parts(3)+val;
+    d_qoi = d_qoi +val;
 end
 
 if IO_opts.show_dqoi_pre_bc
@@ -117,6 +128,8 @@ if blended==2
         error('in %s, angular adjoint boundary src must be zero',mfilename);
     end
     % right extremity: vo.vn = vo.ex
+    parts(4)= parts(4) - dot(snq.w'.*snq.mu.*psi_rite,psia_rite);
+    parts(4)=parts(4) + dot(snq.w'.*snq.mu.*psi_left,psia_left);
     d_qoi = d_qoi - dot(snq.w'.*snq.mu.*psi_rite,psia_rite);
     % left extremity: vo.vn = -vo.ex
     d_qoi = d_qoi + dot(snq.w'.*snq.mu.*psi_left,psia_left);
@@ -145,5 +158,7 @@ else
         fprintf('BCqoiRite value %g  \n',BCqoiRite);
         fprintf('BCqoiLeft value %g  \n',BCqoiLeft);
     end
+    parts(4)= parts(4) + BCqoiLeft;
+    parts(4)=parts(4) + BCqoiRite;
     d_qoi = d_qoi + BCqoiLeft + BCqoiRite;
 end

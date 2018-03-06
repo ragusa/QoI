@@ -259,13 +259,13 @@ hold on
 xlabel('q % change, - \sigma_a % change')
 ylabel('QoI % response')
 plot(sourcePertFactor,twoSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(sourcePertFactor,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(sourcePertFactor,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sourcePertFactor,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'qsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -314,13 +314,13 @@ hold on
 xlabel('\Psi^- % change, - \sigma_a % change')
 ylabel('QoI % response')
 plot(incPertFactor,twoSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(incPertFactor,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(incPertFactor,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(incPertFactor,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'incsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -336,13 +336,13 @@ hold on
 xlabel('\sigma_a % change')
 ylabel('QoI % response')
 plot(sigaPertFactor,sigaSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(sigaPertFactor,sigaSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(sigaPertFactor,sigaSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sigaPertFactor,sigaSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigaPertFactor,sigaSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigaPertFactor,sigaSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigaPertFactor,sigaSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigaPertFactor,sigaSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -356,13 +356,13 @@ hold on
 xlabel('\sigma_s % change')
 ylabel('QoI % response')
 plot(sigsPertFactor,sigsSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(sigsPertFactor,sigsSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(sigsPertFactor,sigsSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sigsPertFactor,sigsSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigsPertFactor,sigsSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigsPertFactor,sigsSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigsPertFactor,sigsSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigsPertFactor,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -376,13 +376,13 @@ hold on
 xlabel('q % change')
 ylabel('QoI % response')
 plot(sourcePertFactor,qSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(sourcePertFactor,qSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(sourcePertFactor,qSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sourcePertFactor,qSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor,qSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor,qSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor,qSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor,qSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
 dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
@@ -396,13 +396,13 @@ hold on
 xlabel('\Psi^- % change')
 ylabel('QoI % response')
 plot(incPertFactor,incSensValues(:,1)./(results.qoi_sn_f),'-+g')
-plot(incPertFactor,incSensValues(:,2)./(results.qoi_sn_f),'-or')
+%plot(incPertFactor,incSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(incPertFactor,incSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor,incSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor,incSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor,incSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor,incSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incSens'];
 dataFile=['data\',int2str(dat.pb_ID),'inc.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});

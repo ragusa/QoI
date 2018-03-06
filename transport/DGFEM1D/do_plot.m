@@ -36,6 +36,7 @@ if ~init
 end
 % markers
 my_markers = ['+', 'o', 's', '*', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
+my_markers = ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'];
 [n1,n2]=size(dat.leg{(figID+1)});
 sss=sprintf('%s-',my_markers(n1));
 figure(1+figID); hold all;

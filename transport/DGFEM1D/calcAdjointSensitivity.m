@@ -4,7 +4,7 @@ global npar dat snq IO_opts results
 sn=snq.n_dir;
 %Basic Adjoint sensitivities
 results.delta_qoi_sn_a = compute_perturbed_qoi_Sn(dat.adjoint_flux,results.phia,results.phi,results.psi,results.psia,sn);
-results.delta_qoi_VEF_a = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E);
+[results.delta_qoi_VEF_a, results.dqoiparts_VEF_a] = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E);
 results.delta_qoi_blend_a = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phiVEF,results.E,results.phia,results.psia);
 results.delta_qoi_VEF_SNphi = compute_perturbed_qoi_VEF(dat.adjoint_flux,results.phiVEFa,results.phi,results.E);
 %Some other unrealistic methods (using values we wouldnt expect to have)

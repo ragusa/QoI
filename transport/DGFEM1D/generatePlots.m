@@ -9,7 +9,7 @@ do_plot(results.phiAltVEF,'AltVET',0,dat.forward_flux)
 
 do_plot(results.phia,'Sn',100,dat.adjoint_flux)
 do_plot(results.phiVEFa,'VET',100,dat.adjoint_flux)
-do_plot(2*results.phiVEFa,'2*VET',100,dat.adjoint_flux)
+%do_plot(2*results.phiVEFa,'2*VET',100,dat.adjoint_flux)
 do_plot(results.phiAltVEFa,'AltVET',100,dat.adjoint_flux)
 
 do_plot(results.E,'E',150,dat.forward_flux,1)

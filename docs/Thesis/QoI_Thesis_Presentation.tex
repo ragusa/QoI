@@ -79,6 +79,8 @@
 \newcommand{\qoi}{{\it QoI}\xspace}
 \newcommand{\tcr}[1]{\textcolor{red}{#1}}
 \newcommand{\tcb}[1]{\textcolor{blue}{#1}}
+\newcommand{\tcm}[1]{\textcolor{magenta}{#1}}
+\newcommand{\tcg}[1]{\textcolor{orange}{#1}}
 
 
 % nicer item settings
@@ -128,18 +130,19 @@
 
 \begin{frame}[t]\frametitle{Motivation}
 \begin{flushleft}
-Adjoint methods provide a mechanism for propagating uncertainty and error in the system variables to the uncertainty in the desired quantity of interest (\qoi). 
-\vspace{3mm}
+Adjoint methods provide a mechanism for propagating uncertainty in the system variables to the uncertainty in the desired \tcr{quantity of interest} (\qoi). 
+\vspace{2mm}
 In general adjoint methods 
 have the advantages
 \begin{itemize}
-\item No additional solves required to find the change in \qoi, $\delta$\qoi
+\item No additional solves required to find the change in \tcr{\qoi, $\delta$\qoi}
 \item Change in \qoi is found using a simple inner product
 \end{itemize}
 \vspace{3mm}
-While adjoint methods can greatly reduce the number of system solves required for sensitivity calculations, for transport memory usage may become an issue. To compute $\delta \qoi$, adjoint transport requires storing both the forward angular $\psi$ and adjoint angular $\psi^\dag$ fluxes. This is prohibitive for \tcr{time-dependent transport} where angular fluxes must be stored \tcr{for each timestep}.
+While adjoint methods can greatly reduce the number of system solves required for sensitivity calculations, \tcr{for transport} memory usage may become an issue. To compute $\delta \qoi$, adjoint transport requires storing both the forward angular $\psi$ and adjoint angular $\psi^\dag$ fluxes. This is prohibitive for \tcr{time-dependent transport} where angular fluxes must be stored \tcr{for each timestep}.
+\vspace{2mm}
 \begin{itemize}
-\item consider a quasi-diffusion approach to reduce the dimensionality, so only scalar fluxes are stored
+\item consider a \tcr{quasi-diffusion approach to reduce the dimensionality}, so only scalar fluxes are stored
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -162,9 +165,13 @@ We will consider a simple transport system
 \begin{frame}\frametitle{Methods Considered}
 \begin{flushleft}
 \begin{itemize}
-\item Present transport equation along with the transport adjoint
-\item Formulate a Variable Eddington Tensor (VET) system from the transport equation and corresponding adjoint
-\item Refine the VET method in two ways: one leveraging the transport adjoint and another for estimating Eddington perturbation
+\item Present \tcr{transport} equation along with the \tcr{transport adjoint}
+\item Formulate a \tcb{Variable Eddington Tensor (VET)} system from the transport equation and \tcb{corresponding adjoint}
+\item Refine the VET method in two ways
+\begin{itemize} 
+\item one leveraging the transport adjoint
+\item another estimating Eddington perturbation
+\end{itemize}
 \item Formulate a Adjoint Variable Eddington Tensor (aVET) system from the \tcr{adjoint transport} equation and corresponding adjoint
 \end{itemize}
 \end{flushleft}
@@ -180,7 +187,7 @@ We will consider a simple transport system
 \label{Trial1}
 \centering
   \centering
-  \includegraphics[scale=0.4]{figures2/RoadMap.png}
+  \includegraphics[scale=0.4]{figures2/BigRoadMap.png}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -197,7 +204,7 @@ We will consider a simple transport system
 \label{Trial1}
 \centering
   \centering
-  \includegraphics[scale=0.4]{figures2/RoadMap1.png}
+  \includegraphics[scale=0.4]{figures2/BigRoadMap1.png}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -207,7 +214,7 @@ We will consider a simple transport system
 
 \begin{frame}\frametitle{\qoi Computed Using Transport}
  \begin{flushleft}
-To begin, consider the one-group transport system with isotropic source $q$ and scattering $\sigs$
+To begin, consider the one-group steady state transport system with isotropic source $q$ and scattering $\sigs$
 \begin{subequations}
 \begin{equation}
 \label{SNfwd}
@@ -221,7 +228,7 @@ We are concerned with a volumetric and isotropic \qoi given by $\scalResp$
 \begin{equation}
 \begin{split}
 \qoi 	
-&= \braSN \psi , \scalResp \ketSN \equiv \int_V \int_\Omega \psi \scalResp \, d\Omega dV \\
+&:= \braSN \psi , \tcr{\scalResp} \ketSN \equiv \int_V \int_\Omega \psi \scalResp \, d\Omega dV \\
 &= \bra \phi , \scalResp \ket \equiv \int_V \phi \scalResp \, dV \\
 \end{split}
 \end{equation} 
@@ -237,15 +244,15 @@ This presents the most straightforward (and most expensive) way to determine the
 \begin{subequations}
 \begin{equation}
 \label{SNfwdp}
-\vO \cdot \grad \psi_p + ( \sigt + \delta \sigt) \psi_p = \frac{\sigs+\delta \sigs}{4 \pi} \phi_p + \angSourcepd
+\vO \cdot \grad \psi_{\tcr{p}} + ( \sigt + \tcb{\delta \sigt}) \psi_{\tcr{p}} = \frac{\sigs+ \tcb{\delta \sigs}}{4 \pi} \phi_{\tcr{p}} + \frac{q + \tcb{\delta q}}{4 \pi}
 \end{equation}
 \begin{equation}
-\psi(\vr) = \psi_p^{ \text{inc}}(\vr) \quad \vr \in \partial V^{-} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
+\psi(\vr) = \psi_{\tcr{p}}^{ \text{inc}}(\vr) \quad \vr \in \partial V^{-} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
 \end{equation}
 \end{subequations}
 Leading to the simple result
 \begin{equation}
-\delta \qoi = \bra \phi_p , \scalResp \ket - \bra \phi , \scalResp \ket = \bra \delta \phi , \scalResp \ket 
+\delta \qoi = \bra \phi_{\tcr{p}} , \scalResp \ket - \bra \phi , \scalResp \ket = \bra \delta \phi , \scalResp \ket 
 \end{equation} 
 \end{flushleft}
 \end{frame}
@@ -287,13 +294,13 @@ Through the standard adjoint method a surface term is added in the \qoi
 \label{snSensPart}
 \begin{split}
 \qoi_p 
-&:=\braSN \psi_p , \angResp \ketSN \\
-&=\braSN \psi_p , \tcr{- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  }\ketSN \\
+&:=\braSN \psi_p , \tcg{\angResp} \ketSN \\
+&=\braSN \psi_p , \tcg{- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag - \frac{\sigs}{4 \pi} \phi^\dag  }\ketSN \\
 &=\braSN  \vO \cdot \grad \psi_p + \sigt \psi_p - \frac{\sigs}{4 \pi} \phi_p , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \\
-&= \braSN  \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p - \delta\sigt\psi_p - \frac{\sigma_{s,p}}{4 \pi} \phi_p
-+\frac{\delta \sigs}{4 \pi} \phi_p
+&= \braSN \tcm{ \vO \cdot \grad \psi_p + \sigma_{t,p}\psi_p} - \delta\sigt \tcr{\psi_p} \tcm{- \frac{\sigma_{s,p}}{4 \pi} \phi_p}
++\frac{\delta \sigs}{4 \pi} \tcr{\phi_p}
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN \\
-&\tcr{\approx} \braSN  \angSourcepd - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
+&\tcr{\approx} \braSN \tcm{ \angSourcepd } - \delta\sigt \tcb{\psi} + \frac{\delta \sigs}{4 \pi} \tcb{\phi}
  , \psi^\dag  \ketSN - \sbraSN \psi_p, \psi^\dag \sketSN
 \end{split}
 \end{equation}
@@ -311,8 +318,8 @@ Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
 \delta \qoi 
 &\approx \braSN  \angSourced - \delta\sigt\psi + \frac{\delta \sigs}{4 \pi} \phi
  , \psi^\dag  \ketSN - \sbraSN \delta \psi, \psi^\dag \sketSN \\
- &= \bra \angSourced, \phi^\dag \ket - \tcr{\braSN \delta\sigt\psi , \psi \dag \ketSN} + \bra \frac{\delta \sigs}{4 \pi} \phi
- , \phi^\dag \ket - \sbraSN \delta \psi, \psi^\dag \sketSN \\
+ &= \bra \angSourced, \phi^\dag \ket - \tcr{\braSN \delta\sigt\psi , \psi^\dag \ketSN} + \bra \frac{\delta \sigs}{4 \pi} \phi
+ , \phi^\dag \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN \\
 \end{split}
 \end{equation}
 Pros
@@ -323,7 +330,7 @@ Pros
 Cons
 \begin{itemize}
 \item Only first-order perturbation accurate ($\delta \sigs \delta \phi=0$, $\delta \sigt \delta \phi=0$)
-\item Need to store angular dependent $\psi$ and $\psi^\dag$, which can be prohibitive for time-dependent problems
+\item Need to store angular dependent $\psi$ and $\psi^\dag$, which is prohibitive for time-dependent problems
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -337,7 +344,7 @@ Cons
 \label{Trial1}
 \centering
   \centering
-  \includegraphics[scale=0.4]{figures2/RoadMap2.png}
+  \includegraphics[scale=0.4]{figures2/BigRoadMap2.png}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -362,10 +369,10 @@ Combine into the VET formulation \cite{Miften}
 \begin{subequations}
 \begin{equation}
 \label{VEFForm}
-- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \, \vr \in V 
+- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \, \quad \vr \in V 
 \end{equation}
 \begin{equation}
-2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \, \vr \in \bound
+2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,\quad  \vr \in \bound
 \end{equation}
 \end{subequations}
 If exact $\Edd$ and $\BEdd$ are know, then $\phi^{\text{VET}} = \phi^{\text{SN}}$
@@ -375,7 +382,7 @@ If exact $\Edd$ and $\BEdd$ are know, then $\phi^{\text{VET}} = \phi^{\text{SN}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Formulation Adjoint}
+\begin{frame}\frametitle{VET Adjoint Formulation}
  \begin{flushleft}
 To derive an expression for the VET adjoint equation $\vefadj$, start with the forward VET balance equation, Eq.~\eqref{VEFForm}
 \begin{equation}
@@ -394,7 +401,7 @@ Where the inner product $\sbra f ,g \sket = \oint_{\partial V} fg \, dS$ has bee
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{VET Formulation Adjoint}
+\begin{frame}\frametitle{VET Adjoint Formulation}
  \begin{flushleft}
 From the previous balance equation, an obvious form of the VET adjoint emerges
 \begin{subequations}
@@ -408,7 +415,7 @@ From the previous balance equation, an obvious form of the VET adjoint emerges
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj,    \quad \vr \in \bound
 \end{equation}
 \end{subequations}
-Choosing $2J^{\dag,\text{out}} =0$ results in the relatively simple \qoi expression using this new formulation
+Choosing $J^{\dag,\text{out}} =0$ results in the relatively simple \qoi expression using this new formulation
 \begin{equation}
 \label{adjVETqoi}
 \qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket
@@ -423,7 +430,7 @@ Of particular note is that $ \phi^\dag \neq \vefadj$
 
 \begin{frame}\frametitle{Sensitivity Using VET Adjoint}
  \begin{flushleft}
-Now an assumption is made that the $\Edd$ and $\BEdd$ remain unperturbed under system perturbation. Note $\ell_t = \frac{1}{\sigt}$
+Now an assumption is made that the \tcr{$\Edd$ and $\BEdd$ remain unperturbed under system perturbation}. Note $\ell_t = \frac{1}{\sigt}$
 \begin{equation}
 \label{VETSensDeriv}
 \begin{split}
@@ -466,7 +473,7 @@ Cons
 \end{frame}
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{``Blended'' Approach}
+\begin{frame}\frametitle{Refinement Option 1: ``Blended'' Approach}
  \begin{flushleft}
 Form a $\delta \qoi$ inner-product by picking the exact source terms from \tcr{SN adjoint Eq.~\eqref{snSens}} and cross-section terms from \tcb{VET formulation adjoint Eq.~\eqref{VETsens}}
 \begin{equation}
@@ -490,11 +497,11 @@ Cons
 \end{flushleft}
 \end{frame}
 
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Estimate $\delta \Edd$}
+\begin{frame}\frametitle{Refinement Option 2: Estimate $\delta \Edd$}
  \begin{flushleft}
 Attempt to approximate by taking the slope with respect to perturbation parameters $\vp$
 \begin{equation}
@@ -504,8 +511,8 @@ Attempt to approximate by taking the slope with respect to perturbation paramete
 \label{VETsens}
 \begin{split}
 \delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
-& - \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket
-- \sbra \vefadj, \phi \delta \BEdd \sket
+& - \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
+- \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket
 \end{split}
 \end{equation}
 Pros
@@ -529,7 +536,7 @@ Cons
 \label{Trial1}
 \centering
   \centering
-  \includegraphics[scale=0.4]{figures2/RoadMap3.png}
+  \includegraphics[scale=0.4]{figures2/BigRoadMap3.png}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -542,9 +549,9 @@ Cons
 Reverse the order of the VET derivation, start with \tcr{adjoint} P1 and work towards an alternate forward $\varphi$
 \begin{equation}
 \label{0amAlt}
--\div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = 4\pi \scalResp 
+\tcr{-}\div \vec{J}^\dag + (\sigt-\sigs) \phi^\dag  = \tcr{4\pi} \scalResp 
 , \quad \quad 
--\div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0
+\tcr{-}\div \left(  \int d\Omega \vO \vO \psi^\dag  \right) + \sigt \vec{J}^\dag  = 0
 \end{equation}
 \begin{equation}
 \Edd^\dag(\vr)=\frac{\int d\Omega \vO \vO \psi^\dag(\vr,\vO)}{\phi^\dag(\vr)}
@@ -568,7 +575,7 @@ Gives the familiar form
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Adjoint-VET (Alternate VET)}
+\begin{frame}\frametitle{Adjoint-VET (aVET)}
  \begin{flushleft}
 Adjoint of this Alternate VET is proposed
 \begin{subequations}
@@ -605,14 +612,14 @@ Perturbations are introduced in the adjoint transport system, which perturbs the
 \begin{equation}
 \begin{split}
 QoI_p 
-&= \bra \phi^\dag_p , \angSourcepd \ket  - \sbraSN \psi^\dag,  \psi \sketSN  \\
-&= \bra \phi^\dag_p , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket + \bra \phi^\dag_p , \angSourced \ket - \sbraSN \psi^\dag,  \psi \sketSN  \\
-&\tcr{\approx} \bra 4 \pi \scalResp + 4 \pi\delta \scalResp , \varphi \ket + \bra\div \left( \delta \isigt \div \Edd^\dag \tcr{\phi^\dag}  \right), \varphi \ket - \bra \delta \siga \tcr{\phi^\dag} , \varphi \ket  \\
-& \quad + \bra \tcr{\phi^\dag} , \angSourced \ket - \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  -\sbraSN \psi^\dag,  \psi \sketSN   \\
+&= \bra \phi^\dag_p , \angSourcepd \ket  - \sbraSN \psi^\dag_p,  \psi \sketSN  \\
+&= \bra \phi^\dag_p , - \Edd^\dag : \grad \left( \frac{1}{\sigt}\grad \varphi \right) + \siga \varphi \ket + \bra \phi^\dag_p , \angSourced \ket - \sbraSN \psi^\dag_p,  \psi \sketSN  \\
+&\tcr{\approx} \bra 4 \pi \scalResp + 4 \pi \tcb{\delta \scalResp} , \varphi \ket + \bra\div \left( \delta \isigt \div \Edd^\dag \tcr{\phi^\dag}  \right), \varphi \ket - \bra \delta \siga \tcr{\phi^\dag} , \varphi \ket  \\
+& \quad + \bra \tcr{\phi^\dag} , \angSourced \ket - \sbra \phi_p^\dag, 2J^{\text{inc}} \sket + \sbra \varphi , 2 J^{\dag,\text{out}} - \delta \isigt \div \Edd \phi^\dag \sket  -\sbraSN \psi^\dag,  \psi_p \sketSN   \\
 \end{split}
 \end{equation} 
 \end{flushleft}
-quad \end{frame}
+\end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
@@ -622,8 +629,8 @@ quad \end{frame}
 \begin{flushleft}
 Some cleanup gives 
 \begin{equation}
-\delta \qoi = \bra \delta q^\dag, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
-- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN
+\delta \qoi = \bra \tcb{\delta q^\dag}, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
+- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \tcr{\psi^{\dag \text{inc}}_p}\sketSN
 \end{equation}
 Pros
 \begin{itemize}
@@ -633,16 +640,39 @@ Pros
 \end{itemize}
 Cons
 \begin{itemize}
+\item Due to boundary term, cannot be used with incident flux systems. 
 \item Assumes an unperturbed $\Edd^\dag$ and $\BEdd^\dag$
 \item Not exact for perturbed response $\delta q^\dag$, which was trivial for forward transport derived methods.: $\bra \phi, \delta q^\dag \ket$
 \end{itemize}
 \end{flushleft}
 \end{frame}
 
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}\frametitle{Summary of methods}
+\begin{flushleft}
+\begin{table}[H]
+\centering
+  \begin{tabular}{| l | l |}
+    \hline
+    Method  &  $\delta \qoi$ Inner Product \\ \hline
+     Transport 			&$\bra \tcr{\phi_{p}} , \scalResp \ket - \bra \phi , \scalResp \ket = \bra \delta \phi , \scalResp \ket $ \\ \hline
+     Trans Adj  			&$\bra \angSourced, \phi^\dag \ket - \tcr{\braSN \delta\sigt\psi , \psi^\dag \ketSN} + \bra \frac{\delta \sigs}{4 \pi} \phi
+ , \phi^\dag \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN$\\ \hline
+     VET Adj			&$ \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket$\\ \hline
+     VET Blend			&$\bra \angSourced , \phi^\dag \ket - \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket 
+- \sbraSN \delta \psi^\text{inc}, \psi^\dag \sketSN $\\ \hline
+     VET $\delta \Edd$ 	&VET Adj $- \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
+- \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket$ \\ \hline
+     aVET			&$
+     \begin{array}{lcl}
+     &\bra \tcb{\delta q^\dag}, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
+- \bra \delta \siga \phi^\dag , \varphi \ket \\ &+ \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \tcr{\psi^{\dag \text{inc}}_p}\sketSN 
+\end{array}$ \\ \hline
+    \end{tabular}
+  \caption{Summary of Methods. For response perturbation $\delta q^\dag$, the straightforward $\bra \phi , \delta q^\dag \ket $ had been omitted from all methods except aVET.}
+\end{table}
+\end{flushleft}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Test Cases}	% define sections here, it is possible to get section slides automatically, but this is not enabled
 \subsection{}	% we have to keep these to get the navigation
@@ -750,7 +780,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
           	 \begin{itemize}
 			      \item $\siga=1$, $\sigs=1$
 			      \item $q=2$, $\psi^{\text{inc}}=0$
-			      \item $\qoi = \int_4^6 \phi \, dx$
+			      \item $\qoi = \int_4^6 \phi \, dx$. Means same adjoint flux as previous case.
 			      \item \textcolor{red}{Perturbed for $0 \leq x \leq 6$}
   			 \end{itemize} 
             \end{flushleft}
@@ -759,13 +789,13 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \centering
 \begin{subfigure}{0.45\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/23phi.png}
+  \includegraphics[width=.98\linewidth]{figures2/23phip.png}
   \label{T1:sfig1}
 \end{subfigure}
 %
 \begin{subfigure}{0.45\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/23phia.png}
+  \includegraphics[width=.98\linewidth]{figures2/23deltaE.png}
   \label{T1:sfig2}
 \end{subfigure}
 \end{figure}
@@ -778,28 +808,30 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{figure}[H]
 \label{Trial2}
+\begin{minipage}{.35\textwidth}
 \centering
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.45\textheight}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23qSens.png}
   \label{T1:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures2/23sigaSens.png}
-  \label{T1:sfig2}
-\end{subfigure}
-%
-\begin{subfigure}{.5\textheight}
+
+\begin{subfigure}{.45\textheight}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/23sigsSens.png}
-  \label{T1:sfig3}
-\end{subfigure}%
-\begin{subfigure}{.5\textheight}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures2/23qsigaSens.png}
-  \label{T1:sfig4}
 \end{subfigure}
+\end{minipage}
+\begin{minipage}{.60\textwidth}
+\begin{subfigure}{1\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/23sigaSens.png}
+\end{subfigure}%
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/23qsigaSens.png}
+%  \label{T1:sfig4}
+%\end{subfigure}
+\end{minipage}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -825,8 +857,8 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
         \begin{flushleft}
              Shielded system with isotropic incident flux
           	 \begin{itemize}
-			      \item Shield $\siga=0.5$, $\sigs=0.5$ for $1 \leq x  \leq 2$ (Vacuum else, $\sigt=1E-8$)
-			      \item $q=0$, $\psi^{\text{inc}}=1$ at $x=0$
+			      \item Shield $\siga=0.5$, $\sigs=0.5$ for $1 \leq x  \leq 2$ (Vacuum else, $\sigt=10^{-8}$)
+			      \item $q=0$, $\psi^{\text{inc}}=1$ for $\mu > 0$; $0$ else
 			      \item $\qoi = \int_3^4 \phi \, dx$
 			      \item $\sigs$, $\siga$ perturbed in shield
   			 \end{itemize} 
@@ -854,28 +886,30 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{figure}[H]
 \label{Trial3}
+\begin{minipage}{.35\textwidth}
 \centering
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24incSens.png}
-  \label{T3:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/24qSens.png}
+  \label{T1:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
+
+\begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24sigaSens.png}
-  \label{T3:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/24sigsSensNoavet.png}
 \end{subfigure}
-%
-\begin{subfigure}{.5\textheight}
+\end{minipage}
+\begin{minipage}{.60\textwidth}
+\begin{subfigure}{1\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24sigsSens.png}
-  \label{T3:sfig3}
+  \includegraphics[width=.98\linewidth]{figures2/24sigaSensNoavet.png}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures2/24incsigaSens.png}
-  \label{T3:sfig4}
-\end{subfigure}
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/24incsigaSens.png}
+%  \label{T3:sfig4}
+%\end{subfigure}
+\end{minipage}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -886,7 +920,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
  \begin{flushleft}
 \begin{itemize}
 \item For incident flux perturbations: Transport Adjdoint, blended, and aVET agree with transport forward. Slight deviation in others.
-\item For source perturbations: VET forward and VET adjoint show minor deviations $\approx 1 \%$.
+\item For source perturbations  VET adjoint shows minor deviations $\approx 1 \%$.
 \item About $5 \%$ error between VET adjoint and transport adjoint for $\delta \siga$. $\delta E$ approximation drops this to $0.5\%$.
 \item Somewhat stronger sensitivity to $\sigs$ perturbations, but still relatively weak.
 \item aVET appears to have strong deviations in this test for cross-section perturbations.
@@ -901,10 +935,10 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{frame}\frametitle{Shielded Incident Beam}
         \begin{flushleft}
-             Shielded system with mono-directional incident beam
+             Shielded system with grazing incident beam $\mu=0.1834$
           	 \begin{itemize}
-			      \item Shield $\siga=0.5$, $\sigs=0.5$ for $1 \leq x  \leq 2$ (Vacuum else, $\sigt=1E-8$)
-			      \item $q=0$, $\psi^{\text{inc}}=1$ at $x=0$
+			      \item Shield $\siga=0.5$, $\sigs=0.5$ for $1 \leq x  \leq 2$ (Vacuum else, $\sigt=10^{-8}$)
+			      \item $q=0$, $\psi^{\text{inc}}=2.7571$ for $\mu=0.1834$ ($N=5$); $0$ else
 			      \item $\qoi = \int_3^4 \phi \, dx$
 			      \item $\sigs$, $\siga$ perturbed in shield
   			 \end{itemize} 
@@ -932,28 +966,29 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{figure}[H]
 \label{Trial4}
+\begin{minipage}{.35\textwidth}
 \centering
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/25incSens.png}
-  \label{T3:sfig1}
+  \includegraphics[width=.98\linewidth]{figures2/25qSens.png}
+  \label{T1:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
+
+\begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/25sigaSens.png}
-  \label{T3:sfig2}
+  \includegraphics[width=.98\linewidth]{figures2/25sigsSensNoavet.png}
 \end{subfigure}
-%
-\begin{subfigure}{.5\textheight}
+\end{minipage}
+\begin{minipage}{.60\textwidth}
+\begin{subfigure}{1\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/25sigsSens.png}
-  \label{T3:sfig3}
+  \includegraphics[width=.98\linewidth]{figures2/25sigaSensNoavet.png}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
-  \centering
-  \includegraphics[width=.98\linewidth]{figures2/25incsigaSens.png}
-  \label{T3:sfig4}
-\end{subfigure}
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/25incsigaSens.png}
+%\end{subfigure}
+\end{minipage}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -963,44 +998,118 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{frame}\frametitle{Shielded Incident Beam}
  \begin{flushleft}
 \begin{itemize}
-\item Deviations in the aVET method are made worse with these boundary conditions.
-\item Similar behavior as isotropically incident case for other methods.
-\item May indicate that the boundary conditions for aVET needs to be reconsidered.
+\item VET/blended method fared worse for cross section perturbations, particularly scattering.
+\item $\delta \Edd$ approximation fared well and nearly reconciled transport adjoint and VET adjoint.
 \end{itemize}
 \end{flushleft}
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}\frametitle{Reed Problem}
+%        \begin{flushleft}
+%             More complex Reed system
+%          	 \begin{itemize}
+%				\item $x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 $\\
+%				\item $x \in [2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0$ \\
+%				\item $x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, q^\dag=0$ \\
+%				\item $x \in [5,6), \quad \siga=0.1, \, 		\sigs=0.9, \, q=1, \, q^\dag=0$ \\
+%				\item $x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, \tcr{q^\dag=1} $\\
+%  			 \end{itemize} 
+%            \end{flushleft}
+%\begin{figure}[H]
+%\label{Trial5}
+%\centering
+%\begin{subfigure}{0.45\textwidth}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7phi.png}
+%  \label{T1:sfig1}
+%\end{subfigure}
+%%
+%\begin{subfigure}{0.45\textwidth}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7phia.png}
+%  \label{T1:sfig2}
+%\end{subfigure}
+%\end{figure}
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}\frametitle{Reed Problem}
+% \begin{flushleft}
+%
+%\begin{figure}[H]
+%\label{Trial5}
+%\centering
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7qSens.png}
+%  \label{T3:sfig1}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7sigaSens.png}
+%  \label{T3:sfig2}
+%\end{subfigure}
+%%
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7sigsSens.png}
+%  \label{T3:sfig3}
+%\end{subfigure}%
+%\begin{subfigure}{.5\textheight}
+%  \centering
+%  \includegraphics[width=.98\linewidth]{figures2/7qsigaSens.png}
+%  \label{T3:sfig4}
+%\end{subfigure}
+%\end{figure}
+%\end{flushleft}
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}\frametitle{Reed Problem}
+% \begin{flushleft}
+%\begin{itemize}
+%\item Source perturbations still behave as expected.
+%\item Effect of $\delta \sigs$ more pronounced. VET forward, VET adjoint, blended, and aVET show deviations from transport methods. Eddington approximations reduces this. $\delta \Edd =0$ and $\delta \Edd^\dag=0$ approximation seemingly not valid here.
+%\end{itemize}
+%\end{flushleft}
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Reed Problem}
+\begin{frame}\frametitle{Reed Problem: QoI comparison}
         \begin{flushleft}
-             Core complex Reed system
+             More complex Reed system. For this consider two separate QoI scenarios corresponding to \tcb{$q^\dag_1$} and \tcr{$q^\dag_2$}. We focus scattering perturbations.
           	 \begin{itemize}
 				\item $x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 $\\
 				\item $x \in [2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0$ \\
-				\item $x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, q^\dag=0$ \\
+				\item $x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, \tcb{q^\dag_1=0}, \tcr{q^\dag_2=1}$, \\
 				\item $x \in [5,6), \quad \siga=0.1, \, 		\sigs=0.9, \, q=1, \, q^\dag=0$ \\
-				\item $x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, \tcr{q^\dag=1} $\\
+				\item $x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, \tcb{q^\dag_1=1}, \tcr{q^\dag_2=0} $
   			 \end{itemize} 
             \end{flushleft}
 \begin{figure}[H]
 \label{Trial5}
 \centering
-\begin{subfigure}{0.45\textwidth}
+\begin{subfigure}{0.35\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7phi.png}
+  \includegraphics[width=.98\linewidth]{figures2/7phiwp.png}
   \label{T1:sfig1}
 \end{subfigure}
 %
-\begin{subfigure}{0.45\textwidth}
+\begin{subfigure}{0.35\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7phia.png}
+  \includegraphics[width=.98\linewidth]{figures2/7Ewp.png}
   \label{T1:sfig2}
 \end{subfigure}
 \end{figure}
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}\frametitle{Reed Problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}\frametitle{Reed Problem: QoI comparison}
  \begin{flushleft}
 
 \begin{figure}[H]
@@ -1008,12 +1117,12 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \centering
 \begin{subfigure}{.5\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7qSens.png}
+  \includegraphics[width=.98\linewidth]{figures2/7phia.png}
   \label{T3:sfig1}
 \end{subfigure}%
 \begin{subfigure}{.5\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7sigaSens.png}
+  \includegraphics[width=.98\linewidth]{figures2/777phia.png}
   \label{T3:sfig2}
 \end{subfigure}
 %
@@ -1024,7 +1133,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \end{subfigure}%
 \begin{subfigure}{.5\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7qsigaSens.png}
+  \includegraphics[width=.98\linewidth]{figures2/777sigsSens.png}
   \label{T3:sfig4}
 \end{subfigure}
 \end{figure}
@@ -1033,16 +1142,40 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Reed Problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Reed Problem: QoI comparison}
  \begin{flushleft}
 \begin{itemize}
-\item Source perturbations still behave as expected.
-\item Effect of $\delta \sigs$ more pronounced. VET forward, VET adjoint, blended, and aVET show deviations from transport methods. Eddington approximations reduces this. $\delta \Edd =0$ and $\delta \Edd^\dag=0$ approximation seemingly not valid here.
+\item \qoi on right section fared fairly well for Eddington formulations, void \qoi did not
+\item In void \qoi, the $\delta \Edd$ approximation method reconciled quite a bit of the error between VET and transport. Indicating there is a large contribution from $ - \bra  \isigt \div \left( \delta \Edd \phi \right),\tcr{ \grad \vefadj_2 }\ket$. Note that in the void $\isigt$ is large 
+\item LHS of above product is the same for both scenarios, difference comes from behavior of $\tcr{ \grad \vefadj_2 }$
 \end{itemize}
 \end{flushleft}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}\frametitle{Reed Problem: QoI comparison term by term}
+\begin{flushleft}
+\begin{table}[H]
+\centering
+  \begin{tabular}{| l | r | r |}
+    \hline
+    Term  &  Right $q^\dag$ & Void  $q^\dag$\\ \hline
+    Unperturbed \qoi																	& 1.53202  & 2.21022 \\ \hline 
+     $+ \bra \delta \scalSource, \vefadj  \ket$											& 0 & 0\\ \hline
+     $- \bra \delta \siga \phi, \vefadj \ket$ 											& 0 & 0 \\ \hline
+     $- \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket$			& 0.0136565 & 0.00270713 \\ \hline
+     $+ \sbra \vefadj, 2 \delta J^{\text{inc}} \sket$										& 0 & 0\\ \hline
+     $- \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket$	& 0.00157771 & -0.0217348\\ \hline
+     $- \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket$									& 0.000122458 & 2.3291e-05 \\ \hline
+    \end{tabular}
+  \caption{Term by Term comparison of VET method and $\delta \Edd$ approximation method for both the Reed QoI's under a $+10\%$ scattering perturbation.}
+\end{table}
+\end{flushleft}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1054,15 +1187,14 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{frame}\frametitle{Takeaways}
 \begin{flushleft}
 \begin{itemize}
-\item All 4 VET formulations show ability to approximate $\delta \qoi$.
+\item All 4 VET formulations show ability to approximate $\delta \qoi$ in many of the test cases, response function in void shows issues for cross-section perturbations.
 
-\item Blended method may be a quick refinement over the straightforward VET.
+\item Blended method may offer a quick refinement over the straightforward VET, at the expense of an additional SN solve to get transport adjoint.
 
-\item $\delta \Edd$ method appears to work quite well, but requires additional SN solves. Potentially useful for computing over a very large perturbation space.
+\item $\delta \Edd$ method appears to work quite well, but requires additional SN solves to parameterize the perturbation space. 
 
-\item The Alternate VET method using $\varphi$ can deal with source perturbations quite better than $\varphi^\dag$ VET methods. (At the expense of response $q^\dag$ perturbations.
+\item The Alternate VET method using $\varphi$ can deal with source perturbations exactly, but cannot be used when there is an incident flux specified.
 
-\item The Alternate VET method shows issues with incident flux. May need to refine boundary conditions of the $\varphi$ equations.
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -1071,7 +1203,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{flushleft}
 \begin{itemize}
 \item Extend tests to 2D/3D. Strong sensitivity to $\sigs$ is difficult to test in the 1D system. Inability to scatter ``around'' obstacles.
-\item Potentially extend $\delta \Edd$ method to the $\varphi$ formulation.
+\item Potentially extend $\delta \Edd$ method to the aVET formulation.
 \item Alternate boundary conditions for VET method.
 \end{itemize}
 \end{flushleft}
@@ -1086,7 +1218,11 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{frame}\frametitle{Acknowledgments}
 \begin{flushleft}
-Graduate study was supported by a fellowship from Texas A\&M University and DOE Grant DE-NA0002376 
+\begin{itemize}
+\item Would like to thank my advisor Professor Jean C. Ragusa for invaluable help and heading my defense committee
+\item Also extend thanks to my defense committee members Professor Marvin L. Adams and Bojan Popov  
+\item Graduate study was supported by a  graduate assistantship from Texas A\&M University and DOE Grant DE-NA0002376 
+\end{itemize}
 \end{flushleft}
 \end{frame}
 
@@ -1149,7 +1285,7 @@ Graduate study was supported by a fellowship from Texas A\&M University and DOE 
 \end{flushleft}
 \end{frame}
 
-\begin{frame}\frametitle{Shielded Incident Flux}
+\begin{frame}\frametitle{Shielded Isotropic Flux}
  \begin{flushleft}
 \begin{table}[H]
 \centering

@@ -80,7 +80,7 @@
 \newcommand{\tcr}[1]{\textcolor{red}{#1}}
 \newcommand{\tcb}[1]{\textcolor{blue}{#1}}
 \newcommand{\tcm}[1]{\textcolor{magenta}{#1}}
-\newcommand{\tcg}[1]{\textcolor{orange}{#1}}
+\newcommand{\tcg}[1]{\textcolor{BlueGreen}{#1}}
 
 
 % nicer item settings
@@ -629,8 +629,11 @@ QoI_p
 \begin{flushleft}
 Some cleanup gives 
 \begin{equation}
-\delta \qoi = \bra \tcb{\delta q^\dag}, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
-- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket - \sbraSN \delta \psi^{\text{inc}}, \tcr{\psi^{\dag \text{inc}}_p}\sketSN
+\begin{split}
+\delta \qoi &= \bra \tcb{\delta q^\dag}, \varphi \ket - \bra\left( \delta \isigt \div \Edd^\dag \phi^\dag  \right), \grad \varphi \ket \
+- \bra \delta \siga \phi^\dag , \varphi \ket + \bra \delta q , \phi \ket \\
+&\quad - \sbraSN \delta \psi^{\text{inc}}, \tcr{\psi^{\dag \text{inc}}_p}\sketSN
+\end{split}
 \end{equation}
 Pros
 \begin{itemize}
@@ -642,7 +645,7 @@ Cons
 \begin{itemize}
 \item Due to boundary term, cannot be used with incident flux systems. 
 \item Assumes an unperturbed $\Edd^\dag$ and $\BEdd^\dag$
-\item Not exact for perturbed response $\delta q^\dag$, which was trivial for forward transport derived methods.: $\bra \phi, \delta q^\dag \ket$
+\item Not exact for perturbed response $\delta q^\dag$, which was trivial for forward transport derived methods. $\bra \phi, \delta q^\dag \ket$
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -890,7 +893,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \centering
 \begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/24qSens.png}
+  \includegraphics[width=.98\linewidth]{figures2/24incSens.png}
   \label{T1:sfig1}
 \end{subfigure}%
 
@@ -970,7 +973,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \centering
 \begin{subfigure}{.45\textheight}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/25qSens.png}
+  \includegraphics[width=.98\linewidth]{figures2/25incSens.png}
   \label{T1:sfig1}
 \end{subfigure}%
 
@@ -998,7 +1001,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{frame}\frametitle{Shielded Incident Beam}
  \begin{flushleft}
 \begin{itemize}
-\item VET/blended method fared worse for cross section perturbations, particularly scattering.
+\item VET/blended method was worse for cross section perturbations, particularly scattering, when compared to the isotropic incident.
 \item $\delta \Edd$ approximation fared well and nearly reconciled transport adjoint and VET adjoint.
 \end{itemize}
 \end{flushleft}
@@ -1083,7 +1086,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 \begin{frame}\frametitle{Reed Problem: QoI comparison}
         \begin{flushleft}
-             More complex Reed system. For this consider two separate QoI scenarios corresponding to \tcb{$q^\dag_1$} and \tcr{$q^\dag_2$}. We focus scattering perturbations.
+             More complex Reed system\cite{buchan}. For this consider two separate QoI scenarios corresponding to \tcb{$q^\dag_1$} and \tcr{$q^\dag_2$}. We focus scattering perturbations.
           	 \begin{itemize}
 				\item $x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 $\\
 				\item $x \in [2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0$ \\
@@ -1147,7 +1150,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{frame}\frametitle{Reed Problem: QoI comparison}
  \begin{flushleft}
 \begin{itemize}
-\item \qoi on right section fared fairly well for Eddington formulations, void \qoi did not
+\item \qoi in scattering section fared fairly well for Eddington formulations, void \qoi did not
 \item In void \qoi, the $\delta \Edd$ approximation method reconciled quite a bit of the error between VET and transport. Indicating there is a large contribution from $ - \bra  \isigt \div \left( \delta \Edd \phi \right),\tcr{ \grad \vefadj_2 }\ket$. Note that in the void $\isigt$ is large 
 \item LHS of above product is the same for both scenarios, difference comes from behavior of $\tcr{ \grad \vefadj_2 }$
 \end{itemize}
@@ -1204,7 +1207,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{itemize}
 \item Extend tests to 2D/3D. Strong sensitivity to $\sigs$ is difficult to test in the 1D system. Inability to scatter ``around'' obstacles.
 \item Potentially extend $\delta \Edd$ method to the aVET formulation.
-\item Alternate boundary conditions for VET method.
+\item Focus on streaming/void problems.
 \end{itemize}
 \end{flushleft}
 \end{frame}

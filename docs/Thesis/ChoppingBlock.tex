@@ -622,6 +622,76 @@ To generate a streaming system, we retain the 5 equal width sectioning of the pr
 \subsubsection{No absorption system}
 \todo{Manufactured solution. Create a system bounded by two QoI regions on each side. In the center of the region, have an arbitrary system of sources and pure scattering only. The bounding QoI regions should detect all of the neutrons produced by the sources in the system, since they are just scattered about and change direction. However, the Eddington perturbation may cause errors in the sensitivity.}
 
+
+\subsection{Reed Problem}
+As a final test, a more varied and complex Reed system\cite{buchan} is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, $\siga$ experiences perturbations in regions 1 and 4, $\sigs$ is perturbed in regions 4 and 5, and $q$ is perturbed in regions 1 and 4. The system has no incident flux. Response is taken in the right most region of the system $x \in [6,8]$.
+\begin{equation*}
+\begin{split}
+&\text{Region 1: } x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50, \, q^\dag=0 \\
+&\text{Region 2: } x \in [2,3), \quad \siga=5, \, 			\sigs=0, \, q=0, \, q^\dag=0 \\
+&\text{Region 3: } x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \, q^\dag=0 \\
+&\text{Region 4: } x \in [5,6), \quad \siga=0.1, \, 		\sigs=0.9, \, q=1, \, q^\dag=0 \\
+&\text{Region 5: } x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0, \, q^\dag=1 \\
+\end{split}
+\end{equation*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phi.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7phia.png}
+\end{subfigure}
+\caption{Plots of unperturbed scalar fluxes for the Reed problem. Forward fluxes $\phi$ and $\varphi$ show on the left, and adjoint fluxes $\phi^\dag$ and $\varphi^\dag$ on the right.}
+\label{Flux4}
+\end{figure}
+
+\begin{figure}[H]
+\label{Trial4}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7qSens.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7sigaSens.png}
+\end{subfigure}
+%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7sigsSens.png}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=.98\linewidth]{figures2/7qsigaSens.png}
+\end{subfigure}
+\caption{\qoi response to various perturbation scenarios for the Reed Problem.}
+\end{figure}
+
+The effect of scattering perturbations is more pronounced in the Reed problem. The response these scattering perturbations is also where the greatest differentiation between the transport and VET appears. The $\delta \Edd$ approximation method proves quite valuable for resolving difference the transport and VET methods due to scattering perturbations. For perturbations in the other system parameters, the VET method is within $10\%$ of those found by transport adjoint, and even the standard VET adjoint method is close for source perturbations.
+
+\begin{table}[H]
+\centering
+  \begin{tabular}{| l | r || r | r | r | r |}
+    \hline
+    Method  & $\qoi$ & $+10\% q $  & $-10\% \siga $ & $+10\% \sigs $ & $+10\% q,-10\% \siga$ \\ \hline
+     SN Fwd 			&1.75802 	&0.17580 &0.030945 &0.030235 & 0.20984\\ \hline
+     VET Fwd 			&1.75802 	&0.17561 &0.029105 &0.047568 &0.20763\\ \hline
+     SN Adj 			&1.75603  	&0.17580 &0.030401 &0.030450 &0.20620\\ \hline
+     VET Adj 			&1.75602  	&0.17561 &0.028580 &0.044778 &0.20419\\ \hline
+     Blended 			&-	 		&0.17580 &0.028580 &0.044778 &0.20438\\ \hline
+     VET $\delta \Edd$ 	&-		 	&0.17573 &0.030348 &0.027743 &0.20608\\ \hline
+     aVET		 		&1.75601 	&0.17580 &0.028632 &0.044497 &0.20443\\ \hline
+    \end{tabular}
+  \caption{Table of selected $\delta \qoi$ values for the Reed system under perturbations. The unperturbed $\qoi$ for various methods is given in the first column.}
+  \label{TableT4}
+\end{table}
+
+
 \newpage
 
 %%%%%%

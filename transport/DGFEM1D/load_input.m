@@ -116,8 +116,9 @@ switch pb_ID
         dat.sourcePertRegion=[1 0 0 1 0];
         dat.incPertRegion(1:sn) = 0;
         dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System'
         
-    case 777 % Reed (5-zone problem)
+    case 770 % Reed (5-zone problem)
         % number of elements per zone
         nel_zone = [ 10 10 10 10 10]*40;
         % width of each zone
@@ -130,7 +131,7 @@ switch pb_ID
         % incoming flux values
         incf(1:sn)   = 0;
         % volumetric source value, per zone
-        qva=[ 0 0 1 0 0];
+        qva=[1/2 0 0 0 0];
         % incoming flux values
         inca(1:sn)   = 0;
         %Regions to be perturbed. Use value of 1 to specify
@@ -139,8 +140,9 @@ switch pb_ID
         dat.sourcePertRegion=[1 0 0 1 0];
         dat.incPertRegion(1:sn) = 0;
         dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 1';
         
- case 778 % Reed (5-zone problem)
+ case 771 % Reed (5-zone problem)
         % number of elements per zone
         nel_zone = [ 10 10 10 10 10]*40;
         % width of each zone
@@ -149,11 +151,11 @@ switch pb_ID
         sigt=[50 5 1e-8 1 1 ];
         sigs=[ 0 0 0 0.9 0.9];
         % volumetric source value, per zone
-        qvf=[50 0 0 0 1];
+        qvf=[50 0 0 1 0];
         % incoming flux values
         incf(1:sn)   = 0;
         % volumetric source value, per zone
-        qva=[ 0 0 1 0 0];
+        qva=[ 0 1 0 0 0];
         % incoming flux values
         inca(1:sn)   = 0;
         %Regions to be perturbed. Use value of 1 to specify
@@ -162,6 +164,103 @@ switch pb_ID
         dat.sourcePertRegion=[1 0 0 1 0];
         dat.incPertRegion(1:sn) = 0;
         dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 2';
+        
+   case 772 % Reed (5-zone problem)
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 2 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 1e-8 1 1 ];
+        sigs=[ 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[ 0 0 1/2 0 0];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[1 0 0 1 0];
+        dat.sigsPertRegion=[0 0 0 1 1];
+        dat.sourcePertRegion=[1 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 3';
+        
+   case 773 % Reed (5-zone problem)
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 2 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 1e-8 1 1 ];
+        sigs=[ 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[ 0 0 0 1 0];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[1 0 0 1 0];
+        dat.sigsPertRegion=[0 0 0 1 1];
+        dat.sourcePertRegion=[1 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 4';
+        
+   case 774 % Reed (5-zone problem)
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 2 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 1e-8 1 1 ];
+        sigs=[ 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[ 0 0 0 0 1/2];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[1 0 0 1 0];
+        dat.sigsPertRegion=[0 0 0 1 1];
+        dat.sourcePertRegion=[1 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 5';
+        
+      case 775 % Reed (7-zone problem)
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 0.95 .1 0.95 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 1e-8 10 1e-8 1 1 ];
+        sigs=[ 0 0 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[ 0 0 0 1/0.1 0 0 0];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[1 0  0 0 0 1 0];
+        dat.sigsPertRegion=[0 0 0 0 0 1 1];
+        dat.sourcePertRegion=[1 0 0 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System w/ detector';
         
     case 8 % Adams (PIM)
         % number of elements per zone
@@ -429,6 +528,7 @@ switch pb_ID
         dat.sigsPertRegion=[1 1 1 1 1 1];
         dat.sourcePertRegion=[1 1 1 1 1 1];
         dat.incPertRegion(1:sn)=1;
+        dat.name='Homogeneous System';
         
  case 23 %Thesis test 2
         % number of elements per zone
@@ -451,6 +551,7 @@ switch pb_ID
         dat.sigsPertRegion=[1 1 1 1 0 0];
         dat.sourcePertRegion=[1 1 1 1 0 0];
         dat.incPertRegion(1:sn)=1;
+        dat.name='Inhomogeneous Perturbation';
         
  case 24 %Shield
         % number of elements per zone
@@ -475,6 +576,7 @@ switch pb_ID
         dat.sourcePertRegion=[0 0 0 0 0];
         dat.incPertRegion(1:sn) = 0;
         dat.incPertRegion((sn/2)+1:sn) = 1;
+        dat.name='Isotropic Incident System';
         
  case 25 %Shield
         % number of elements per zone
@@ -499,6 +601,7 @@ switch pb_ID
         dat.sourcePertRegion=[0 0 0 0 0];
         dat.incPertRegion(1:sn) = 0;
         dat.incPertRegion(5) = 1;
+        dat.name='Inicdent Beam System';
         
 %     case 25 %Uniform, 0 inc flux. Response on right
 %         % number of elements per zone
@@ -1174,6 +1277,10 @@ else
     error('fix load input');
     dat.qv_adjoint =qvf;
     dat.inc_adjoint = incf;
+end
+
+if ~isfield(dat,'name')
+    dat.name=['Problem ', int2str(pb_ID)];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%% prepare data for computation

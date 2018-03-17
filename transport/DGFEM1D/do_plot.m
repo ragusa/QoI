@@ -36,19 +36,19 @@ if ~init
 end
 % markers
 my_markers = ['+', 'o', 's', '*', 'd', 'v', '.', '^', '<', '>', 'p', 'h'];
-my_markers = ['.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'];
+my_markers = ['+', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'];
 [n1,n2]=size(dat.leg{(figID+1)});
 sss=sprintf('%s-',my_markers(n1));
 figure(1+figID); hold all;
 plot(npar.xf,reshape(phi,npar.ndofs,1),sss,'LineWidth',1);
 if is_E==1
-    title(sprintf('%s Eddington Tensor, problem %d',forward_txt,dat.pb_ID));
+    title(sprintf('%s Eddington Tensor, %s',forward_txt,dat.name));
     xlabel('x'); ylabel('E');
 elseif is_E==2
-    title(sprintf('%s Eddington Tensor Difference, problem %d',forward_txt,dat.pb_ID));
-    xlabel('x'); ylabel('Delta E');
+    title(sprintf('%s Eddington Tensor Difference, %s',forward_txt,dat.name));
+    xlabel('x'); ylabel('% Delta E');
 else
-    title(sprintf('%s scalar flux, problem %d',forward_txt,dat.pb_ID));
+    title(sprintf('%s scalar flux, %s',forward_txt,dat.name));
     xlabel('x'); ylabel('scalar flux');
 end
 % filename=sprintf('scal_%s_sn%i.png',tit,sn);

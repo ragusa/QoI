@@ -14,5 +14,7 @@ do_plot(results.phiAltVEFa,'AltVET',100,dat.adjoint_flux)
 
 do_plot(results.E,'E',150,dat.forward_flux,1)
 do_plot(results.E_pert,'Epert',150,dat.forward_flux,1)
-do_plot(results.E_pert-results.E,'Epert-E',151,dat.forward_flux,2)
+do_plot(results.E_pert-results.E,'$$\delta E$$',151,dat.forward_flux,2)
+
+do_plot(100*(results.E_pert-results.E)./results.E,'$$\delta E$$ ($$\%$$ change)',155,dat.forward_flux,2)
 end

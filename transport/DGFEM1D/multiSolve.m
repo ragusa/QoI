@@ -17,6 +17,7 @@ file=['DGFEM1D_prob',int2str(dat.pb_ID),'_',today,'.csv'];
 %figurePath='C:\Users\Ian\Projects\QoI\docs\IanProposal\figures2';
 figurePath='C:\Users\Ian\Projects\QoI\docs\Thesis\figures2';
 figureFolder='figures2';
+legendStr={'sn forward','VEF forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'};
 %filename=fullfile('E:\Storage\git_checkout','output',file);
 % outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
 % outputMatrix=[outputMatrix '%sigtPert' '%sigaPert' '%sourcePert' '%incPert'];
@@ -259,19 +260,19 @@ hold on
 xlabel('q % change, - \sigma_a % change')
 ylabel('QoI % response')
 plot(sourcePertFactor*100,twoSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(sourcePertFactor*100,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(sourcePertFactor*100,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sourcePertFactor*100,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor*100,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor*100,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor*100,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor*100,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'qsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [sourcePertFactor'  twoSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Absorption and Source, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 
@@ -314,19 +315,19 @@ hold on
 xlabel('\Psi^- % change, - \sigma_a % change')
 ylabel('QoI % response')
 plot(incPertFactor*100,twoSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(incPertFactor*100,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(incPertFactor*100,twoSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(incPertFactor*100,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor*100,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor*100,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor*100,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor*100,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'incsiga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [sourcePertFactor'  twoSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Absorption and Incident, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 %%%%%%End multi Pert
@@ -336,19 +337,19 @@ hold on
 xlabel('\sigma_a % change')
 ylabel('QoI % response')
 plot(sigaPertFactor*100,sigaSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(sigaPertFactor*100,sigaSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(sigaPertFactor*100,sigaSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sigaPertFactor*100,sigaSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigaPertFactor*100,sigaSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigaPertFactor*100,sigaSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigaPertFactor*100,sigaSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigaPertFactor*100,sigaSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'siga.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [sigaPertFactor'  sigaSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Absorption, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 figure(601)
@@ -356,19 +357,19 @@ hold on
 xlabel('\sigma_s % change')
 ylabel('QoI % response')
 plot(sigsPertFactor*100,sigsSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(sigsPertFactor*100,sigsSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(sigsPertFactor*100,sigsSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sigsPertFactor*100,sigsSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigsPertFactor*100,sigsSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigsPertFactor*100,sigsSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigsPertFactor*100,sigsSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sigsPertFactor*100,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [sigsPertFactor'  sigsSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Scattering, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 figure(602)
@@ -376,19 +377,19 @@ hold on
 xlabel('q % change')
 ylabel('QoI % response')
 plot(sourcePertFactor*100,qSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(sourcePertFactor*100,qSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(sourcePertFactor*100,qSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(sourcePertFactor*100,qSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor*100,qSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor*100,qSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor*100,qSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(sourcePertFactor*100,qSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qSens'];
 dataFile=['data\',int2str(dat.pb_ID),'q.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [sourcePertFactor'  qSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Source, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 figure(603)
@@ -396,19 +397,19 @@ hold on
 xlabel('\Psi^- % change')
 ylabel('QoI % response')
 plot(incPertFactor*100,incSensValues(:,1)./(results.qoi_sn_f),'-+g')
-%plot(incPertFactor*100,incSensValues(:,2)./(results.qoi_sn_f),'-or')
+plot(incPertFactor*100,incSensValues(:,2)./(results.qoi_sn_f),'-or')
 plot(incPertFactor*100,incSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(incPertFactor*100,incSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(incPertFactor*100,incSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(incPertFactor*100,incSensValues(:,6)./(results.qoi_sn_f),'--dm')
 plot(incPertFactor*100,incSensValues(:,7)./(results.qoi_sn_f),'--+r')
-legend({'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'},'Position',[0.5 0.78 0.01 0.01])
+legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'incSens'];
 dataFile=['data\',int2str(dat.pb_ID),'inc.csv'];
 fullPath=fullfile(figurePath,{figureFile,dataFile});
 outputMatrix = [incPertFactor'  incSensValues];
 csvwrite(fullPath{2},outputMatrix)
-title(dataFile,'interpreter','none')
+title(['Perturbed Incident, ', dat.name],'interpreter','none')
 print(fullPath{1},'-dpng');
 
 do_plot(results.phi,'$$\phi$$ Sn',610,dat.forward_flux)

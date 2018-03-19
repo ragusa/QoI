@@ -110,7 +110,7 @@
 %-----------------------------------------------------------
 \usepackage{ifthen}
 \newboolean{draftversion}
-\setboolean{draftversion}{false}
+\setboolean{draftversion}{true}
 %-----------------------------------------------------------
 %----------------------------------------------------------
 
@@ -473,10 +473,8 @@ we investigate this question in the simpler setting of a steady-state system.
 \jcr{in the MS thesis, expand on how this would work for time-dependent problems. the entire
 gist of the VET idea was to simplify sensitivity calculations for TD transport, so you need
 to demonstrate/explain that the ideas you applied in SS were actually going to be useful as well for TD}
-
 \todo{Add in more detail about time dependence. The ideal scenario would be to add in the Eddington equation with time derivatives, however that wouldn't make sense at this exact point in the thesis, as we haven't even derived the steady-state Eddington formulation yet. After a qualitative discussion here, consider looping back towards the end of thesis, presenting the time-dependent VET formulation.}
 
-\iwh{Going to place the derivation in an appendix. This is requested in a few places, not sure if you want it both here and earlier.}
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Forward VET Formulation}
@@ -1027,8 +1025,6 @@ With the angular dependence handeled by the SN method for transport, each of the
 \section{VET Solution Method}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Solution of the quasi-diffusion VET formulations are performed using a Discontinuous Galerkin (DG) method with an interior-penalty approach; see Arnold \cite{Arnold}, for instance. Compared to a standard diffusion approach, slight modifications to the interior penalty terms are required to support quasi-diffusion. For standard diffusion the current terms used at the mesh interface would take the form $\frac{1}{3 \sigt} \grad \phi$ but for the Eddington approach the current terms take the form $\frac{1}{\sigt} \div ( \Edd \phi)$. Linear basis functions are used as the finite element basis. As was the case for SN transport, the spatial domain is discretized into 2,000 uniform elements for the results shown in the following sections.
-\jcr{``The'' modifications are required. ? This makes people curious. What are they?}
-\iwh{sufficient, or do I need to get more rigorous with this? I may have a question or two about using the this method on this form when we can get to a whiteboard and have a free moment. More about theory than anything}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1090,7 +1086,7 @@ To start, a test case consisting of a relatively simple system is chosen. The sy
 \begin{equation}
 \qoi \approx \bra q^\dag , \phi \ket = \int_4^6 dx \, \frac{q}{\siga} = 4
 \end{equation}
-The unperturbed scalar fluxes are shown in Figure~\ref{fig:Flux1}. These plots show both the true scalar flux $\phi$ obtained using the SN and VET methods (which should be equal), as well as the ``forward-like'' flux $\varphi$ obtained as the adjoint of the aVET method. Similarly, the scalar adjoint flux $\phi^\dag$ obtained using SN and aVET are shown on the same plot as the ``adjoint-like'' $\varphi^\dag$ from the VET formulation. Looking at the graphs it becomes clear that $\phi^\dag \neq \varphi^\dag$ and $\phi \neq \varphi$, providing a succinct confirmation that the solution of the adjoint of the VET formulation is not the same as the solution to the VET formulation of the transport adjoint. At a glance it may appear that the difference between the scalar flux solutions $\phi$, $\phi^\dag$ and the flux-like $\varphi$, $\varphi^\dag$ is a simple factor of 2 due to source normalization, but that is not the case and plots which take the factor of 2 into account are presented in Appendix~\ref{chap:appx3}
+The unperturbed scalar fluxes are shown in Figure~\ref{fig:Flux1}. These plots show both the true scalar flux $\phi$ obtained using the SN and VET methods (which should be equal), as well as the ``forward-like'' flux $\varphi$ obtained as the adjoint of the aVET method. Similarly, the scalar adjoint flux $\phi^\dag$ obtained using SN and aVET are shown on the same plot as the ``adjoint-like'' $\varphi^\dag$ from the VET formulation. Looking at the graphs it becomes clear that $\phi^\dag \neq \varphi^\dag$ and $\phi \neq \varphi$, providing a succinct confirmation that the solution of the adjoint of the VET formulation is not the same as the solution to the VET formulation of the transport adjoint. At a glance it may appear that the difference between the scalar flux solutions $\phi$, $\phi^\dag$ and the flux-like $\varphi$, $\varphi^\dag$ is a simple factor of 2 due to source normalization, but that is not the case and plots which take the factor of 2 into account are presented in Appendix~\ref{chap:appx3}.
 \jcr{what point do you want to make. They only looked different by a factor 2, which one may argue may be changed appropriate by changing the source normalization. So what are you trying to show here?}
 \iwh{I tried to clarify this, and added a few additional images to an appendix to prevent overcrowding the main images. I think the point is I just wanted to present a visual confirmation that the adjont of the VET isn't the VET of the adjoint, which is something that wasn't explicitly obvious when I first started working on this. That the solutions we are getting from taking adjoints of VET/aVET are not true "scalar flux" in the transport sense. If this seems extraneous I am willing to drop it and the additional images in the appendix.}
 
@@ -1338,8 +1334,8 @@ Compared to the isotropic case, the VET methods appear to behave somewhat worse 
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Reed Problem}
-A more varied and complex Reed system\cite{buchan} is tested. The system is split into 5 regions of unequal length with properties given below. As for perturbations, the focus of this trial will be placed on 
-perturbations to the scattering cross-section in regions 4 and 5. 
+A more varied and complex problem (Reed's problem, \cite{buchan}) is used next. The domain is split into 5 regions of unequal length with properties given below. As for perturbations, the focus of this series of tests will be placed on 
+perturbations to the scattering cross section in regions 4 and 5. 
 \begin{equation*}
 \begin{split}
 &\text{Region 1: } x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50 \\
@@ -1349,6 +1345,8 @@ perturbations to the scattering cross-section in regions 4 and 5.
 &\text{Region 5: } x \in [6,8], \quad \siga=0.1, \, 		\sigs=0.9, \, q=0\\
 \end{split}
 \end{equation*}
+\jcr{can put the first figure separately and then add as a new figure a plot for (i) E (not shown here) and (ii) delta E (which you have below)? I think haing both E and delta E would be useful to grasp the effect of a perturbation}
+\jcr{additionally, ``a $+10 \%$ scattering perturbation'' in the caption: do you mean in both regions 4 and 5? be clear}
 \begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
@@ -1363,7 +1361,9 @@ perturbations to the scattering cross-section in regions 4 and 5.
 \label{fig:Flux4}
 \end{figure}
 
-Five separate response functions are considered, corresponding to the average flux in each of the 5 regions. Since the response function is the only change between the tests, the values for the unperturbed and perturbed forward fluxes are the same for all tests, as well as the Eddington tensor. This means that the focus is on the shape of the adjoint fluxes $\phi^\dag$ and $\varphi^\dag$.
+Five separate response functions are considered, corresponding to the average flux in each of the 5 regions. 
+%Since the response function is the only change between the tests, the values for the unperturbed and perturbed forward fluxes are the same for all tests, as well as the Eddington tensor. This means that the focus is on the shape of 
+The corresponding five adjoint fluxes and the computed sensitivities are given in Figures \ref{Reed1} through \ref{Reed5}.
 \begin{figure}[H]
 \centering
 \begin{subfigure}{.5\textwidth}
@@ -1433,10 +1433,12 @@ Five separate response functions are considered, corresponding to the average fl
 \label{Reed5}
 \end{figure}
 
-With the \qoi in regions 1 and 2 the overall response to the scattering perturbation is small, on the order of $10^{-7}$ and $10^{-3}$ respectively. In these regions the VET methods (excluding $\delta \Edd$ approximation appear to underestimate the small response to the perturbation, this appears to be reconciled well using the $\delta \Edd$ though. With the \qoi in regions 4 and 5, where the scattering perturbations take place, the response to the scattering is of slightly higher magnitude, and the VET methods appear to overestimate the response. Once again the $\delta \Edd$ approximation method resolves much of the difference between VET and transport adjoint. The most problematic region appears to be when the \qoi is in the void of region 3. In this scenario the transport methods show a response similar in magnitude to the response of \qoi in regions 4 and 5, but the VET method shows a response of relatively small magnitude in the opposite direction. The $\delta \Edd$ approximation however, goes a long way to improving the VET method so that it agrees fairly well with transport adjoint. Looking at the $\delta \Edd$ inner-product term $ \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket$ of Eq.~\eqref{QoIVETAdjEdd} can give insight to why $\delta \Edd$ plays such a large role in these scenarios. The total mean free path term $\isigt$ is very large in voids ($10^8$ in this case) and results in the term blowing up even for quite small perturbations in $\delta \Edd$ as shown in Figure~\ref{fig:Flux4}.
+With the \qoi in regions 1 and 2 the overall response to the scattering perturbation is small, on the order of $10^{-7}$ and $10^{-3}$ respectively. In these regions the VET methods (excluding $\delta \Edd$ approximation) appear to underestimate the small response to the perturbation; this appears to be reconciled well using the $\delta \Edd$ though. With the \qoi in regions 4 and 5, where the scattering perturbations take place, the response to the scattering is of slightly higher magnitude, and the VET methods appear to overestimate the response. Once again the $\delta \Edd$ approximation method resolves much of the difference between VET and transport adjoint. The most problematic region appears to be when the \qoi is in the void of region 3. In this scenario the transport methods show a response similar in magnitude to the response of \qoi in regions 4 and 5, but the VET method shows a response of relatively small magnitude in the opposite direction. The $\delta \Edd$ approximation however, goes a long way to improving the VET method so that it agrees fairly well with transport adjoint. Looking at the $\delta \Edd$ inner-product term $ \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket$ of Eq.~\eqref{QoIVETAdjEdd} can give insight to why $\delta \Edd$ plays such a large role in these scenarios. The total mean free path term $\isigt$ is very large in voids ($10^8$ in this case) and results in the term blowing up even for quite small perturbations in $\delta \Edd$ as shown in Figure~\ref{fig:Flux4}.
+\jcr{you had a table in the defense where you split the contribution of each term, right? can you add this here as well? I think it was for exactly this problem, no?}
 
+%%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Detector in void}
-We will now focus in on the void \qoi Reed system presented above. The \qoi used in the previous example was the average flux within the void. However, in a non-simulation experiment the void flux may be detected by detector of some non-zero cross-section placed within the void region. This presence of a non-zero cross-section my help dampen the effect of the $\delta \Edd$ term by reducing the $\isigt$ value and reshaping the adjoint flux. To  test this more realistic scenario, the previous reed system has the void region broken into two void regions of almost half the original length, and a small absorption region inserted in the middle to represent a detector. The width of this detector is about one mean free path for a particle traveling directly in the $\pm x$ direction.
+We will now focus in the \qoi in a void, using Reed's problem presented in the previous section. The \qoi used in the previous example was the average flux within the void. However, in a non-simulation experiment the void flux may be detected by detector of some non-zero cross-section placed within the void region. This presence of a non-zero cross section may help dampen the effect of the $\delta \Edd$ term by reducing the $\isigt$ value and reshaping the adjoint flux. To test this more realistic scenario, the previous Reed's system has the void region broken into two void regions of almost half the original length, and a small absorption region inserted in the middle to represent a detector. The width of this detector is one mean free path.
 \begin{equation*}
 \begin{split}
 &\text{Region 1: } x \in [0,2), \quad \siga=50, \, 			\sigs=0, \, q=50 \\
@@ -1475,7 +1477,11 @@ The response considered is then the average flux in the detector region. Once ag
 \caption{Scattering response and adjoint flux for Reed problem with detector in void region.}
 \label{Reed5}
 \end{figure}
-While the behavior of the VET method are not ideal in this test case, they are improved over the void average flux \qoi of the previous test case, in the sense that the VET response is on the same order of magnitude and direction as the transport adjoint method. The $\delta \Edd$ approximation method once again proves to be a powerful tool for reconciling VET and transport adjoint methods. the aVET method appears to fair a bit better in this case when compared to VET.
+\jcr{label in figure above is repeated. fix.}
+While the behavior of the VET method are not ideal in this test case, they are improved over the void average flux \qoi of the previous section, in the sense that the VET response is on the same order of magnitude and direction as the transport adjoint method. The $\delta \Edd$ approximation method once again proves to be a powerful tool for reconciling VET and transport adjoint methods. The aVET method appears to fair a bit better in this case when compared to VET.
+
+\jcr{can you stop by at 1 pm tomorrow, Tuesday, to discuss this last figure?}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{\uppercase {Conclusions and Outlook}} \label{chap:conclusion}

@@ -110,7 +110,7 @@
 %-----------------------------------------------------------
 \usepackage{ifthen}
 \newboolean{draftversion}
-\setboolean{draftversion}{true}
+\setboolean{draftversion}{false}
 %-----------------------------------------------------------
 %----------------------------------------------------------
 
@@ -1349,16 +1349,23 @@ perturbations to the scattering cross section in regions 4 and 5.
 \jcr{additionally, ``a $+10 \%$ scattering perturbation'' in the caption: do you mean in both regions 4 and 5? be clear}
 \begin{figure}[H]
 \centering
+ \includegraphics[scale=0.75]{figures2/7phi.png}
+ \caption{Plot of unperturbed forward scalar flux for the Reed's problem.}
+\label{fig:Flux4}
+\end{figure}
+ 
+\begin{figure}[H]
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/7phi.png}
+  \includegraphics[width=.98\linewidth]{figures2/7E.png}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/7deltaE.png}
 \end{subfigure}
-\caption{Plots of unperturbed forward scalar flux for the Reed problem as well as the Eddington perturbation $\delta \Edd$ for a $+10 \%$ scattering perturbation.}
-\label{fig:Flux4}
+\caption{Plots of unperturbed Eddington Tensor for Reed's problem as well as the Eddington perturbation $\delta \Edd$ for a $+10 \%$ scattering perturbation in regions 4 and 5.}
+\label{fig:Edd4}
 \end{figure}
 
 Five separate response functions are considered, corresponding to the average flux in each of the 5 regions. 
@@ -1433,8 +1440,32 @@ The corresponding five adjoint fluxes and the computed sensitivities are given i
 \label{Reed5}
 \end{figure}
 
-With the \qoi in regions 1 and 2 the overall response to the scattering perturbation is small, on the order of $10^{-7}$ and $10^{-3}$ respectively. In these regions the VET methods (excluding $\delta \Edd$ approximation) appear to underestimate the small response to the perturbation; this appears to be reconciled well using the $\delta \Edd$ though. With the \qoi in regions 4 and 5, where the scattering perturbations take place, the response to the scattering is of slightly higher magnitude, and the VET methods appear to overestimate the response. Once again the $\delta \Edd$ approximation method resolves much of the difference between VET and transport adjoint. The most problematic region appears to be when the \qoi is in the void of region 3. In this scenario the transport methods show a response similar in magnitude to the response of \qoi in regions 4 and 5, but the VET method shows a response of relatively small magnitude in the opposite direction. The $\delta \Edd$ approximation however, goes a long way to improving the VET method so that it agrees fairly well with transport adjoint. Looking at the $\delta \Edd$ inner-product term $ \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket$ of Eq.~\eqref{QoIVETAdjEdd} can give insight to why $\delta \Edd$ plays such a large role in these scenarios. The total mean free path term $\isigt$ is very large in voids ($10^8$ in this case) and results in the term blowing up even for quite small perturbations in $\delta \Edd$ as shown in Figure~\ref{fig:Flux4}.
+With the \qoi in regions 1 and 2 the overall response to the scattering perturbation is small, on the order of $10^{-7}$ and $10^{-3}$ respectively. In these regions the VET methods (excluding $\delta \Edd$ approximation) appear to underestimate the small response to the perturbation; this appears to be reconciled well using the $\delta \Edd$ though. With the \qoi in regions 4 and 5, where the scattering perturbations take place, the response to the scattering is of slightly higher magnitude, and the VET methods appear to overestimate the response. Once again the $\delta \Edd$ approximation method resolves much of the difference between VET and transport adjoint. The most problematic region appears to be when the \qoi is in the void of region 3. In this scenario the transport methods show a response similar in magnitude to the response of \qoi in regions 4 and 5, but the VET method shows a response of relatively small magnitude in the opposite direction. The $\delta \Edd$ approximation however, goes a long way to improving the VET method so that it agrees fairly well with transport adjoint. Looking at the $\delta \Edd$ inner-product term $ \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket$ of Eq.~\eqref{QoIVETAdjEdd} can give insight to why $\delta \Edd$ plays such a large role in these scenarios. The total mean free path term $\isigt$ is very large in voids ($10^8$ in this case) and results in the term blowing up even for quite small perturbations in $\delta \Edd$ as shown in Figure~\ref{fig:Edd4}.
 \jcr{you had a table in the defense where you split the contribution of each term, right? can you add this here as well? I think it was for exactly this problem, no?}
+
+\begin{table}[H]
+\footnotesize
+\centering
+  \begin{tabular}{| l | r | r | r | r | r |}
+    \hline
+    Term  &  \qoi 1 & \qoi 2 & \qoi 3 & \qoi 4 & \qoi 5\\ \hline
+    Unperturbed \qoi & 0.994951  & 0.158209 &  1.10511 & 1.75802  &0.766009  \\ \hline 
+     $+ \bra \delta \scalSource, \vefadj  \ket$											
+     & 0 & 0 & 0& 0 & 0\\ \hline
+     $- \bra \delta \siga \phi, \vefadj \ket$ 											
+     & 0 & 0 & 0 & 0 & 0 \\ \hline
+     $- \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket$			
+     &9.26678e-09 &  0.000132024  & 0.00135357 & 0.0444895  & 0.00682825 \\ \hline
+     $+ \sbra \vefadj, 2 \delta J^{\text{inc}} \sket$										
+     & 0 & 0 & 0 & 0 & 0\\ \hline
+     $- \bra  \isigt \div \left( \delta \Edd \phi \right), \grad \vefadj \ket$	
+     &1.44e-07  &0.000169373  & -0.0108674 & -0.0167694 & 0.000788856 \\ \hline
+     $- \sbra \vefadj, \phi \delta \BEdd \sket$									
+     &7.97272e-11 &1.13587e-06   & 1.16455e-05  & 2.51421e-05 &6.12292e-05 \\ \hline
+    \end{tabular}
+  \caption{Term by Term comparison of VET method and $\delta \Edd$ approximation method for the Reed QoI's under a $+10\%$ scattering perturbation in regions 4 and 5.}
+\end{table}
+
 
 %%%%%%%----------------------------------------------------------------------------------------------
 \subsection{Detector in void}
@@ -1452,16 +1483,23 @@ We will now focus in the \qoi in a void, using Reed's problem presented in the p
 \end{equation*}
 \begin{figure}[H]
 \centering
+ \includegraphics[scale=0.75]{figures2/775phi.png}
+ \caption{Plot of unperturbed forward scalar flux for the Reed's problem with detector in void.}
+\label{fig:Flux6}
+\end{figure}
+ 
+\begin{figure}[H]
+\centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{figures2/775phi.png}
+  \includegraphics[width=.98\linewidth]{figures2/775E.png}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{figures2/775deltaE.png}
 \end{subfigure}
-\caption{Plots of unperturbed forward scalar flux for the Reed problem with detector in void as well as the Eddington perturbation $\delta \Edd$ for a $+10 \%$ scattering perturbation.}
-\label{fig:Flux5}
+\caption{Plots of unperturbed Eddington Tensor for Reed's problem with detector as well as the Eddington perturbation $\delta \Edd$ for a $+10 \%$ scattering perturbation in regions 4 and 5.}
+\label{fig:Edd6}
 \end{figure}
 The response considered is then the average flux in the detector region. Once again the focus is placed on scattering perturbations.
 \begin{figure}[H]
@@ -1475,12 +1513,9 @@ The response considered is then the average flux in the detector region. Once ag
   \includegraphics[width=.98\linewidth]{figures2/775sigsSens.png}
 \end{subfigure}
 \caption{Scattering response and adjoint flux for Reed problem with detector in void region.}
-\label{Reed5}
+\label{Reed6}
 \end{figure}
-\jcr{label in figure above is repeated. fix.}
 While the behavior of the VET method are not ideal in this test case, they are improved over the void average flux \qoi of the previous section, in the sense that the VET response is on the same order of magnitude and direction as the transport adjoint method. The $\delta \Edd$ approximation method once again proves to be a powerful tool for reconciling VET and transport adjoint methods. The aVET method appears to fair a bit better in this case when compared to VET.
-
-\jcr{can you stop by at 1 pm tomorrow, Tuesday, to discuss this last figure?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

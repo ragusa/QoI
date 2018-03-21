@@ -12,6 +12,7 @@ do_plot(results.phiVEFa,'VET',100,dat.adjoint_flux)
 %do_plot(2*results.phiVEFa,'2*VET',100,dat.adjoint_flux)
 do_plot(results.phiAltVEFa,'AltVET',100,dat.adjoint_flux)
 
+do_plot(results.E,'E',149,dat.forward_flux,1)
 do_plot(results.E,'E',150,dat.forward_flux,1)
 do_plot(results.E_pert,'Epert',150,dat.forward_flux,1)
 do_plot(results.E_pert-results.E,'$$\delta E$$',151,dat.forward_flux,2)

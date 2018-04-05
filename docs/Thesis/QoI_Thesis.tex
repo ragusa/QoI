@@ -141,24 +141,24 @@
 \renewcommand{\tamumanuscripttitle}{Adjoint-based Sensitivity for Radiation Transport Using an Eddington Tensor Formulation}
 
 %Type only Thesis, Dissertation, or Record of Study.
-\renewcommand{\tamupapertype}{Thesis DRAFT}
+\renewcommand{\tamupapertype}{Thesis}
 
 %Your full name goes here, as it is in university records. Check your student record on Howdy if there is any mismatch.
-\renewcommand{\tamufullname}{Ian Halvic}
+\renewcommand{\tamufullname}{Ian William Halvic}
 
 %The degree title goes here. See the OGAPS site for more info.
 \renewcommand{\tamudegree}{Master of Science}
-\renewcommand{\tamuchairone}{Professor Jean C. Ragusa}
+\renewcommand{\tamuchairone}{Jean C. Ragusa}
 
 
 % Uncomment out the next line if you have co-chairs.  You will also need to edit the titlepage.tex file.
 %\newcommand{\tamuchairtwo}{Additional Chair Name}
-\renewcommand{\tamumemberone}{Professor Marvin L. Adams}
-\newcommand{\tamumembertwo}{Professor Bojan Popov}
-\renewcommand{\tamudepthead}{Professor Yassin Hassan}
+\renewcommand{\tamumemberone}{Marvin L. Adams}
+\newcommand{\tamumembertwo}{Bojan Popov}
+\renewcommand{\tamudepthead}{Yassin Hassan}
 
 %Type only May, August, or December.
-\renewcommand{\tamugradmonth}{March}
+\renewcommand{\tamugradmonth}{May}
 \renewcommand{\tamugradyear}{2018}
 %Your department name goes here.
 \renewcommand{\tamudepartment}{Nuclear Engineering}
@@ -206,11 +206,6 @@ Application of the adjoint method to time-dependent transport can pose a major t
 Typically, a checkpointing method can be employed to alleviate some of the memory limitations of a time dependent adjoint system \cite{Carey} \cite{Griewank}. In this scheme, the forward solution, i.e., the angular flux in the case of transport, is stored at checkpoint timesteps when performing a forward solve from $t=0$ to $T$. The adjoint method then initializes at the final time step, which sweeps in the reverse time direction. At any point the forward solution is needed in the reverse sweep for a quantity of interest calculation the forward solution is reconstructed by performing a forward solve starting with the nearest checkpoint. Ultimately, this becomes a balancing act of memory usage for storing checkpoints and additional computation time for recomputing the forward solution from checkpoints. An efficient checkpointing scheme which chooses the checkpoints in a binomial fashion is presented by Griewank and Walther \cite{Griewank}. However this method still requires the storing of the primary time-dependent variable, the angular flux, at the checkpoint times. For large phase-space solutions, this can severely limit the number of checkpoints that can be stored in memory, resulting in a increase in compute time for calculating the uncertainty propagation.
 
 \iwh{In response to: The forward solution at the final time step $T$ is used to initialize the adjoint method [not true. where did you see this?]. Sorry, I think is was slipped out from reading the generalization of the checkpoint method, and not transport specifically. If my comprehension is right then in general this is possible, though not for transport as considered here. Would occur at least if we had some dependence on the forward solution in the adjoint formulation. Say temperature dependent cross sections, where the temperature is due to the forward flux $\sigma(\phi)$, so to start the adjoint transport solve we would need the $\sigma(\phi)$ value for TF, so the forward scalar flux may need to be retrieved. In this point checkpointing would not be just for qoi calculation, but for forming the system parameters for the entire adjoint solve. }
-
-%For the previously mentioned depletion reactor problem of Stripling, this limitation was not existent because a quasi-static approximation was used for the neutron transport equation and only isotopic concentrations were %time-dependent. For time-independent radiation problems, only storing the converged scattering moments at defined checkpoints (in burnup) is sufficient to reconstruct the flux solution. If a flux solution is requested %outside of the checkpointed burnups, the forward flux can be reconstructed by interpolation \cite{Stripling} \cite{Carey}.
-%Using converged scattering source term, a single transport sweep is needed to recover the converged
-%angular flux. However this method does not extend to time-dependent transport in general because
-%the primary time-dependent variable, the angular flux, needs to be stored as well. Furthermore, while not in scope for this writing, even with a checkpointing method applied to the transport equation in a straightforward %way, the adjoint solution which would solve in the reverse time direction as well as possibly the method to recompute the forward angular flux would typically require using an angular flux solver \cite{Carey}. Using some of %the methods laid out in this thesis could allow for the angular flux solves to be replaced with a quasi-diffusion solver, which could provide increased performance or provide another method for balancing between computation %and I/O.
 
 Moreover, many quantities of interest in transport can be computed from the scalar flux and do not require the angular flux. Having to store and recompute the angular flux only for it to be integrated over angle and converted to a scalar flux for use can be a computational burden. A potential solution to the memory requirement for the time-dependent transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time (space, direction, energy, time for transport) to 4D+time (space, energy, time for quasi-diffusion). The quasi-diffusion method examined in this work is termed  as a ``Variable Eddington Tensor'' (VET) formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach. While not the focus of this thesis, in the VET formulation the primary time-dependent variable is the scalar flux. Therefore, with the proper adjoint formulation a checkpointing method could be applied to the VET formulation in which scalar flux are checkpointed as a method to further reduce memory requirements.
 
@@ -705,7 +700,7 @@ We have ignored the possibility of a perturbation in the response function $\sca
 &\approx \bra \phi , \scalResp \ket + \bra \delta \phi , \scalResp \ket + \bra \phi , \delta \scalResp \ket \\ 
 \end{split}
 \end{equation}
-The last inner-product $\bra \phi , delta \scalResp \ket$ is simply added to any of the derived methods where $\phi$ is known, which is true for all but one method in this thesis. This method where the inner-product due to $delta \scalResp$ is no longer trivial is defined later, and the term is dealt with in more detail.
+The last inner-product $\bra \phi , \delta \scalResp \ket$ is simply added to any of the derived methods where $\phi$ is known, which is true for all but one method in this thesis. This method where the inner-product due to $\delta \scalResp$ is no longer trivial is defined later, and the term is dealt with in more detail.
 
 \section{Refinements on the VET Approach for Sensitivity Estimation}
 
@@ -1585,7 +1580,7 @@ Overall the $\delta \Edd$ approximation method appeared to fare the best of all 
 While out of scope for this writing, a major goal of this method is the application towards time-dependent systems. As such, it is worth taking a brief look at how the VET formulation would look in a time dependent system. As with the steady state, the starting point is the one-group transport equation, now with the time derivative factor.
 \begin{equation}
 \label{Trans1GTE}
-\frac{1}{v} \frac{\partial}{\partial t} \psi(\vr,\vO,t)+ \vO \cdot \grad \psi(\vr,\vO,t) + \sigt(\vr) \psi(\vr,\vO,t) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + q(\vr,\vO,t), \quad \forall \vr \in V,t \geq 0
+\frac{1}{v} \frac{\partial}{\partial t} \psi(\vr,\vO,t)+ \vO \cdot \grad \psi(\vr,\vO,t) + \sigt \psi(\vr,\vO,t) = \frac{1}{4 \pi} \sigs \phi(\vr,t) + q(\vr,\vO,t)
 \end{equation}
 \begin{equation}
 \label{Trans1GTE_bc}

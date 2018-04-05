@@ -15,8 +15,9 @@ file=['DGFEM1D_prob',int2str(dat.pb_ID),'_',today,'.csv'];
 %filename=fullfile('C:\Users\Ian\checkout','output',file);
 %figurePath='C:\Users\Ian\checkout\QoI\docs\IanProposal\figures2';
 %figurePath='C:\Users\Ian\Projects\QoI\docs\IanProposal\figures2';
-figurePath='C:\Users\Ian\Projects\QoI\docs\Thesis\figures2';
-figureFolder='figures2';
+%figurePath='C:\Users\Ian\Projects\QoI\docs\Thesis\figures2';
+figurePath='C:\Users\Ian\Projects\QoI\docs\Thesis\posterfigures';
+%figureFolder='figures2';
 legendStr={'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'};
 %filename=fullfile('E:\Storage\git_checkout','output',file);
 % outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
@@ -24,10 +25,10 @@ legendStr={'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint'
 % outputMatrix=[outputMatrix 'dQoISNf' 'dQoIVEFf' 'dQoISNa' 'dQoIVEFa' 'Ediff'];
 % Iterators for perturbation factors
 % linspace(-0.1,0.1,21);
-sigaPertFactor=linspace(-0.1,0.1,11);
-sigsPertFactor=linspace(-0.1,0.1,11);
-sourcePertFactor=linspace(-0.1,0.1,11);
-incPertFactor=linspace(-0.1,0.1,11);
+sigaPertFactor=linspace(0,0.1,6);
+sigsPertFactor=linspace(0,0.1,6);
+sourcePertFactor=linspace(0.08,0.1,6);
+incPertFactor=linspace(0,0.1,6);
 %Begin iterations over perturbations.
 dat.sigaPert = dat.sigaPertRegion.*0;
 dat.sigsPert = dat.sigsPertRegion.*0;

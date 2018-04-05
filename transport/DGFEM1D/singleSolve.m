@@ -50,8 +50,11 @@ generatePlots
 displaySensitivityError
 eddingtonTerms
 %do_plot(E_interp,'Einterp',150,dat.forward_flux,1)
-do_plot(E_interp-results.E,'$$\delta$$ E estimate',152,dat.forward_flux,1)
-do_plot(results.E_pert-results.E,'$$\delta$$ E real',152,dat.forward_flux,1)
+do_plot(E_interp-results.E,'$$\delta$$ E estimate',252,dat.forward_flux,1)
+do_plot(results.E_pert-results.E,'$$\delta$$ E real',252,dat.forward_flux,1)
+
+do_plot(results.phi,'$$\phi$$',253,dat.forward_flux)
+do_plot(results.phi_pert,'$$\phi$$ pert',253,dat.forward_flux)
 
 results.Ebd
 results.Ebd_pert

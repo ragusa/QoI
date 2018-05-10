@@ -22,7 +22,8 @@
 
 %\usepackage{stix}
 \usepackage{stmaryrd}
-\usepackage{hyperref}
+\usepackage[draft]{hyperref}
+%\usepackage{url}
 
 %If you have JPEG format images, add .jpg as an
 %allowed file extension below. Same for Bitmaps (.bmp).
@@ -168,8 +169,8 @@
 \include{data/abstract}
 %\include{data/dedication}
 \include{data/acknowledgements}
-\include{data/contributors}
 \include{data/nomenclature}
+\include{data/contributors}
 
 \include{data/lists}  % This is simply a file that formats and adds your toc, lof, and lot, please do not edit this unless you have a specific need.
 
@@ -1549,16 +1550,17 @@ Overall the $\delta \Edd$ approximation method appeared to fare the best of all 
 \bibliographystyle{ieeetr}
 
 \phantomsection
-\addcontentsline{toc}{chapter}{REFERENCES}
-
+%\addcontentsline{toc}{chapter}{REFERENCES}
+%\phantomsection
 \renewcommand{\bibname}{{\normalsize\rm REFERENCES}}
 
 %This file is a .bib database that contains the sources.
 %This removes the dependency on the previous file
 %bibliography.tex.
+\pagebreak
+\addcontentsline{toc}{chapter}{REFERENCES}
+
 \bibliography{QoI_MS}
-
-
 
 
 %This next line includes appendices. The file
@@ -1575,7 +1577,7 @@ Overall the $\delta \Edd$ approximation method appeared to fare the best of all 
 \renewcommand{\appendixname}{APPENDIX}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{ \uppercase{APPENDIX: Time Dependent VET} } \label{chap:appx1}
+\chapter{ \uppercase{Time Dependent VET} } \label{chap:appx1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 While out of scope for this writing, a major goal of this method is the application towards time-dependent systems. As such, it is worth taking a brief look at how the VET formulation would look in a time dependent system. As with the steady state, the starting point is the one-group transport equation, now with the time derivative factor.
 \begin{equation}
@@ -1618,7 +1620,7 @@ which is the steady state equation, and muse about how that term must be dealt w
 Doing sensitivity we want an operator $A \phi = b$ which the above isn't exactly due to the $\vec{J}$. In addition to $\Edd$ is is reasonable to store some vector value like $\vec{g}=\frac{\vec{J}}{\phi}$? That way there is a well defined $A$ operator to perform the adjoint process on.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{\uppercase{APPENDIX: Detailed VET Boundary Term Derivation}} \label{chap:appx2}
+\chapter{\uppercase{Detailed VET Boundary Term Derivation}} \label{chap:appx2}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Represent the value $\isigt \div \Edd \phi$ by some vector $\vec{v}$. 
 \begin{equation}
@@ -1662,7 +1664,7 @@ Putting everything together
 \end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{ \uppercase{ APPENDIX: Additional Flux Graphs showing 2$\varphi$ and 2$\varphi^\dag$}} \label{chap:appx3}
+\chapter{ \uppercase{Additional Flux Graphs showing 2$\varphi$ and 2$\varphi^\dag$}} \label{chap:appx3}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Additional graphs showing $\varphi$ and $\varphi^\dag$ scaled by a factor of 2, showing the difference between $\phi$ and $\varphi$ values is more than just the apparent factor of two
 \begin{figure}[H]

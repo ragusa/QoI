@@ -266,7 +266,7 @@ plot(sourcePertFactor*100,twoSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sourcePertFactor*100,twoSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sourcePertFactor*100,twoSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sourcePertFactor*100,twoSensValues(:,6)./(results.qoi_sn_f),'--dm')
-plot(sourcePertFactor*100,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
+%plot(sourcePertFactor*100,twoSensValues(:,7)./(results.qoi_sn_f),'--+r')
 legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'qsigaSens'];
 dataFile=['data\',int2str(dat.pb_ID),'qsiga.csv'];
@@ -363,7 +363,7 @@ plot(sigsPertFactor*100,sigsSensValues(:,3)./(results.qoi_sn_f),'-db')
 plot(sigsPertFactor*100,sigsSensValues(:,4)./(results.qoi_sn_f),'--+k')
 plot(sigsPertFactor*100,sigsSensValues(:,5)./(results.qoi_sn_f),'--oc')
 plot(sigsPertFactor*100,sigsSensValues(:,6)./(results.qoi_sn_f),'--dm')
-plot(sigsPertFactor*100,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
+%plot(sigsPertFactor*100,sigsSensValues(:,7)./(results.qoi_sn_f),'--+r')
 legend(legendStr,'Position',[0.5 0.78 0.01 0.01])
 figureFile=[int2str(dat.pb_ID),'sigsSens'];
 dataFile=['data\',int2str(dat.pb_ID),'sigs.csv'];

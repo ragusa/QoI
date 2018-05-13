@@ -1,0 +1,188 @@
+\documentclass{anstrans}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Adjoint-based Sensitivity for Radiation Transport Using an Eddington Tensor Formulation}
+\author{Ian Halvic,$^{*}$}
+
+\institute{
+$^{*}$ Texas A\&M University,
+College Station, TX, iwhalvic@tamu.edu}
+
+
+% Optional disclaimer: remove this command to hide
+%\disclaimer{Notice: this manuscript is a work of fiction. Any resemblance to
+%actual articles, living or dead, is purely coincidental.}
+
+%%%% packages and definitions (optional)
+\usepackage{graphicx} % allows inclusion of graphics
+\usepackage{booktabs} % nice rules (thick lines) for tables
+\usepackage{microtype} % improves typography for PDF
+\usepackage{xspace} 
+%\newcommand{\SN}{S$_N$}
+%\renewcommand{\vec}[1]{\bm{#1}} %vector is bold italic
+%\newcommand{\vd}{\bm{\cdot}} % slightly bold vector dot
+%\newcommand{\grad}{\vec{\nabla}} % gradient
+%\newcommand{\ud}{\mathop{}\!\mathrm{d}} % upright derivative symbol
+
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vp}{\vec{p}}
+\newcommand{\vOmega}{\vec{\Omega}}
+\newcommand{\vJ}{\vec{J}}
+\newcommand{\vO}{\vec{\Omega}}
+\newcommand{\bra}{\left\langle}
+\newcommand{\ket}{\right\rangle}
+\newcommand{\braSN}{\left\langle \! \left\langle}
+\newcommand{\ketSN}{\right\rangle \! \right\rangle}
+\newcommand{\sbraSN}{\left[ \! \left[}
+\newcommand{\sketSN}{\right] \! \right]}
+\newcommand{\sbra}{\left[}
+\newcommand{\sket}{\right]}
+\renewcommand{\div}{\vec{\nabla} \cdot}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\vbeta}{\vec{\beta} }
+\newcommand{\pdx}{\frac{\partial}{\partial x}}
+\newcommand{\pdy}{\frac{\partial}{\partial y}}
+\newcommand{\pdz}{\frac{\partial}{\partial z}}
+\newcommand{\intrrr}{\int d^3 r \,}
+\newcommand{\intrr}{\int d^2 r \,}
+\newcommand{\dEdphi}{\partial_\phi E }
+\newcommand{\dEdp}{\partial_p E }
+\newcommand{\dBdphi}{\partial_\phi B }
+\newcommand{\dBdp}{B }
+\newcommand{\adj}{\phi^\dag}
+\newcommand{\vefadj}{\varphi^\dag}
+\newcommand{\surf}{\int_{\partial V}}
+\newcommand{\domain}{V}
+\newcommand{\bound}{\partial V}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\Edd}{\mathbb{E}}
+\newcommand{\BEdd}{B}
+\newcommand{\sigt}{\sigma_t}
+\newcommand{\sigs}{\sigma_s}
+\newcommand{\siga}{\sigma_a}
+%\newcommand{\isigt}{\sigma_t^{-1}}
+%\newcommand{\isigtp}{\sigma_{t,p}^{-1}}
+\newcommand{\isigt}{\ell_t}
+\newcommand{\isigtp}{\ell_{t,p}}
+\newcommand{\angSource}{\frac{q}{4 \pi}}
+\newcommand{\angSourcep}{\frac{q_p}{4 \pi}}
+\newcommand{\angSourcepd}{\frac{q_p+\delta q_p}{4 \pi}}
+\newcommand{\angSourced}{\frac{\delta q}{4 \pi}}
+\newcommand{\scalSource}{q}
+\newcommand{\angResp}{q^\dag}
+\newcommand{\scalResp}{q^\dag}
+\newcommand{\qoi}{{\it QoI}\xspace}
+
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction (Heading A)}
+
+\begin{subequations}\label{eqs:TransportSystem}
+\begin{equation}
+\label{SS1GTE}
+\vO \cdot \grad \psi(\vr,\vO) + \sigt(\vr) \psi(\vr,\vO) = \frac{1}{4 \pi} \sigs(\vr) \phi(\vr) + \frac{1}{4 \pi} q(\vr)\, ,
+\end{equation}
+\begin{equation}
+\label{SS1GTE_bc}
+\psi(\vr,\vO) = \psi^{\text{inc}}(\vr,\vO) \quad \vr \in \partial V^{-} = \{ \vr \in \partial V,  \vO \cdot \vec{n}(\vr) < 0\}
+\end{equation}
+\end{subequations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Theory}
+\subsection{Eddington Formulation and Sensitivity}
+
+In an effort to circumvent the excessive storage requirement for the angular flux, a quasi-diffusive adjoint approach is considered. The approach relies on the Eddington Tensor ($\Edd$) defined as $\Edd \phi = \int d\Omega \vO \vO \psi$ and a Boundary Eddington Factor $B \phi = \int d\Omega \, | \vO \cdot \vn | \psi$ to generate the quasi-diffusive system
+\begin{subequations} \label{eqs:EddingtonSystem}
+\begin{equation} \label{eq:EddingtonVol}
+- \div \left( \frac{1}{\sigt(\vr)}\div \Edd(\vr) \phi(\vr) \right) + \siga(\vr) \phi(\vr) = \scalSource(\vr) \,,
+\end{equation}
+inside $\vec{r} \in V$, with boundary condition given by 
+\begin{equation} \label{eq:EddingtonBC}
+2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \frac{1}{\sigt(\vr)} \div \Edd(\vr) \phi(\vr)  \quad \vr \in \bound \,.
+\end{equation}
+\end{subequations}
+Given the correct value of $\Edd$ from a transport solve, the Eddington System can exactly compute the scalar flux $\phi$, which is sufficient for obtaining quantities of interest in the form $\bra q^\dag , \phi \ket$.
+
+The adjoint system of Eq.~\eqref{eqs:EddingtonSystem} is given as
+\begin{subequations}\label{eqs:EddingtonAdjSystem}
+\begin{equation}\label{eq:EddingtonAdjVol}
+- \Edd : \grad \left( \frac{1}{\sigt}\grad \vefadj \right)  + \siga \vefadj = \scalResp
+\end{equation}
+\begin{equation}\label{eq:EddingtonAdjBC}
+0 = B \vefadj+ \vn \cdot
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj    \quad \vr \in \bound
+\end{equation}
+\end{subequations}
+
+Perturbations are then introduced in the form of $\delta q$, $\delta \siga$, $\delta \sigt$, and $\delta J^{\text{inc}}$ to generate a perturbed system leading to a change in the desired \qoi. USing a first-order perturbation method and making the important assumption that $\Edd$ remains unperturbed, the change in the \qoi can be approximated using the inner product
+\begin{equation}\label{eqs:sensitivity}
+\delta \qoi =  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket
+ + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \,.
+\end{equation}
+
+
+The proposed method requires an initial solve of the angular transport system Eq.~\eqref{eqs:TransportSystem} to compute $\phi$ and $\Edd$, which are stored for use in Eq.~\eqref{eqs:sensitivity}
+\subsection{Eddington Approximation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and Analysis (Heading A)}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Subsection Goes Here (Heading B)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table*}[htb]
+  \centering
+  \caption{Example of a Really Wide Table that Might Not Normally Fit in the Document}
+  \begin{tabular}{llllllllll}\toprule
+      & $\phi_T(0)$      & $\phi_T(10)$      & $\phi_T(20)$      &
+      $\phi_D(0)$      & $\phi_D(10)$      & $\phi_D(20)$      & $\rho$      &
+      $\varepsilon$      & $N_\text{it}$
+\\ \midrule
+$c=0.999$  & 0.9038 & 20.63 & 31.24 & 0.9087 & 20.63 & 31.23 & 0.2192 & $10^{-7}$ & 15
+\\
+$c=0.990$  & 0.3675 & 13.04 & 24.7 & 0.3696 & 13.04 & 24.69 & 0.2184 & $10^{-7}$ & 15
+\\
+$c=0.900$  & 0.009909 & 4.776 & 17.64 & 0.009984 & 4.786 & 17.63 & 0.2118 & $10^{-7}$ & 14
+\\
+$c=0.500$  & $6.069\times 10^{-5}$ & 2.212 & 15.53 & 6.213$\times 10^{-5}$ & 2.239 & 15.53 & 0.2068 & $10^{-7}$ & 13
+\\
+\bottomrule
+\end{tabular}
+  \label{tab:widetable}
+\end{table*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions (Heading A)}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Appendix}
+
+Inner-products used
+\begin{equation}
+\braSN \psi , f \ketSN  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO) \,
+\end{equation}
+\begin{equation}
+\sbraSN \psi , f \sketSN_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)f(\vr, \vO) \,
+\end{equation}
+\begin{equation}
+\bra \phi(\vr) , f \ket  = \int_V dV \,  \phi(\vr) g(\vr) \,
+\end{equation}
+\begin{equation}
+\sbra \phi(\vr) , g(\vr)  \sket = \int_{\partial V} dS \, \phi (\vr) g (\vr)  \,
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Acknowledgments}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{ans}
+\bibliography{bibliography}
+\end{document}
+

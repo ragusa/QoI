@@ -118,6 +118,7 @@
 \newcommand{\todo}[1]{\phantom{a}}
 }
 \newcommand{\tcr}[1]{\textcolor{red}{#1}}
+\newcommand{\tcb}[1]{\textcolor{blue}{#1}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -168,12 +169,23 @@ The abstract ...
 \iwh{
 The main parts that I think I want to touch on in the Introduction/Background are:
 \begin{itemize}
-\item Lit review focus on the purpose (Including VVUQ needs), strengths, and shortcomings of adjoint methods. I think this was a somewhat weak part in the thesis write up, so probably want to put a bit more into it this time around. In this setting, is it more appropriate to make the general explanation of the adjoint method much more brief? That is to say have a statement of $\delta \qoi \approx \braSN \delta q - \delta \mathbf{A} \psi , \psi^\dag \ketSN + \delta BC$ and a reference as opposed to doing the whole general derivation of a first order perturbation using a general operator $\mathbf{A}$.
-\item Presentation of the transport equation and the transport adjoint. Also introduce the $\delta \qoi$ innerproduct for the transport system using the adjoint.
-\item The issues using the adjoint in this method for time dependent transport, namely the $\braSN  \delta \sigt \psi , \psi^\dag \ketSN$ term which involves storing the angular flux solutions. 
-\item At some point we need to do the transition from time dependent to steady state, and the justification for beginning with the steady state problem in the hope of informing the behavior of the time dependent problem
+\item Lit review focus on the purpose (Including VVUQ needs), strengths, and shortcomings of adjoint methods. I think this was a somewhat weak part in the thesis write up, so probably want to put a bit more into it this time around. (predictive science, sensitivity,  general methods: adjoint, poly chaos, gaussian emulators, )
+\item \tcb{linear transport, high dim phase space, 6+1, ... add more adjoitn refs pertaining to transport}. 
+\item \tcb{general linear adjoint problems and how to do sensitivity in that case ... } In this setting, is it more appropriate to make the general explanation of the adjoint method much more brief? That is to say have a statement of $\delta \qoi \approx \braSN \delta q - \delta \mathbf{A} \psi , \psi^\dag \ketSN + \delta BC$ and a reference as opposed to doing the whole general derivation of a first order perturbation using a general operator $\mathbf{A}$.
+\item \tcb{no: some of this is distributed above} Presentation of the transport equation and the transport adjoint. Also introduce the $\delta \qoi$ innerproduct for the transport system using the adjoint.
+\item \tcb{angle: 6 -> 4, note could be quite interesting to expand to TD pbs, need to keep full forward ang flux at time checkpoints....} The issues using the adjoint in this method for time dependent transport, namely the $\braSN  \delta \sigt \psi , \psi^\dag \ketSN$ term which involves storing the angular flux solutions. 
+\item \tcb{no} At some point we need to do the transition from time dependent to steady state, and the justification for beginning with the steady state problem in the hope of informing the behavior of the time dependent problem
 \end{itemize}
-Main question(s) I will have are probably about what can be presented without derivation. I assume I can present the transport equation, but can the adjoint be presented just as simply? If so, can the first-order sensitivity inner-product then be presented without demonstrating the adjoint process (instead just citing the appropriate paper). Key equations to introduce are related to transport adjoint sensitivity:
+.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Background notation, TE}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tcb{TE, aTE, innerprod, QoI, dQoI}
+\iwh{
+Main question(s) I will have are probably about what can be presented without derivation. I assume I can present the transport equation, but can the adjoint be presented just as simply? If so, can the first-order sensitivity inner-product then be presented without demonstrating the ad joint process (instead just citing the appropriate paper). Key equations to introduce are related to transport adjoint sensitivity:
 Forward
 \begin{subequations}\label{eqs:TransportSystem}
 \begin{equation}
@@ -202,7 +214,7 @@ Sensitivity
 \end{equation}
 }
 
-\subsection{VVUQ and Adjoint Methods}
+%%%\subsection{VVUQ and Adjoint Methods}
 
 \subsection{Sensitivity Using Transport Adjoint Formulation}
 
@@ -212,6 +224,7 @@ Sensitivity
 \label{sec:VET}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tcb{little derivation; more on its application to our adjoint problem, discretize IP}
 \iwh{
 Section comes from the bulk of my thesis, the general flow I expect to be similar to my thesis, but without the weird ``Eddington of the adjoint'' thing. Also may drop the ``blended'' method. In general these are what I wish to touch on
 \begin{itemize}
@@ -292,9 +305,11 @@ Sensitivity with Eddington Approx
 \end{itemize}
 .}
 
+\subsection{1D Homogeneous to non-homogeneous}
+
 \subsection{1D Reed System}
 
-\subsection{2D MOOSE Results}
+\subsection{2D MOOSE Results: maybe 2 cases: a volumetric source one and a shielding-type problem}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -91,19 +91,19 @@ A potential solution to the memory requirement for the transport adjoint formula
 In an effort to circumvent the excessive storage requirement for the angular flux, a quasi-diffusive adjoint approach is considered. The approach relies on the Eddington Tensor ($\Edd$) defined as $\Edd \phi = \int d\Omega \vO \vO \psi$ and a Boundary Eddington Factor $B \phi = \int d\Omega \, | \vO \cdot \vn | \psi$ to generate the quasi-diffusive system for a one group steady-state case
 \begin{subequations} \label{eqs:EddingtonSystem}
 \begin{equation} \label{eq:EddingtonVol}
-- \div \left( \isigt(\vr) \div \Edd(\vr) \phi(\vr) \right) + \siga(\vr) \phi(\vr) = \scalSource(\vr) \,,
+- \div \left( \isigt \div \Edd \phi \right) + \siga \phi = \scalSource \,,
 \end{equation}
 inside $\vec{r} \in V$, with boundary condition given by 
 \begin{equation} \label{eq:EddingtonBC}
-2 J^{\text{inc}}(\vr) = \BEdd(\vr) \phi(\vr) + \vn \cdot \isigt(\vr) \div \Edd(\vr) \phi(\vr)  \quad \vr \in \bound \,.
+2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \isigt \div \Edd \phi  \quad \vr \in \bound \,.
 \end{equation}
 \end{subequations}
-where $\isigt(\vr)$ denotes the mean free path $\sigt^{-1}(\vr)$. Given the correct value of $\Edd$ from a transport solve, the Eddington System can exactly compute the scalar flux $\phi$, which is sufficient for obtaining quantities of interest in the inner product form $\bra q^\dag , \phi \ket$.
+where $\isigt$ denotes the mean free path $\sigt^{-1}$. Given the correct value of $\Edd$ from a transport solve, the Eddington System can exactly compute the scalar flux $\phi$, which is sufficient for obtaining quantities of interest in the inner product form $\bra q^\dag , \phi \ket$.
 
 The adjoint system of Eq.~\eqref{eqs:EddingtonSystem} is given as
 \begin{subequations}\label{eqs:EddingtonAdjSystem}
 \begin{equation}\label{eq:EddingtonAdjVol}
-- \Edd : \grad \left( \isigt(\vr) \grad \vefadj \right)  + \siga \vefadj = \scalResp
+- \Edd : \grad \left( \isigt \grad \vefadj \right)  + \siga \vefadj = \scalResp
 \end{equation}
 \begin{equation}\label{eq:EddingtonAdjBC}
 0 = B \vefadj+ \vn \cdot

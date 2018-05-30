@@ -7,7 +7,7 @@ clc; clear variables; clear global;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global npar dat snq IO_opts results
 % set variable once for all
-dat.pb_ID=772;
+dat.pb_ID=7;
 dat.forward_flux = true;
 dat.adjoint_flux = ~dat.forward_flux;
 do_transport_adjoint=false;

@@ -150,8 +150,8 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
 
 \begin{figure}
 \centering
- \includegraphics[scale=0.5]{../Thesis/figures2/7phi.png}
- \caption{Plot of unperturbed forward scalar flux for the Reed's problem.}
+ \includegraphics[scale=0.5]{7phi.png}
+ \caption{Plot of unperturbed forward scalar flux for the Reed's problem. Flux found using both transport and VET method.}
 \label{fig:Flux4}
 \end{figure}
 
@@ -160,13 +160,13 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
 \centering
 \begin{subfigure}{.25\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{../Thesis/figures2/774phia.png}
+  \includegraphics[width=.98\linewidth]{774phia.png}
 \end{subfigure}%
 \begin{subfigure}{.25\textwidth}
   \centering
-  \includegraphics[width=.98\linewidth]{../Thesis/figures2/772phia.png}
+  \includegraphics[width=.98\linewidth]{772phia.png}
 \end{subfigure}
-\caption{Adjoint flux solutions for $\qoi_5$ (left) and $\qoi_3$ (right).}
+\caption{Adjoint flux solutions for $\qoi_5$ (left) and $\qoi_3$ (right). Each ha a transport adjoint flux $\phi^\dag$ and a VET adjoint flux $\varphi^\dag$.}
 \label{fig:adj}
 \end{figure}
 
@@ -174,7 +174,7 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
   \centering
   \caption{$\delta \qoi$ values for $\qoi_5$}
   \begin{tabular}{l|lllll}\toprule
-  $\delta\qoi_1$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx .
+  $\delta\qoi_1$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
 \\ \midrule
 $q=+10\%$  & 0.0766009  & 0.0766009  & 0.0765787 & 0.0766009  & 0.0765787
 \\
@@ -194,7 +194,7 @@ $q=+10\%,\siga=+10\%$  & 0.0625379 & 0.0635974  & 0.0635383 & 0.0635604  &  0.06
   \centering
   \caption{$\delta \qoi$ values for $\qoi_3$}
   \begin{tabular}{l|lllll}\toprule
-  $\delta\qoi_2$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx .
+  $\delta\qoi_2$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
 \\ \midrule
 $q=+10\%$  & 0.110511   & 0.110511   & 0.110431 & 0.110511   & 0.110431 
 \\
@@ -213,13 +213,13 @@ $q=+10\%,\siga=+10\%$  & 0.0877841  & 0.0894712   & 0.0901487 & 0.0902281   &  0
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
-In one dimensional systems, the VET method preforms reasonably well for estimating $\delta \qoi$ in a  variety of scenarios without needing to store angular flux data. Shortcoming of the VET method when dealing with source perturbations can be partially mitigated using a blended adjoint method combining aspects of the transport adjoint method with the VET. 
+For the one dimensional systems tested, the VET method preforms reasonably well for estimating $\delta \qoi$ in a  variety of scenarios without needing to store angular flux data. Shortcoming of the VET method when dealing with source perturbations can be partially mitigated using a blended adjoint method combining aspects of the transport adjoint method with the VET. 
 
 With voids present in the system, the unperturbed Eddington approximation can falter when the scattering cross-section is perturbed. By leveraging additional transport solves to characterize the $\delta \Edd$ within the given perturbation space the unperturbed Eddington approximation can be relaxed and a $\delta \Edd$ value can be predicted. This approximation appears to greatly improve the accuracy of the VET formulation in the void scenario
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
-\section{Appendix}
+%\section{Appendix}
 
 %Inner-products used
 %\begin{equation}
@@ -261,6 +261,7 @@ With voids present in the system, the unperturbed Eddington approximation can fa
 %\end{equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Acknowledgments}
 The work presented here was supported by a graduate assistantship from the U.S. DOE NNSA's PSAAP program (Predictive Science Academic Alliance Program), Grant DE-NA0002376.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

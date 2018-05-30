@@ -56,6 +56,13 @@ do_plot(results.E_pert-results.E,'$$\delta$$ E real',252,dat.forward_flux,1)
 do_plot(results.phi,'$$\phi$$',253,dat.forward_flux)
 do_plot(results.phi_pert,'$$\phi$$ pert',253,dat.forward_flux)
 
+do_plot(results.phi,'$$\phi$$ Sn',300,dat.forward_flux)
+do_plot(results.phiVEF,'$$\phi$$ VET',300,dat.forward_flux)
+
+do_plot(results.phia,'$$\phi^\dagger$$ Sn',301,dat.adjoint_flux)
+do_plot(results.phiVEFa,'$$\varphi^\dagger$$ VET',301,dat.adjoint_flux)
+
+
 results.Ebd
 results.Ebd_pert
 

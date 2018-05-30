@@ -7,7 +7,7 @@ clc; clear variables; clear global;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global npar dat snq IO_opts results
 % set variable once for all
-dat.pb_ID=774;
+dat.pb_ID=772;
 dat.forward_flux = true;
 dat.adjoint_flux = ~dat.forward_flux;
 do_transport_adjoint=false;
@@ -86,8 +86,8 @@ displayUnpertQOI
 % [phiVEFa_alt]=solve_VEF(dat.adjoint_flux,Ea,Ebda);
 % do_plot(phiVEFa_alt,'VEF-alt',100,dat.adjoint_flux)
 
-%singleSolve
-multiSolve
+singleSolve
+%multiSolve
 %multiSurfaceSolve
 
 dat.name

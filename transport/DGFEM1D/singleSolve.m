@@ -4,7 +4,7 @@ global npar dat snq IO_opts results
 [dEdq, dEdsa, dEdss, dEdinc]=getEslopes;
 
 qPertFac=0.0;
-sigaPertFac=-0.0;
+sigaPertFac=0.0;
 sigsPertFac=0.1;
 incPertFac=0.0;
 % Load Perturbations. Used in adjoint sensitivity

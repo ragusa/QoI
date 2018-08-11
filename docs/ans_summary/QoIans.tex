@@ -107,7 +107,7 @@ The adjoint system of Eq.~\eqref{eqs:EddingtonSystem} is given as
 \end{equation}
 \begin{equation}\label{eq:EddingtonAdjBC}
 0 = B \vefadj+ \vn \cdot
-\Edd \cdot \isigt(\vr) \vec{\nabla} \vefadj    \quad \vr \in \bound
+\Edd \cdot \isigt \vec{\nabla} \vefadj    \quad \vr \in \bound
 \end{equation}
 \end{subequations}
 
@@ -166,7 +166,7 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
   \centering
   \includegraphics[width=.98\linewidth]{772phia.png}
 \end{subfigure}
-\caption{Adjoint flux solutions for $\qoi_5$ (left) and $\qoi_3$ (right). Each ha a transport adjoint flux $\phi^\dag$ and a VET adjoint flux $\varphi^\dag$.}
+\caption{Adjoint flux solutions for $\qoi_5$ (left) and $\qoi_3$ (right). Each has a transport adjoint flux $\phi^\dag$ and a VET adjoint flux $\varphi^\dag$.}
 \label{fig:adj}
 \end{figure}
 
@@ -174,7 +174,7 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
   \centering
   \caption{$\delta \qoi$ values for $\qoi_5$}
   \begin{tabular}{l|lllll}\toprule
-  $\delta\qoi_1$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
+  $\delta\qoi_5$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
 \\ \midrule
 $q=+10\%$  & 0.0766009  & 0.0766009  & 0.0765787 & 0.0766009  & 0.0765787
 \\
@@ -194,7 +194,7 @@ $q=+10\%,\siga=+10\%$  & 0.0625379 & 0.0635974  & 0.0635383 & 0.0635604  &  0.06
   \centering
   \caption{$\delta \qoi$ values for $\qoi_3$}
   \begin{tabular}{l|lllll}\toprule
-  $\delta\qoi_2$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
+  $\delta\qoi_3$ method    & Exact     & Trans adj     & VET adj      &   VET blended  & VET $\delta \Edd$-appx 
 \\ \midrule
 $q=+10\%$  & 0.110511   & 0.110511   & 0.110431 & 0.110511   & 0.110431 
 \\
@@ -262,7 +262,7 @@ With voids present in the system, the unperturbed Eddington approximation can fa
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Acknowledgments}
-The work presented here was supported by a graduate assistantship from the U.S. DOE NNSA's PSAAP program (Predictive Science Academic Alliance Program), Grant DE-NA0002376.  
+The work presented was supported by a graduate assistantship from the U.S. DOE NNSA's PSAAP program (Predictive Science Academic Alliance Program), Grant DE-NA0002376.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{ans}

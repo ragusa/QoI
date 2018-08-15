@@ -109,24 +109,43 @@ Application of the adjoint method to transport can pose a major technical limita
 
 A potential solution to the memory requirement for the transport adjoint formulation is the use of a quasi-diffusion method to reduce the overall dimensionality of the transport problem, from 6D+time to 4D+time. The quasi-diffusion method examined is termed  as a ``Variable Eddington Tensor'' (VET) formulation and uses the unperturbed forward angular flux to compute the Eddington tensor needed in the quasi-diffusion approach. 
 
-In this paper a simpler 1-group steady state problem is considered. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to multigroup, time-dependent transport equation.
-
-\tcr{[Think on this](When expanding to a multigroup treatment, if up-scattering between groups can be ignored, the system can be treated as a series of equations of the 1-group form by using a combined scattering source term.)}
+In this paper the simpler 1-group steady state problem is considered. Examination of effectiveness of an adjoint formalism using the quasi-diffusion approximation instead of the full transport solution in this setting will provide insight to the advantages and shortcomings of the technique when applied to the multigroup time-dependent problem. If the treatment that is presented here is also applied to the time-dependent one-group system, the Eddington term found in Eq.~\eqref{eqs:sensitivity} also appears. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theory}
 The notation for inner products used throughout is as follows:
 \begin{itemize}
-\item $\braSN \psi , f \ketSN  = \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO) \,$
+\item $\braSN \psi , f \ketSN  := \int_V dV \int_{4 \pi} d \Omega \,  \psi(\vr, \vO)f(\vr, \vO) \,$
 
-\item $\bra \phi , f \ket  = \int_V dV \,  \phi(\vr) g(\vr) \,$
+\item $\bra \phi , f \ket : = \int_V dV \,  \phi(\vr) g(\vr) \,$
 
-\item $\sbraSN \psi , f \sketSN_{\pm}   = \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)f(\vr, \vO) \,$
+\item $\sbraSN \psi , f \sketSN_{\pm}   := \int_{\bound} dS \int_{\vO \cdot \vn \gtrless 0} d\Omega \,  \vO \cdot \vn(\vr) \, \psi(\vr, \vO)f(\vr, \vO) \,$
 
-\item $\sbra \phi(\vr) , g(\vr)  \sket = \int_{\partial V} dS \, \phi (\vr) g (\vr)  \,$
+\item $\sbra \phi(\vr) , g(\vr)  \sket := \int_{\partial V} dS \, \phi (\vr) g (\vr)  \,$
 \end{itemize}
 
+\subsection{Background}
 For this work the \qoi values considered are restricted to those than can be expressed in the form $\qoi := \bra \phi , q^\dag \ket $ where $q^\dag$ is the response function. This definition can handle total and average flux counting as well as simple detector setups.
-
+The one-group steady-state transport system we focus on is defined as
+\begin{subequations}
+\begin{equation}
+\label{SS1GTE}
+\vO \cdot \grad \psi + \sigt \psi = \frac{1}{4 \pi} \sigs \phi + \frac{1}{4 \pi} q \in V
+\end{equation}
+\begin{equation}
+\label{eqs:SS1GTE_bc}
+\psi= \psi^{\text{inc}} \quad \vr \in \partial V^{-} = \{ \vr \in \bound, \text{ s.t. }, \vO \cdot \vec{n}(\vr) < 0\}.
+\end{equation}
+\end{subequations}
+In addition to the forward transport system, the appropriate adjoint transport system for the \qoi definition in use is 
+\begin{subequations}
+\begin{equation}
+\label{eqs:transAdj}
+- \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
+\end{equation}
+\begin{equation}
+\psi^\dag =0 \quad \vr \in \partial V^{+} = \{  \vr \in \bound , \text{ s.t. }, \quad \vO \cdot \vec{n} > 0 \}.
+\end{equation}
+\end{subequations}
 The $\delta \qoi$ inner-product for use with one-group adjoint transport is given by Eq.~\eqref{eqs:snSens} \cite{Greenspan}. This formulation utilizes both the scalar and angular fluxes of both the forward and adjoint transport solutions. The requirement to store the angular flux solution for use in the $\delta \sigt$ term is what this research aims to eliminate.
 
 \begin{equation}
@@ -193,6 +212,8 @@ With $\frac{\partial \Edd}{\partial p}$ known a $\delta \Edd$ can then be approx
 \end{equation} 
 A particular weakness of this approach is that additional forward solves and Eddington stores are required to characterize $\Edd$ in the the perturbation space, which scales with the number of perturbed variables considered. Therefore in this approach it may be advantageous to only consider perturbations that would have a significant effect of the $\delta \Edd$ or $\delta \BEdd$ terms in Eq.~\eqref{eqs:EddErr} if possible. 
 
+In addition to the two $\qoi$ cases presented in this summary, additional $\qoi$ regions of the above system are also examined in a similar manner in the full work. Beyond the Reed system presented here additional systems were also tested in the full work, including a simple shielding system to demonstrate the effect of an perturbation in the incident flux $\delta \psi^{inc}$ and incident current $\delta J^{inc}$.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -219,7 +240,7 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
 
 
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 2 \includegraphics[scale=0.5]{7phi.png}
  \caption{Plot of unperturbed forward scalar flux for the Reed's problem. Flux found using both transport and VET method.}
@@ -227,7 +248,7 @@ Table~\ref{tab:qoi1} and Table~\ref{tab:qoi2} present the $\delta \qoi$ values f
 \end{figure}
 
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 \begin{subfigure}{.25\textwidth}
   \centering
@@ -288,7 +309,7 @@ For both test systems under source perturbation, all VET methods perform to with
 
 Perturbations in the scattering cross-sections show the strongest deviation of  the VET method from transport adjoint. For the $\qoi_3$ test the VET adjoint method and the blended are functionally useless. However, using an additional transport solve to begin to characterize the $\delta \Edd$ value had a drastic effect in this scenario and results in a much more usable value. One possible explanation is that in Eq.~\eqref{eqs:EddErr} the $\delta \Edd$ term is multiplied by a factor of $\isigt$. With the $\qoi$ region on the boundary of a void there is a significant numerical contribution from this $\isigt$ value, which resolves to a very large number in for the numerical scheme chosen. This gives some evidence that when using the $\delta \Edd$ approximation method it may be advantageous to characterize the $\Edd$ behavior under perturbation at void boundaries near a selected $\qoi$ region.
 
-\tcr{Touch on maybe if the way we modeled voids using the $10^{-8}$ caused this behavior, in retrospect maybe there was a more elegant way to do this.}
+Future work should also focus on refinement of the solution method for dealing with void regions, perhaps employing more elegant methods than the small cross-section approximation used in this implementation. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix

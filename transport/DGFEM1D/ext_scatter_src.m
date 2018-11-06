@@ -22,8 +22,13 @@ for iel=1:npar.nel
 
     my_zone=npar.iel2zon(iel);
     % isotropic scattering
-    sigs = dat.sigs(my_zone)/snq.sw;
-    qext = qv(my_zone);
+    if dat.NTD_sweep
+        sigs = 0;
+        qext = 1/ snq.sw;
+    else
+        sigs = dat.sigs(my_zone)/snq.sw;
+        qext = qv(my_zone);
+    end
 
     q(:,iel) = qext + sigs * phi(:,iel);
 end

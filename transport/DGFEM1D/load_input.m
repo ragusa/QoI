@@ -262,6 +262,55 @@ switch pb_ID
         dat.incPertRegion((sn/2)+1:sn) = 0;
         dat.name='Reed System w/ detector';
         
+    case 778 % Reed (5-zone problem)
+        % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 2 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 1e-8 1 1 ];
+        sigs=[ 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[ 0 1 0 0 0];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[0 0 1 0 0];
+        dat.sigsPertRegion=[0 0 1 0 0];
+        dat.sourcePertRegion=[1 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System lambda test';
+        
+   case 780 % Reed (sigt test)
+         % number of elements per zone
+        nel_zone = [ 10 10 10 10 10]*40;
+        % width of each zone
+        width_zone = [ 2 1 2 1 2 ];
+        % sigt/sigs per zone
+        sigt=[50 5 0 1 1 ];
+        sigs=[ 0 0 0 0.9 0.9];
+        % volumetric source value, per zone
+        qvf=[50 0 0 1 0];
+        % incoming flux values
+        incf(1:sn)   = 0;
+        % volumetric source value, per zone
+        qva=[1/2 0 0 0 0];
+        % incoming flux values
+        inca(1:sn)   = 0;
+        %Regions to be perturbed. Use value of 1 to specify
+        dat.sigaPertRegion=[1 0 0 1 0];
+        dat.sigsPertRegion=[0 0 0 1 1];
+        dat.sourcePertRegion=[1 0 0 1 0];
+        dat.incPertRegion(1:sn) = 0;
+        dat.incPertRegion((sn/2)+1:sn) = 0;
+        dat.name='Reed System QoI 1 Void 0';
+        
+        
     case 8 % Adams (PIM)
         % number of elements per zone
         nel_zone = [ 10 ];

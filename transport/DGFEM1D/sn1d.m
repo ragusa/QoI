@@ -7,7 +7,7 @@ clc; clear variables; clear global;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global npar dat snq IO_opts results
 % set variable once for all
-dat.pb_ID=7;
+dat.pb_ID=25;
 dat.forward_flux = true;
 dat.adjoint_flux = ~dat.forward_flux;
 do_transport_adjoint=false;
@@ -36,6 +36,14 @@ IO_opts.console_io = false;
 dat.do_dsa = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% dat.do_dsa = false;
+% dat.NTD_sweep = true;
+% [results.NTD_phi,results.NTD_E,results.NTD_Ebd,results.NTD_psi]=solveForwardSn;
+% do_plot(1./results.NTD_phi,'$$\phi_{NTD}$$',1253,dat.forward_flux)
+% do_plot(1./(3*results.NTD_phi.*results.NTD_E),'$$E_{NTD}$$',1253,dat.forward_flux)
+
+dat.do_dsa = true;
+dat.NTD_sweep = false;
 [results.phi,results.E,results.Ebd,results.psi]=solveForwardSn;
 [results.phia,results.Ea,results.Ebda,results.psia]=solveAdjointSn;
 [results.phiVEF]=solveForwardVEF;
@@ -86,8 +94,8 @@ displayUnpertQOI
 % [phiVEFa_alt]=solve_VEF(dat.adjoint_flux,Ea,Ebda);
 % do_plot(phiVEFa_alt,'VEF-alt',100,dat.adjoint_flux)
 
-singleSolve
-%multiSolve
+%singleSolve
+multiSolve
 %multiSurfaceSolve
 
 dat.name

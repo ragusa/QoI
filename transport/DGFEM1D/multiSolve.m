@@ -23,7 +23,7 @@ figurePath='C:\Users\Ian\Projects\QoI\docs\Thesis\ANSfigures';
 if plot_aVET
     legendStr={'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}','aVET'};
 else
-    legendStr={'sn forward','VET forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'};
+    legendStr={'sn forward','sn adjoint','VET adjoint','Blend adjoint','VET adjoint E_{appx}'};
 end
 %filename=fullfile('E:\Storage\git_checkout','output',file);
 % outputMatrix=['pid' 'QoISNf' 'QoISNa' 'QoIVEFf' 'QoIVEFa'];
@@ -343,11 +343,11 @@ figure(600)
 hold on
 xlabel('\sigma_a % change')
 ylabel('QoI % response')
-plot(sigaPertFactor*100,sigaSensValues(:,1)./(results.qoi_sn_f)*100,'-+g')
-plot(sigaPertFactor*100,sigaSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
+plot(sigaPertFactor*100,sigaSensValues(:,1)./(results.qoi_sn_f)*100,'-+k')
+%plot(sigaPertFactor*100,sigaSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
 plot(sigaPertFactor*100,sigaSensValues(:,3)./(results.qoi_sn_f)*100,'-db')
-plot(sigaPertFactor*100,sigaSensValues(:,4)./(results.qoi_sn_f)*100,'--+k')
-plot(sigaPertFactor*100,sigaSensValues(:,5)./(results.qoi_sn_f)*100,'--oc')
+plot(sigaPertFactor*100,sigaSensValues(:,4)./(results.qoi_sn_f)*100,'--+r')
+plot(sigaPertFactor*100,sigaSensValues(:,5)./(results.qoi_sn_f)*100,'--og')
 plot(sigaPertFactor*100,sigaSensValues(:,6)./(results.qoi_sn_f)*100,'--dm')
 if plot_aVET
     plot(sigaPertFactor*100,sigaSensValues(:,7)./(results.qoi_sn_f)*100,'--+r')
@@ -365,11 +365,11 @@ figure(601)
 hold on
 xlabel('\sigma_s % change')
 ylabel('QoI % response')
-plot(sigsPertFactor*100,sigsSensValues(:,1)./(results.qoi_sn_f)*100,'-+g')
-plot(sigsPertFactor*100,sigsSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
+plot(sigsPertFactor*100,sigsSensValues(:,1)./(results.qoi_sn_f)*100,'-+k')
+%plot(sigsPertFactor*100,sigsSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
 plot(sigsPertFactor*100,sigsSensValues(:,3)./(results.qoi_sn_f)*100,'-db')
-plot(sigsPertFactor*100,sigsSensValues(:,4)./(results.qoi_sn_f)*100,'--+k')
-plot(sigsPertFactor*100,sigsSensValues(:,5)./(results.qoi_sn_f)*100,'--oc')
+plot(sigsPertFactor*100,sigsSensValues(:,4)./(results.qoi_sn_f)*100,'--+r')
+plot(sigsPertFactor*100,sigsSensValues(:,5)./(results.qoi_sn_f)*100,'--og')
 plot(sigsPertFactor*100,sigsSensValues(:,6)./(results.qoi_sn_f)*100,'--dm')
 if plot_aVET
     plot(sigsPertFactor*100,sigsSensValues(:,7)./(results.qoi_sn_f)*100,'--+r')
@@ -387,11 +387,11 @@ figure(602)
 hold on
 xlabel('q % change')
 ylabel('QoI % response')
-plot(sourcePertFactor*100,qSensValues(:,1)./(results.qoi_sn_f)*100,'-+g')
-plot(sourcePertFactor*100,qSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
+plot(sourcePertFactor*100,qSensValues(:,1)./(results.qoi_sn_f)*100,'-+k')
+%plot(sourcePertFactor*100,qSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
 plot(sourcePertFactor*100,qSensValues(:,3)./(results.qoi_sn_f)*100,'-db')
-plot(sourcePertFactor*100,qSensValues(:,4)./(results.qoi_sn_f)*100,'--+k')
-plot(sourcePertFactor*100,qSensValues(:,5)./(results.qoi_sn_f)*100,'--oc')
+plot(sourcePertFactor*100,qSensValues(:,4)./(results.qoi_sn_f)*100,'--+r')
+plot(sourcePertFactor*100,qSensValues(:,5)./(results.qoi_sn_f)*100,'--og')
 plot(sourcePertFactor*100,qSensValues(:,6)./(results.qoi_sn_f)*100,'--dm')
 if plot_aVET
     plot(sourcePertFactor*100,qSensValues(:,7)./(results.qoi_sn_f)*100,'--+r')
@@ -409,11 +409,11 @@ figure(603)
 hold on
 xlabel('\Psi^- % change')
 ylabel('QoI % response')
-plot(incPertFactor*100,incSensValues(:,1)./(results.qoi_sn_f)*100,'-+g')
-plot(incPertFactor*100,incSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
+plot(incPertFactor*100,incSensValues(:,1)./(results.qoi_sn_f)*100,'-+k')
+%plot(incPertFactor*100,incSensValues(:,2)./(results.qoi_sn_f)*100,'-or')
 plot(incPertFactor*100,incSensValues(:,3)./(results.qoi_sn_f)*100,'-db')
-plot(incPertFactor*100,incSensValues(:,4)./(results.qoi_sn_f)*100,'--+k')
-plot(incPertFactor*100,incSensValues(:,5)./(results.qoi_sn_f)*100,'--oc')
+plot(incPertFactor*100,incSensValues(:,4)./(results.qoi_sn_f)*100,'--+r')
+plot(incPertFactor*100,incSensValues(:,5)./(results.qoi_sn_f)*100,'--og')
 plot(incPertFactor*100,incSensValues(:,6)./(results.qoi_sn_f)*100,'--dm')
 if plot_aVET
     plot(incPertFactor*100,incSensValues(:,7)./(results.qoi_sn_f)*100,'--+r')

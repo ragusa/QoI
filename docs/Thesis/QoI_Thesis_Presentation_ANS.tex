@@ -65,10 +65,10 @@
 \newcommand{\sigt}{\sigma_t}
 \newcommand{\sigs}{\sigma_s}
 \newcommand{\siga}{\sigma_a}
-%\newcommand{\isigt}{\sigma_t^{-1}}
-%\newcommand{\isigtp}{\sigma_{t,p}^{-1}}
-\newcommand{\isigt}{\ell_t}
-\newcommand{\isigtp}{\ell_{t,p}}
+\newcommand{\isigt}{\sigma_t^{-1}}
+\newcommand{\isigtp}{\sigma_{t,p}^{-1}}
+%\newcommand{\isigt}{\ell_t}
+%\newcommand{\isigtp}{\ell_{t,p}}
 \newcommand{\angSource}{\frac{q}{4 \pi}}
 \newcommand{\angSourcep}{\frac{q_p}{4 \pi}}
 \newcommand{\angSourcepd}{\frac{q+\delta q}{4 \pi}}
@@ -130,13 +130,13 @@
 
 \begin{frame}[t]\frametitle{Motivation}
 \begin{flushleft}
-CERT (Center for Exascale Radiation Transport) - Focus on deterministic transport code which can scale to Exascale regime
+CERT\footnote[frame]{NNSA PSAAP-II Program}(Center for Exascale Radiation Transport) - Focus on deterministic transport code which can scale to Exascale regime
 \begin{itemize}
 \item Potentially many unknowns for each transport solve
 \item Initial focus was on time-dependent transport experiments with detector quantity of interest (\qoi)
 \item High dimensionality of solution (space, angle, energy, and time) leads to memory limitations
 \item UQ using adjoint transport is negatively affected by this limitation.
-\item Can we get away with a Quasi-diffusive treatment with the adjoint approach to reduce dimensionality and still obtain the correct $\delta \qoi$ for use in UQ?
+\item Can we get away with a Quasi-diffusion treatment with the adjoint approach to reduce dimensionality and still obtain the correct $\delta \qoi$ for use in UQ?
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -193,7 +193,7 @@ CERT (Center for Exascale Radiation Transport) - Focus on deterministic transpor
 
 \begin{frame}\frametitle{\qoi Computed Using Transport}
  \begin{flushleft}
-To begin, consider the one-group steady state transport system with isotropic source $q$ and scattering $\sigs$
+To begin, consider the one-group steady state \tcr{forward} transport system with isotropic source $q$ and scattering $\sigs$
 \begin{subequations}
 \begin{equation}
 \label{SNfwd}
@@ -249,7 +249,7 @@ We are concerned with a volumetric and isotropic \qoi given by $\scalResp$
 
 \begin{frame}\frametitle{Transport Adjoint and \qoi}
  \begin{flushleft}
-To avoid a forward solve for every perturbation case, an adjoint method may be employed.\cite{Marchuk} The adjoint system is defined 
+To avoid a forward solve for every perturbation case, an \tcr{adjoint} method may be employed.\cite{Marchuk} The adjoint system is defined 
 \begin{subequations}
 \begin{equation}
 - \vO \cdot \grad \psi^\dag + \sigt \psi^\dag = \frac{\sigs}{4 \pi} \phi^\dag + \scalResp
@@ -294,7 +294,7 @@ Through the standard adjoint method a surface term is added in the \qoi
 %\end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- \begin{frame}\frametitle{Transport Adjoint}
+ \begin{frame}\frametitle{Sensitivity Using Transport Adjoint}
  \begin{flushleft}
 Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
 \begin{equation}
@@ -309,13 +309,13 @@ Perform $\qoi_p - \qoi$ to obtain the change in $\qoi$
 \end{equation}
 Pros
 \begin{itemize}
-\item Do not need SN solve for each perturbation scenario, just 2 SN solves to get unperturbed fluxes $\psi$ and $\psi^\dag$
-\item Still exact for source (volumetric and boundary) perturbations, $\delta q$ and $\delta \psi^{\text{inc}}$
+\item Do not need transport solve for each perturbation scenario, just \tcr{2 transport solves} to get unperturbed fluxes $\psi$ and $\psi^\dag$
+\item Still \tcr{exact for source} (volumetric and boundary) perturbations, $\delta q$ and $\delta \psi^{\text{inc}}$
 \end{itemize}
 Cons
 \begin{itemize}
 \item Only first-order perturbation accurate ($\delta \sigs \delta \phi=0$, $\delta \sigt \delta \phi=0$)
-\item Need to store angular dependent $\psi$ and $\psi^\dag$, which is prohibitive for time-dependent problems
+\item \tcr{Need to store} angular dependent $\psi$ and $\psi^\dag$, which is prohibitive for time-dependent problems
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -388,7 +388,7 @@ If $\Edd$ and $\BEdd$ are known, then $\phi^{\text{VET}} = \phi^{\text{SN}}$
 
 \begin{frame}\frametitle{VET Adjoint Formulation}
  \begin{flushleft}
-From the previous balance equation, an obvious form of the VET adjoint emerges
+From the previous balance equation, a form for the VET adjoint emerges:
 \begin{subequations}
 \begin{equation}
 \label{adjForm}
@@ -400,12 +400,14 @@ From the previous balance equation, an obvious form of the VET adjoint emerges
 \Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj,    \quad \vr \in \bound
 \end{equation}
 \end{subequations}
+Solving the system yields a VET adjoint scalar flux $\vefadj$. This is not the same adjoint scalar flux one would find using the transport adjoint. $\vefadj \neq \phi^\dag$
+\vspace{3mm}
+
 Choosing $J^{\dag,\text{out}} =0$ results in the relatively simple \qoi expression using this new formulation
 \begin{equation}
 \label{adjVETqoi}
 \qoi=\bra \scalSource , \vefadj \ket  + \sbra \vefadj, 2J^{\text{inc}} \sket
 \end{equation}
-Note that $ \phi^\dag \neq \vefadj$
 \end{flushleft}
 \end{frame}
 
@@ -415,16 +417,16 @@ Note that $ \phi^\dag \neq \vefadj$
 
 \begin{frame}\frametitle{Sensitivity Using VET Adjoint}
  \begin{flushleft}
-Now an assumption is made that the \tcr{$\Edd$ and $\BEdd$ remain unperturbed under system perturbation}. Note $\ell_t = \frac{1}{\sigt}$
+Now an assumption is made that the \tcr{$\Edd$ and $\BEdd$ remain unperturbed under system perturbation}. ($\delta \Edd, \delta \BEdd=0$) 
 \begin{equation}
 \label{VETSensDeriv}
 \begin{split}
 \qoi_p = &\bra \tcb{\phi_p} , \scalResp \ket \\
-       = &\bra \tcb{\phi_p} , - \Edd : \left( \grad \isigt \grad \varphi^\dag \right) + \siga \vefadj \ket \\
-\tcr{\approx} & \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd \tcr{\phi} \right) - \delta \siga \tcr{\phi}, \vefadj \ket - \sbra \tcb{\phi_p}, \Edd \cdot \isigt \grad \vefadj \sket \\
-&+ \sbra \vefadj, \isigt \div \Edd \tcb{\phi_p} \sket \\
-=& \bra q, \vefadj \ket  + \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd \tcr{\phi} \right)  - \delta \siga \tcr{\phi}, \vefadj \ket \\
-& - \sbra \tcb{\phi_p}, \Edd \cdot \isigt \grad \vefadj \sket + \sbra \vefadj, \isigt \div \Edd \tcb{\phi_p} \sket 
+       = &\bra \tcb{\phi_p} , - \Edd^u : \left( \grad \isigt \grad \varphi^\dag \right) + \siga \vefadj \ket \\
+\tcr{\approx} & \bra \scalSource + \delta \scalSource + \div \delta \isigt \div \left( \Edd^u \tcr{\phi} \right) - \delta \siga \tcr{\phi}, \vefadj \ket - \sbra \tcb{\phi_p}, \Edd^u \cdot \isigt \grad \vefadj \sket \\
+&+ \sbra \vefadj, \isigt \div \Edd^u \tcb{\phi_p} \sket \\
+=& \bra q, \vefadj \ket  + \bra \delta \scalSource + \div \delta \isigt \div \left( \Edd^u \tcr{\phi} \right)  - \delta \siga \tcr{\phi}, \vefadj \ket \\
+& - \sbra \tcb{\phi_p}, \Edd^u \cdot \isigt \grad \vefadj \sket + \sbra \vefadj, \isigt \div \Edd^u \tcb{\phi_p} \sket 
 \end{split}
 \end{equation}
 
@@ -441,18 +443,19 @@ Now an assumption is made that the \tcr{$\Edd$ and $\BEdd$ remain unperturbed un
  \begin{equation}
 \label{VETsens}
 \begin{split}
-\delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
+\delta \qoi =&  \bra \delta \scalSource - \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
 \end{split}
 \end{equation}
 Pros
 \begin{itemize}
-\item Requires only 1 SN solve to get $\Edd$ and $\phi$, and 1 scalar VET solve for $\varphi^\dag$
-\item No angular fluxes stored, only $\Edd$
+\item Requires only 1 transport solve to get $\Edd^u$ and $\phi$, and 1 scalar VET solve for $\varphi^\dag$
+\item No angular fluxes stored, only $\Edd^u$
 \end{itemize}
 Cons
 \begin{itemize}
-\item Only first order perturbation accurate (as was SN adjoint)
-\item Major assumption that $\delta \Edd=0$, which is not always true. This means that the method in general is not exact for source perturbations $\delta q$ and $\delta \psi^{\text{inc}}$, which was the case for transport
+\item Only first order perturbation accurate (as was transport adjoint)
+\item Major assumption that $\delta \Edd=0$, which is not necessarily true. 
+\item A consequence is that the method in general is not exact for source perturbations $\delta q$ and $\delta \psi^{\text{inc}}$, which was the case for transport adjoint
 \end{itemize}
 \end{flushleft}
 \end{frame}
@@ -460,17 +463,17 @@ Cons
 
 \begin{frame}\frametitle{Refinement Option 1: ``Blended'' Approach}
  \begin{flushleft}
-Form a $\delta \qoi$ inner-product by picking the exact source terms from \tcr{SN adjoint Eq.~\eqref{snSens}} and cross-section terms from \tcb{VET formulation adjoint Eq.~\eqref{VETsens}}
+Form a $\delta \qoi$ inner-product by picking the \tcr{exact} source terms from \tcr{transport adjoint Eq.~\eqref{snSens}} and cross-section terms from \tcb{VET formulation adjoint Eq.~\eqref{VETsens}}
 \begin{equation}
 \label{Blendsens}
 \begin{split}
-\delta \qoi =&  \tcr{\bra \angSourced , \phi^\dag \ket} \tcb{- \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket} \tcr{
+\delta \qoi =&  \tcr{\bra \angSourced , \phi^\dag \ket} \tcb{- \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket} \tcr{
 - \sbraSN \delta \psi^\text{inc}, \psi^\dag \sketSN }\\
 \end{split}
 \end{equation}
 Pros
 \begin{itemize}
-\item Requires 2 transport solves to get $\Edd$, $\phi$ and $\phi^\dag$ then one VET solve for $\varphi^\dag$
+\item Requires 2 transport solves to get $\Edd^u$, $\phi$ and $\phi^\dag$ then one VET solve for $\varphi^\dag$
 \item No angular fluxes stored
 \item Still exact for source perturbations (equivalent to transport adjoint)
 \end{itemize}
@@ -646,8 +649,8 @@ Cons
      Transport 			&$\bra \tcr{\phi_{p}} , \scalResp \ket - \bra \phi , \scalResp \ket = \bra \delta \phi , \scalResp \ket $ \\ \hline
      Trans Adj  			&$\bra \angSourced, \phi^\dag \ket - \tcr{\braSN \delta\sigt\psi , \psi^\dag \ketSN} + \bra \frac{\delta \sigs}{4 \pi} \phi
  , \phi^\dag \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN$\\ \hline
-     VET Adj			&$ \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket$\\ \hline
-     VET Blend			&$\bra \angSourced , \phi^\dag \ket - \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd \phi \right) , \grad \vefadj \ket 
+     VET Adj			&$ \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket$\\ \hline
+     Blend		&$\bra \angSourced , \phi^\dag \ket - \bra \delta \siga \phi, \vefadj \ket - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket 
 - \sbraSN \delta \psi^\text{inc}, \psi^\dag \sketSN $\\ \hline
      VET $\delta \Edd$ 	&VET Adj $- \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
 - \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket$ \\ \hline
@@ -826,17 +829,17 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
- \begin{flushleft}
-\begin{itemize}
-\item Infinite medium approximation in only unperturbed.
-\item For source perturbations: Transport Adjdoint, blended, and aVET agree with transport forward.
-\item For $\sigma$ perturbations, adjoint methods begin to show first order approximation error.
-\item For $\sigma$ perturbations VET/blended adjoint are within $1 \%$ of transport adjoint. Eddington approximation and aVET nearly equal to transport adjoint $< 0.1 \%$ 
-\item Still low sensitivity to $\sigs$ perturbations.
-\end{itemize}
-\end{flushleft}
-\end{frame}
+%\begin{frame}\frametitle{Homogeneous System, Non-Homogeneous Perturbation}
+% \begin{flushleft}
+%\begin{itemize}
+%\item Infinite medium approximation in only unperturbed.
+%\item For source perturbations: Transport Adjdoint, blended, and aVET agree with transport forward.
+%\item For $\sigma$ perturbations, adjoint methods begin to show first order approximation error.
+%\item For $\sigma$ perturbations VET/blended adjoint are within $1 \%$ of transport adjoint. Eddington approximation and aVET nearly equal to transport adjoint $< 0.1 \%$ 
+%\item Still low sensitivity to $\sigs$ perturbations.
+%\end{itemize}
+%\end{flushleft}
+%\end{frame}
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1099,34 +1102,50 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \end{subfigure}
 \end{figure}
 \end{frame}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}\frametitle{Reed Problem: QoI comparison}
+\begin{frame}\frametitle{Reed Problem: Adjoint flux comparison}
  \begin{flushleft}
 
 \begin{figure}[H]
 \label{Trial5}
 \centering
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{ANSfigures/774phia.png}
   \label{T3:sfig1}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{ANSfigures/772phia.png}
   \label{T3:sfig2}
 \end{subfigure}
-%
-\begin{subfigure}{.5\textheight}
+\caption*{Adjoint fluxes for scatter region \qoi (left) and void region \qoi (right)}
+\end{figure}
+\end{flushleft}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}\frametitle{Reed Problem: $\delta$QoI comparison}
+ \begin{flushleft}
+
+\begin{figure}[H]
+\label{Trial5}
+\centering
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{ANSfigures/774sigsSens.png}
   \label{T3:sfig3}
 \end{subfigure}%
-\begin{subfigure}{.5\textheight}
+\begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=.98\linewidth]{ANSfigures/772sigsSens.png}
   \label{T3:sfig4}
 \end{subfigure}
+\caption*{$\delta \qoi$ values for scatter region \qoi (left) and void region \qoi (right)}
 \end{figure}
 \end{flushleft}
 \end{frame}
@@ -1135,7 +1154,7 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Reed Problem: QoI comparison}
+\begin{frame}\frametitle{Reed Problem: $\delta$QoI comparison}
  \begin{flushleft}
 \begin{itemize}
 \item \qoi in scattering section fared fairly well for Eddington formulations, void \qoi did not
@@ -1195,10 +1214,12 @@ Note that $\delta \siga$ and $\delta \sigs$ are specified for each problem, and 
 \begin{flushleft}
 \begin{itemize}
 \item Extend tests to 2D/3D. Strong sensitivity to $\sigs$ is difficult to test in the 1D system. Inability to scatter ``around'' obstacles.
-\vspace{2mm}
-\item Potentially extend $\delta \Edd$ method to the aVET formulation.
+%\vspace{2mm}
+%\item Potentially extend $\delta \Edd$ method to the aVET formulation.
 \vspace{2mm}
 \item Focus on streaming/void problems.
+\vspace{2mm}
+\item Attempt to characterize $\delta \Edd$ in more clever ways.
 \end{itemize}
 \end{flushleft}
 \end{frame}

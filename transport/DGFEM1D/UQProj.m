@@ -12,7 +12,8 @@ global npar dat snq IO_opts results
 input_vars=[50 1 50 5 0.1 0.1 0.9 0.9];
 %UQLab Inputs
 Model.mFile = 'reed_wrapper';
-myModel = uq_createModel(Model);
+%Model.mHandle = @qoi_model; 
+qoiModel = uq_createModel(Model);
 %Region 1 Source
 Input.Marginals(1).Name = 'R1_q';
 Input.Marginals(1).Type = 'Gaussian';
@@ -60,19 +61,11 @@ PCEOpts.Type = 'Metamodel';
 PCEOpts.MetaType = 'PCE';
 % Specify the model that will be sampled to create the experimental design
 % for PCE
-PCEOpts.FullModel = myModel;
+PCEOpts.FullModel = qoiModel;
 % Specify the maximum polynomial degree (default: sparse PCE expansion)
-PCEOpts.Degree = 5;
+PCEOpts.Degree = 2;
 %  Specify the size of the experimental design (total cost of the metamodel)
-PCEOpts.ExpDesign.NSamples = 50;
-
-
-
-
-
-
-
-
+PCEOpts.ExpDesign.NSamples = 30;
 
 setup_solver()
 
@@ -85,9 +78,48 @@ uq_print(PCESobolAnalysis,2)
 out=PCESobolAnalysis.Results.Total;
 names=PCESobolAnalysis.Results.VariableNames;  
 fprintf('V & SN5 & VEF5 & SN3 & VEF3 & dE \\\\ \n');
-for ii=1:length(out)
+for ii=1:size(out,1)
     fprintf('%s & %g & %g & %g & %g & %g \\\\ \n',names{ii},out(ii,1),out(ii,2),out(ii,3),out(ii,4),out(ii,5));
 end
+
+ref_vec=[];
+model_vec=[];
+pert_vec=[];
+%%%%%%%%%%%%%Plot some output
+for ii=1:0.01:1.1
+    test_input = [50 1 50 5 0.1 0.1 ii*0.9 ii*0.9];
+    load_reed(test_input)
+    [phi_ref,E_ref,Ebd_ref,psi_ref]=solveForwardSn;
+    qoi3_sn = compute_qoi(dat.forward_flux,phi_ref,snq.n_dir,psi_ref,psi_ref);
+    model_out= uq_evalModel(myPCE,test_input);
+    qoi3_model=model_out(4);
+    ref_vec=[ref_vec qoi3_sn];
+    model_vec=[model_vec qoi3_model];
+    pert_vec=[pert_vec ii];
+end
+
+figure(3)
+hold on
+plot(pert_vec,ref_vec,'-+b')
+plot(pert_vec,model_vec,'-+r')
+
+test_input = [50 1 50 5 0.1 0.1 0.9 0.9];
+load_reed(test_input)
+[phi_ref,E_unpert,Ebd_ref,psi_ref]=solveForwardSn;
+E_unpert=reshape(E_unpert,800,1);
+test_input = [50 1 50 5 0.1 0.1 0.99 0.99];
+load_reed(test_input)
+[phi_ref,E_pert,Ebd_ref,psi_ref]=solveForwardSn;
+E_pert=reshape(E_pert,800,1);
+model_out= uq_evalModel(myPCE,test_input);
+E_model=model_out(6:805)';
+
+figure(4)
+hold on
+plot(E_model-E_unpert,'-+r')
+plot(E_pert-E_unpert,'-b')
+
+
 end
 
 function setup_solver()
@@ -119,4 +151,8 @@ IO_opts.console_io = false;
 dat.do_dsa = true;
 dat.NTD_sweep = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
+
+function Y=qoi_model(X)
+Y=reed_wrapper(X,1);
 end

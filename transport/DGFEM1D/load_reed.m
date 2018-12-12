@@ -32,7 +32,7 @@ qvf=[r1q 0 0 r4q 0];
 % incoming flux values
 incf(1:sn)   = 0;
 % volumetric response value, per zone
-qva=[ 0 0 0 0 1];
+qva=[ 0 0 1 0 0];
 % incoming flux values
 inca(1:sn)   = 0;
 %Regions to be perturbed. Use value of 1 to specify

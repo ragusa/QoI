@@ -1,15 +1,15 @@
 function [Y]=reed_wrapper(X)
 global npar dat snq IO_opts results
-nominal_input=[50 1 50 5 0.1 0.1 0.9 0.9];
+nominal_input=dat.nominal_input;
 load_reed(nominal_input);
 [results.phi,results.E,results.Ebd,results.psi]=solveForwardSn;
 nom_phi=results.phi;
 nom_E=results.E;
 nom_Ebd=results.Ebd;
 nom_psi=results.psi;
-do_plot(nom_phi,'$$\phi_{nom}$$',1,dat.forward_flux)
-qoi = compute_qoi(dat.forward_flux,results.phi,snq.n_dir,results.psi,results.psi);
-fprintf('Nominal: %d \n',qoi);
+%do_plot(nom_phi,'$$\phi_{nom}$$',1,dat.forward_flux)
+%qoi = compute_qoi(dat.forward_flux,results.phi,snq.n_dir,results.psi,results.psi);
+%fprintf('Nominal: %d \n',qoi);
 
 
 nSamp=length(X);
@@ -17,7 +17,14 @@ Y =zeros(nSamp,5+800);
 for ii=1:nSamp
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Load Reed Problem
-    load_reed(X(ii,:));
+    if dat.use_reduced_input
+        test_input=nominal_input;
+        test_input(4)=X(ii,1);
+        test_input(7)=X(ii,2);
+    else
+        test_input=X(ii,:);
+    end
+    load_reed(test_input);
     [results.phi_p,E_p,results.Ebd_p,results.psi_p]=solveForwardSn;
     [results.phiVEF_p]=solveForwardVEF;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -80,6 +80,7 @@ Project\\
 
 The full VET adjoint first-order sensitivity inner-product is
 \begin{equation}
+\label{EQ:VETsens}
 \delta \qoi = \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket - \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
 - \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket .
 \end{equation}
@@ -102,24 +103,83 @@ Our response function here is $q^\dag$, which here represents a \qoi of the tota
 \end{figure}
 
 As previously mentioned attempting to apply the VET adjoint-method to this system with the $0$ Eddington assumption produces unusable results. This is particularly bad when $\sigs$ is perturbed in regions $4$ and $5$.
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.8\linewidth]{772sigsSens.png}
+  \caption{\% \qoi change in response to $\sigs$ perturbations.}
+\label{fig:thesissens}
+\end{figure}
+It is fairly obvious that the $\delta \Edd=0$ approximation fails in this scenario. However, attempting a very crude estimation of $\delta \Edd$ using a single additional forward solve resulted in a very noticeable improvement in the adjoint approximation, shown as the purple line in Figure~\ref{fig:thesissens}.
 
-\section{Proposal}
-From my master's thesis work, a sensitivity formulation for the scalar flux using the first order adjoint applied to the VET formulation of the neutron transport equation is
+%\tcr{PUT IN LINEAR APPROXIMATION HERE!!}
+
+The project presented here is an attempt to expand and refine this method of approximating $\delta E$ using a polynomial chaos expansion (PCE). The simple explanation of the method is to create a PCE model of $\Edd$ using a number of transport solves. Which is to say, determine $\Edd_0(x)$ such that
 \begin{equation}
-\delta \qoi = \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket - \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
-- \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket .
+\Edd(x,\vec{\xi}) = \sum \Edd_0(x)P(\vec{\xi}) \quad.
 \end{equation}
-The problematic terms are highlighted in red, since we do not know the Eddington perturbation terms. Within my thesis I mainly assumed $\delta \Edd,\delta \BEdd=0$ which lead to problems for certain scenarios. I did a very quick and simple refinement to very simply compute a $\delta \Edd/ \delta p$ sensitivity for a parameter $p$ and add the term back in, which resulted in much stronger agreement between the VET sensitivity and transport sensitivity.
-
-This leads me to think of the above formulation as a method which reduces the problem of transport UQ to a problem of an Eddington tensor UQ (which is of lower dimensionality). Working under the sort of general idea that the Eddington tensor is not very sensitive to may parameter perturbations, then hopefully applying a method such as POD where our interest is $\Edd$ results in a small relevant basis. Then with a ROM for predicting $\delta \Edd$ we can utilize that prediction in the $\delta \qoi$ formulation above and obtain a much better first order perturbation than was done in the thesis. Importantly due to solution dimensionality this method should be more memory feasible than performing POD on the full angular flux solution $\psi$. Moreover, since $\Edd$ doesn't depend on the response $q^\dag$, performing the POD for our system gets a $\delta \Edd$ prediction that can be used for ANY response function. For every new $\qoi$ we only need to perform one additional quasi-diffusion solve to gain $\vefadj$
-
-So the general idea:
+Here $\vec{\xi}$ is our list of uncertain parameters. For the reed system listed above we have chosen $8$ parameters for our model:
 \begin{itemize}
-\item Offline POD stage - use an SN solver to generate snapshots of $\Edd$. Computationally expensive. May end up being memory expensive but hopefully not as much as performing POD on $\psi$. May consider using a coarser mesh in this stage.
-\item Online stage using the ROM to generate a $\delta \Edd$ value given system perturbations $\delta p$.
-\item Using the found $\delta \Edd$ in the VET Adjoint inner-product for $\delta \qoi$ shown above.
+\item 2 source values: Regions 1 and 4
+\item 4 $\siga$ values: Regions 1,2,3, and 4
+\item 2 $\sigs$ values: Regions 4,5
 \end{itemize}
+For the following test system, the $x$ domain was descretized into $400$ elements with $2$ degrees of freedom each. As such $\Edd_0(x)$ is a vector of $800$ values.
 
-The hope is that this results in a better prediction of $\delta \qoi$ than was found in my thesis, particularly for void problems. Also the limiting factor is to ensure that the memory doesn't requirement doesn't exceed that of performing an adjoint method using a full transport $\psi$.
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.8 \linewidth]{E8_nsamples.png}
+  \caption{Comparison of modeled $\delta E$ values varying number of samples.}
+\label{fig:phi_reed}
+\end{figure} 
+
+
+However there is a major practical issue with the above method. Since we are performing a PCE across the whole uncertain space, using a transport solve each time we could simply just do a PCE of the scalar flux and determine our perturbed \qoi that way. To attempt to carve out a use case for a PCE of $\Edd$, we turn to Sobol indices. Here we have defined a ``\qoi'' which is the norm of the difference in the $\Edd(x,\xi)$ from the nominal value $\Edd(x,\vec{0})$. We inspect the Sobol indices to observe which input variables this \qoi is most sensitive to.
+\begin{table}[H]
+\footnotesize
+\centering
+  \begin{tabular}{| l | r | r | r | r | r | r | r | r |}
+    \hline
+  & $\xi_1$ & $\xi_2$ & $\xi_3$ & $\xi_4$ & $\xi_5$ & $\xi_6$ & $\xi_7$ & $\xi_8$ \\ \hline
+$S$ & 0.00152535 & 0 & 0 & 0.659784 & 0.00162217 & 0.00710227 & 0.282522 & 0.00170134 \\  \hline
+    \end{tabular}
+  \caption{}
+\end{table}
+Observation of the above table indicates there are two unknowns $\Edd$ is especially sensitive to, these correspond to $\siga$ in the region to the left of the void and $\sigs$ in the region to the right of the void. Summing the values indicates that these two vairables are responsible for $\approx 98 \%$ of the variance. In some ways this should be expected, in that the materials surrounding the void are responsible for the issues encountered when a void is introduced into the system.
+
+As such we could consider reducing our variable space from $8$ to $2$, and performing a PCE expansion using only those two variables. This could yield a reasonable approximation of $\delta \Edd$ for use in the VET adjoint method, while costing less than a PCE of the scalar flux using transport solves. A PCE model was created, this time using only $2$ uncertain input variables. The estimation of $\delta \Edd$ from these is shown in Figure~\ref{fig:E2n} with the resulting $\delta \qoi$ approximation using Equation~\ref{EQ:VETsens} shown in Figure~\ref{fig:E2dqoi}
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.8 \linewidth]{E2_nsamples.png}
+  \caption{Comparison of modeled $\delta E$ values  using the reduced $\xi$ set versus varying number of samples.}
+  \label{fig:E2n}
+\end{figure} 
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.8 \linewidth]{E2_dqoi.png}
+  \caption{}
+ \label{fig:E2dqoi}
+\end{figure} 
+
+%\section{Proposal}
+%From my master's thesis work, a sensitivity formulation for the scalar flux using the first order adjoint applied to the VET formulation of the neutron transport equation is
+%\begin{equation}
+%\delta \qoi = \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket - \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket
+%- \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket .
+%\end{equation}
+%The problematic terms are highlighted in red, since we do not know the Eddington perturbation terms. Within my thesis I mainly assumed $\delta \Edd,\delta \BEdd=0$ which lead to problems for certain scenarios. I did a very quick and simple refinement to very simply compute a $\delta \Edd/ \delta p$ sensitivity for a parameter $p$ and add the term back in, which resulted in much stronger agreement between the VET sensitivity and transport sensitivity.
+%
+%This leads me to think of the above formulation as a method which reduces the problem of transport UQ to a problem of an Eddington tensor UQ (which is of lower dimensionality). Working under the sort of general idea that the Eddington tensor is not very sensitive to may parameter perturbations, then hopefully applying a method such as POD where our interest is $\Edd$ results in a small relevant basis. Then with a ROM for predicting $\delta \Edd$ we can utilize that prediction in the $\delta \qoi$ formulation above and obtain a much better first order perturbation than was done in the thesis. Importantly due to solution dimensionality this method should be more memory feasible than performing POD on the full angular flux solution $\psi$. Moreover, since $\Edd$ doesn't depend on the response $q^\dag$, performing the POD for our system gets a $\delta \Edd$ prediction that can be used for ANY response function. For every new $\qoi$ we only need to perform one additional quasi-diffusion solve to gain $\vefadj$
+%
+%So the general idea:
+%\begin{itemize}
+%\item Offline POD stage - use an SN solver to generate snapshots of $\Edd$. Computationally expensive. May end up being memory expensive but hopefully not as much as performing POD on $\psi$. May consider using a coarser mesh in this stage.
+%\item Online stage using the ROM to generate a $\delta \Edd$ value given system perturbations $\delta p$.
+%\item Using the found $\delta \Edd$ in the VET Adjoint inner-product for $\delta \qoi$ shown above.
+%\end{itemize}
+%
+%The hope is that this results in a better prediction of $\delta \qoi$ than was found in my thesis, particularly for void problems. Also the limiting factor is to ensure that the memory doesn't requirement doesn't exceed that of performing an adjoint method using a full transport $\psi$.
 
 \end{document}

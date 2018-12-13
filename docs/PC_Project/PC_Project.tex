@@ -115,24 +115,38 @@ It is fairly obvious that the $\delta \Edd=0$ approximation fails in this scenar
 
 The project presented here is an attempt to expand and refine this method of approximating $\delta E$ using a polynomial chaos expansion (PCE). The simple explanation of the method is to create a PCE model of $\Edd$ using a number of transport solves. Which is to say, determine $\Edd_0(x)$ such that
 \begin{equation}
-\Edd(x,\vec{\xi}) = \sum \Edd_0(x)P(\vec{\xi}) \quad.
+\Edd(x,\vec{\xi}) = \sum \Edd_i(x)P(\vec{\xi}) \quad.
 \end{equation}
 Here $\vec{\xi}$ is our list of uncertain parameters. For the reed system listed above we have chosen $8$ parameters for our model:
 \begin{itemize}
-\item 2 source values: Regions 1 and 4
-\item 4 $\siga$ values: Regions 1,2,3, and 4
-\item 2 $\sigs$ values: Regions 4,5
+\item 2 $q$ values: Regions 1 and 4
+\item 4 $\siga$ values: Regions 1, 2, 4, and 5
+\item 2 $\sigs$ values: Regions 4, 5
 \end{itemize}
 For the following test system, the $x$ domain was descretized into $400$ elements with $2$ degrees of freedom each. As such $\Edd_0(x)$ is a vector of $800$ values.
 
-
 \begin{figure}[H]
 \centering
-  \includegraphics[width=0.8 \linewidth]{E8_nsamples.png}
-  \caption{Comparison of modeled $\delta E$ values varying number of samples.}
-\label{fig:phi_reed}
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E8_nsamples.png}
+  \caption{}
+  \label{fig:E8n}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E8_dqoi.png}
+  \caption{}
+  \label{fig:E8dqoi}
+  \end{subfigure}%
+  \caption{(a)Comparison of modeled $\delta E$ values versus varying number of samples. (b) Resulting $\delta \qoi$ values from VET sensitivity.}
+  %\label{fig:E2n}
 \end{figure} 
 
+%\begin{figure}[H]
+%\centering
+%  \includegraphics[width=0.8 \linewidth]{E8_nsamples.png}
+%  \caption{Comparison of modeled $\delta E$ values varying number of samples.}
+%\label{fig:phi_reed}
+%\end{figure} 
 
 However there is a major practical issue with the above method. Since we are performing a PCE across the whole uncertain space, using a transport solve each time we could simply just do a PCE of the scalar flux and determine our perturbed \qoi that way. To attempt to carve out a use case for a PCE of $\Edd$, we turn to Sobol indices. Here we have defined a ``\qoi'' which is the norm of the difference in the $\Edd(x,\xi)$ from the nominal value $\Edd(x,\vec{0})$. We inspect the Sobol indices to observe which input variables this \qoi is most sensitive to.
 \begin{table}[H]
@@ -151,17 +165,26 @@ As such we could consider reducing our variable space from $8$ to $2$, and perfo
 
 \begin{figure}[H]
 \centering
-  \includegraphics[width=0.8 \linewidth]{E2_nsamples.png}
-  \caption{Comparison of modeled $\delta E$ values  using the reduced $\xi$ set versus varying number of samples.}
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E2_nsamples.png}
+  \caption{}
   \label{fig:E2n}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E2_dqoi.png}
+  \caption{}
+  \label{fig:E2dqoi}
+  \end{subfigure}%
+  \caption{(a)Comparison of modeled $\delta E$ values using the reduced $\xi$ set versus varying number of samples. (b) Resulting $\delta \qoi$ values from VET sensitivity.}
+  %\label{fig:E2n}
 \end{figure} 
 
-\begin{figure}[H]
-\centering
-  \includegraphics[width=0.8 \linewidth]{E2_dqoi.png}
-  \caption{}
- \label{fig:E2dqoi}
-\end{figure} 
+%\begin{figure}[H]
+%\centering
+%  \includegraphics[width=0.8 \linewidth]{E2_dqoi.png}
+%  \caption{}
+% \label{fig:E2dqoi}
+%\end{figure} 
 
 %\section{Proposal}
 %From my master's thesis work, a sensitivity formulation for the scalar flux using the first order adjoint applied to the VET formulation of the neutron transport equation is

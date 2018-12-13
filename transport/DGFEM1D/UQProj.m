@@ -122,9 +122,11 @@ end
 % plot(pert_vec,ref_vec,'-+b')
 % plot(pert_vec,model_vec,'-+r')
 
-%Transport solve of unperturbed problem: Forward and VET adjoint
+sn=snq.n_dir;
+%Transport solve of unperturbed problem: Forward and Sn/VET adjoint
 load_reed(dat.nominal_input)
 [phi_ref,E_unpert,Ebd_ref,psi_ref]=solveForwardSn;
+[phia,Ea,Ebda,psia]=solveAdjointSn;
 phiVEFa=solve_VEF_math_adjoint(dat.adjoint_flux,E_unpert,Ebd_ref);
 qoi_ref = compute_qoi(dat.forward_flux,phi_ref,snq.n_dir,psi_ref,psi_ref);
 E_unpert=reshape(E_unpert,800,1);
@@ -166,82 +168,85 @@ else
     model_input = [50 1 50 5 0.1 0.1 0.99 0.99];
 end
 
-if do_nsamp_plot
-    %Plot reference delta QOI solution
-    ref_qoi_vec=[];
-    ref_qoi_adj_vec=[];
-    pert_vec=[];
-    for ii=-0.1:0.01:0.1
-        test_input = [50 1 50 5 0.1 0.1 (1+ii)*0.9 (1+ii)*0.9];
-        load_reed(test_input)
-        [phi_pert,E_pert,Ebd_pert,psi_pert]=solveForwardSn;
-        qoi3_sn = compute_qoi(dat.forward_flux,phi_pert,snq.n_dir,psi_pert,psi_pert);
-        ref_qoi_vec=[ref_qoi_vec qoi3_sn-qoi_ref];
-        pert_vec=[pert_vec ii];
-    end
 
-    figure(7)
-    hold on
-    plot(100*pert_vec,100*ref_qoi_vec/qoi_ref,'-+b')
-    %plot(pert_vec,model_vec,'-+r')
-    
-    load_reed(dat.nominal_input)
-    
-    for ii=7:-1:3
-        %Plot the dE approximation
-        PCEOpts.ExpDesign.NSamples = 2^ii;
-        myPCE = uq_createModel(PCEOpts);
-        model_out= uq_evalModel(myPCE,model_input);
-        E_model=model_out(6:805)';
-        figure(5)
-        hold on
-        plot(E_model-E_unpert,'-')
-        legstr{end+1}=num2str(2^ii);
-        legstr2{end+1}=num2str(2^ii);
-        %Compute sensitivity using Adj and dE from PC
-        delta_E_correction=[];
-        for jj=-0.1:0.01:0.1
-            if dat.use_reduced_input
-               model_in=[5 (1+jj)*0.9];
-            else
-               model_in=[50 1 50 5 0.1 0.1 (1+jj)*0.9 (1+jj)*0.9];
-            end
-            model_out= uq_evalModel(myPCE,model_in);
-            E_model=model_out(6:805)';
-            %Load perturbation for adjoint
-            dat.sigsPert = dat.sigsPertRegion.*dat.sigs*jj;
-            dat.sigtPert = dat.sigsPert;
-            dat.sigaPert = dat.sigaPertRegion.*0.0;
-            dat.sourcePert =dat.sourcePertRegion.*0.0;
-            dat.psiIncPert = dat.incPertRegion.*0.0;
-            %Compute dE Correction
-            [deltaE_term,deltaB_L,deltaB_R,~]=compute_deltaE_QoI_term(phiVEFa,phi_ref,phi_ref,reshape(E_unpert,2,400),reshape(E_model,2,400),Ebd_ref,Ebd_ref);
-            delta_qoi_VEF_a_Eint=deltaE_term+deltaB_L+deltaB_R;
-            delta_E_correction=[delta_E_correction delta_qoi_VEF_a_Eint]
-            if ii==7
-                [dqoi3_VET, ~] = compute_perturbed_qoi_VEF(dat.adjoint_flux,phiVEFa,phi_ref,reshape(E_model,2,400));
-                ref_qoi_adj_vec=[ref_qoi_adj_vec dqoi3_VET]
-            end
-        end
-        figure(7)
-        hold on
-        plot(100*pert_vec,100*(ref_qoi_adj_vec+delta_E_correction)/qoi_ref,'-+')
-    end
-    figure(5)
-    legend(legstr,'Location','best');
-    xlabel('x')
-    ylabel('\delta E')
-    
-    legstr2{end+1}='VET_{adj}';
-    figure(7)
-    hold on
-    plot(100*pert_vec,100*ref_qoi_adj_vec/qoi_ref,'-+')
-    legend(legstr2,'Location','best');
-    xlabel('% \delta \sigma_s')
-    ylabel('% \delta QOI')
-    
-    
+%Plot reference delta QOI solution
+ref_qoi_vec=[];
+ref_qoi_adj_vec=[];
+ref_qoi_adjVET_vec=[];
+pert_vec=[];
+for ii=-0.1:0.01:0.1
+    test_input = [50 1 50 5 0.1 0.1 (1+ii)*0.9 (1+ii)*0.9];
+    load_reed(test_input)
+    [phi_pert,E_pert,Ebd_pert,psi_pert]=solveForwardSn;
+    qoi3_sn = compute_qoi(dat.forward_flux,phi_pert,snq.n_dir,psi_pert,psi_pert);
+    ref_qoi_vec=[ref_qoi_vec qoi3_sn-qoi_ref];
+    pert_vec=[pert_vec ii];
 end
+
+figure(7)
+hold on
+plot(100*pert_vec,100*ref_qoi_vec/qoi_ref,'-+b')
+%plot(pert_vec,model_vec,'-+r')
+
+load_reed(dat.nominal_input)
+
+for ii=7:-1:3
+    %Plot the dE approximation
+    PCEOpts.ExpDesign.NSamples = 2^ii;
+    myPCE = uq_createModel(PCEOpts);
+    model_out= uq_evalModel(myPCE,model_input);
+    E_model=model_out(6:805)';
+    figure(5)
+    hold on
+    plot(E_model-E_unpert,'-')
+    legstr{end+1}=num2str(2^ii);
+    legstr2{end+1}=num2str(2^ii);
+    %Compute sensitivity using Adj and dE from PC
+    delta_E_correction=[];
+    for jj=-0.1:0.01:0.1
+        if dat.use_reduced_input
+           model_in=[5 (1+jj)*0.9];
+        else
+           model_in=[50 1 50 5 0.1 0.1 (1+jj)*0.9 (1+jj)*0.9];
+        end
+        model_out= uq_evalModel(myPCE,model_in);
+        E_model=model_out(6:805)';
+        %Load perturbation for adjoint
+        dat.sigsPert = dat.sigsPertRegion.*dat.sigs*jj;
+        dat.sigtPert = dat.sigsPert;
+        dat.sigaPert = dat.sigaPertRegion.*0.0;
+        dat.sourcePert =dat.sourcePertRegion.*0.0;
+        dat.psiIncPert = dat.incPertRegion.*0.0;
+        %Compute dE Correction
+        [deltaE_term,deltaB_L,deltaB_R,~]=compute_deltaE_QoI_term(phiVEFa,phi_ref,phi_ref,reshape(E_unpert,2,400),reshape(E_model,2,400),Ebd_ref,Ebd_ref);
+        delta_qoi_VEF_a_Eint=deltaE_term+deltaB_L+deltaB_R;
+        delta_E_correction=[delta_E_correction delta_qoi_VEF_a_Eint]
+        if ii==7
+            dqoi3_sn = compute_perturbed_qoi_Sn(dat.adjoint_flux,phia,phi_ref,psi_ref,psia,sn);
+            [dqoi3_VET, ~] = compute_perturbed_qoi_VEF(dat.adjoint_flux,phiVEFa,phi_ref,reshape(E_model,2,400));
+            ref_qoi_adj_vec=[ref_qoi_adj_vec dqoi3_sn]
+            ref_qoi_adjVET_vec=[ref_qoi_adjVET_vec dqoi3_VET]
+        end
+    end
+    figure(7)
+    hold on
+    plot(100*pert_vec,100*(ref_qoi_adjVET_vec+delta_E_correction)/qoi_ref,'-+')
+end
+figure(5)
+legend(legstr,'Location','best');
+xlabel('x')
+ylabel('\delta E')
+
+legstr2{end+1}='Trans_{adj}';
+legstr2{end+1}='VET_{adj}';
+figure(7)
+hold on
+plot(100*pert_vec,100*ref_qoi_adj_vec/qoi_ref,'-+')
+plot(100*pert_vec,100*ref_qoi_adjVET_vec/qoi_ref,'-+')
+legend(legstr2,'Location','best');
+xlabel('% \delta \sigma_s')
+ylabel('% \delta QOI')
+
 
 fprintf('Nominal: %d \n',qoi_ref);
 

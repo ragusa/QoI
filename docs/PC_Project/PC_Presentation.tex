@@ -1,0 +1,498 @@
+\documentclass[xcolor={usenames,dvipsnames,svgnames,table}]{beamer}
+
+\mode<presentation>
+\usetheme{Madrid}
+
+\usecolortheme[RGB={80,0,0}]{structure}
+\useoutertheme[subsection=false]{miniframes}
+\useinnertheme{default}
+
+% hide navigation controlls
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamercolor{normal text}{fg=black}
+\setbeamercovered{dynamic}
+\beamertemplatetransparentcovereddynamicmedium
+%\usepackage{chronology}
+\setbeamertemplate{caption}[numbered]
+
+\definecolor{Maroon}{RGB}{80,0,0}
+\definecolor{BurntOrange}{RGB}{204,85,0}
+
+
+% load macros and prevent authblk from loading
+\input{../Presentations/common/macros.tex}
+\dontusepackage{authblk}
+
+% load packages, settings and definitions
+\input{../Presentations/common/packages.tex}
+\input{../Presentations/common/settings.tex}
+%\input{../common/definitions.tex}
+
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vp}{\vec{p}}
+\newcommand{\vOmega}{\vec{\Omega}}
+\newcommand{\vJ}{\vec{J}}
+\newcommand{\vO}{\vec{\Omega}}
+\newcommand{\bra}{\left\langle}
+\newcommand{\ket}{\right\rangle}
+\newcommand{\sbra}{\left[}
+\newcommand{\sket}{\right]}
+\newcommand{\braSN}{\left\langle \! \left\langle}
+\newcommand{\ketSN}{\right\rangle \! \right\rangle}
+\newcommand{\sbraSN}{\left[ \! \left[}
+\newcommand{\sketSN}{\right] \! \right]}
+\renewcommand{\div}{\vec{\nabla} \cdot}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\vbeta}{\vec{\beta} }
+\newcommand{\pdx}{\frac{\partial}{\partial x}}
+\newcommand{\pdy}{\frac{\partial}{\partial y}}
+\newcommand{\pdz}{\frac{\partial}{\partial z}}
+\newcommand{\intrrr}{\int d^3 r \,}
+\newcommand{\intrr}{\int d^2 r \,}
+\newcommand{\dEdphi}{\partial_\phi E }
+\newcommand{\dEdp}{\partial_p E }
+\newcommand{\dBdphi}{\partial_\phi B }
+\newcommand{\dBdp}{B }
+\newcommand{\adj}{\phi^\dag}
+\newcommand{\vefadj}{\varphi^\dag}
+\newcommand{\surf}{\int_{\partial V}}
+\newcommand{\domain}{V}
+\newcommand{\bound}{\partial V}
+\newcommand{\vn}{\vec{n}}
+\newcommand{\Edd}{\mathbb{E}}
+\newcommand{\BEdd}{B}
+\newcommand{\sigt}{\sigma_t}
+\newcommand{\sigs}{\sigma_s}
+\newcommand{\siga}{\sigma_a}
+\newcommand{\isigt}{\sigma_t^{-1}}
+\newcommand{\isigtp}{\sigma_{t,p}^{-1}}
+%\newcommand{\isigt}{\ell_t}
+%\newcommand{\isigtp}{\ell_{t,p}}
+\newcommand{\angSource}{\frac{q}{4 \pi}}
+\newcommand{\angSourcep}{\frac{q_p}{4 \pi}}
+\newcommand{\angSourcepd}{\frac{q+\delta q}{4 \pi}}
+\newcommand{\angSourced}{\frac{\delta q}{4 \pi}}
+\newcommand{\scalSource}{q}
+\newcommand{\angResp}{q^\dag}
+\newcommand{\scalResp}{q^\dag}
+\newcommand{\qoi}{{\it QoI}\xspace}
+\newcommand{\tcr}[1]{\textcolor{red}{#1}}
+\newcommand{\tcb}[1]{\textcolor{blue}{#1}}
+\newcommand{\tcm}[1]{\textcolor{magenta}{#1}}
+\newcommand{\tcg}[1]{\textcolor{BlueGreen}{#1}}
+
+
+% nicer item settings
+\setlist[1]{nolistsep,label=\(\textcolor{Maroon}{\blacksquare}\)}
+\setlist[2]{nolistsep,label=\(\textcolor{Maroon}{\bullet}\)}
+
+\setenumerate[1]{
+	label=\protect\usebeamerfont{enumerate item}%
+	\protect\usebeamercolor[fg]{enumerate item}%
+	\insertenumlabel.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% edit to fit your document
+
+% set up pdf support and indexing
+\hypersetup{
+    pdftitle={Using Polynomial Chaos Expansion for Eddington Approximation for use in VET Adjoint Calculations},
+    pdfauthor={Ian Halvic},
+}
+
+\title[]{Using Polynomial Chaos Expansion for Eddington Approximation for use in VET Adjoint Calculations}
+\author[ ]{Ian Halvic}
+\institute[Texas A\&M]{Department of Nuclear Engineering \\ Texas A\&M University}
+\date[12/13/18]
+
+\begin{document}
+
+% title page, do not edit
+{
+\setbeamertemplate{headline}[default] 
+\begin{frame}
+\vspace{-1.1cm}
+	\begin{figure}[t]
+		\centering
+			\includegraphics[width=.25\textwidth]{seal.png}
+	\end{figure}
+\vspace{-0.75cm}
+\titlepage
+\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Background}	% define sections here, it is possible to get section slides automatically, but this is not enabled
+\subsection{}	% we have to keep these to get the navigation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Motivation}
+\begin{flushleft}
+\begin{block}{Primarily an expansion of some previous work (master's thesis) \cite{MyMasters}}
+\begin{itemize}
+	\item Previous work focused on reducing memory requirement of transport adjoint methods by storing only scalar flux $\phi$ instead of angular flux $\psi$
+	\item Accomplished using a Vairable Eddington Tensor (VET) formulation of the problem and a corresponding adjoint
+	\item However assumptions were made which were shown to fail in certain test cases
+\end{itemize}
+\end{block}
+This work attempts to relax these assumptions using a selected polynomial chaos expansion to fill in unknown data.
+\end{flushleft}
+\end{frame}
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Why Not Transport?}
+\begin{flushleft}
+Consider the one-group steady state \tcr{forward} transport system with isotropic source $q$ and scattering $\sigs$
+\begin{subequations}
+\begin{equation}
+\label{SNfwd}
+ \vO \cdot \grad \psi + \sigt \psi = \frac{\sigs}{4 \pi} \phi + \angSource
+\end{equation}
+\begin{equation}
+\psi(\vr) = \psi^{ \text{inc}}(\vr) \quad \vr \in \partial V^{-} = \{  \vr \in \bound , \quad \vO \cdot \vec{n} < 0 \}
+\end{equation}
+\end{subequations}
+The adjoint of the above nearly self adjoint ($\vO \to -\vO$). 
+\begin{block}{First order sensitivity inner product}
+\begin{equation}
+\label{snSens}
+\begin{split}
+\delta \qoi 
+ &\delta \approx \bra \angSourced, \phi^\dag \ket - \tcr{\braSN \delta\sigt\psi , \psi^\dag \ketSN} + \bra \frac{\delta \sigs}{4 \pi} \phi
+ , \phi^\dag \ket - \sbraSN \delta \psi^{\text{inc}}, \psi^\dag \sketSN \\
+\end{split}
+\end{equation}
+Storing $\psi$ and $\psi^\dag$ is \tcr{BAD}!
+\end{block}
+\end{flushleft}
+\end{frame}
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{VET Formulation}
+\begin{flushleft}
+Formulate the Eddington Tensor $\Edd$ and a Boundary Eddington Factor $\BEdd$ 
+\begin{equation}
+\Edd(\vr)=\frac{\int d\Omega \vO \vO \psi(\vr,\vO)}{\phi(\vr)}
+, \, \vr \in V \quad \quad 
+\BEdd(\vr) = \frac{\int_{4 \pi} d\Omega \, | \vO \cdot \vn | \psi}{\phi(\vr)} , \, \vr \in \bound
+\end{equation}
+Use with P1 equations to form the quasi-diffusive VET formulation \cite{Miften}
+\begin{subequations}
+\begin{equation}
+\label{VEFForm}
+- \div \left( \frac{1}{\sigt}\div \Edd \phi \right) + \siga \phi = \scalSource \, \quad \vr \in V 
+\end{equation}
+\begin{equation}
+2 J^{\text{inc}} = \BEdd \phi + \vn \cdot \frac{1}{\sigt} \div \Edd \phi \,\quad  \vr \in \bound
+\end{equation}
+\end{subequations}
+If $\Edd$ and $\BEdd$ are known, then $\phi^{\text{VET}} = \phi^{\text{SN}}$
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{VET Adjoint}
+\begin{flushleft}
+From the previous balance equation, a form for the VET adjoint emerges:
+\begin{subequations}
+\begin{equation}
+\label{adjForm}
+- \Edd : \left( \grad \left( \frac{1}{\sigt}\grad \vefadj \right) \right) + \siga \vefadj = \scalResp,    \quad \vr \in V
+\end{equation}
+\begin{equation}
+\label{adjVETBC}
+2J^{\dag,\text{out}} = B \vefadj+ \vn \cdot
+\Edd \cdot \frac{1}{\sigma_{t} } \vec{\nabla} \vefadj,    \quad \vr \in \bound
+\end{equation}
+\end{subequations}
+Solving the system yields a VET adjoint scalar flux $\vefadj$. This is not the same adjoint scalar flux one would find using the transport adjoint. $\vefadj \neq \phi^\dag$
+\vspace{3mm}
+
+We choose $J^{\dag,\text{out}} =0$
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{VET Sensitivity}
+\begin{flushleft}
+\begin{block}{VET adjoint first-order sensitivity inner-product}
+\begin{equation}
+\label{EQ:VETsens}
+\begin{split}
+\delta \qoi &\approx \bra \delta \scalSource, \vefadj  \ket - \bra \delta \siga \phi, \vefadj \ket  - \bra \delta \isigt \div \left( \Edd^u \phi \right) , \grad \vefadj \ket + \sbra \vefadj, 2 \delta J^{\text{inc}} \sket \\
+& \quad - \bra  \isigt \div \left( \tcr{\delta \Edd} \phi \right), \grad \vefadj \ket - \sbra \vefadj, \phi \tcr{\delta \BEdd} \sket \\
+\end{split}
+\end{equation}
+\end{block}
+\begin{itemize}
+\item Contains system perturbations $\delta \scalSource$, $\delta J^{\text{inc}}$, $\delta \siga$, $\delta \sigt$ while also not requiring $\psi$ stored
+\item Eddington perturbations $\delta \Edd$ and $\delta \BEdd$ are problematic, they cannot be determined from system perturbations without another transport solve
+\item The previous work primarily made the assumption that $\delta \Edd$ and $\delta \BEdd=0$, which was adequate for a variety of scenarios, \tcr{but not all}
+\end{itemize}
+\end{flushleft}
+\end{frame}
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{VET Sensitivity: Voids}
+\begin{flushleft}
+\begin{minipage}{.45\textwidth}
+\begin{itemize}
+\item Introduction of voids regions into the system caused the VET sensitivity to perform poorly
+\item 5 region Reed problem: attempting to predict $\delta \qoi$ in response to $\delta \sigs$ failed spectacularly
+\end{itemize}
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=1\linewidth]{772sigsSens.png}
+\label{fig:thesissens}
+\end{figure}
+\end{minipage}
+\begin{itemize}
+\item A linear approximation of $\delta \Edd$ was made using an additional transport solve, this appeared to drastically improve the results, but what if we could do better...
+\end{itemize}
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Method+Results}	% define sections here, it is possible to get section slides automatically, but this is not enabled
+\subsection{}	% we have to keep these to get the navigation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Reed Problem}
+\begin{flushleft}
+\begin{block}{1D Reed Problem}
+\begin{itemize}
+\item Region 1: $x \in [0,2), \quad \tcb{\siga=50}, \, 			\sigs=0, \, \tcb{q=50}, \, q^\dag=0 $
+\item Region 2: $x \in [2,3), \quad \tcb{\siga=5}, \, 			\sigs=0, \, q=0, \, q^\dag=0$ 
+\item Region 3: $x \in [3,5), \quad \siga \approx 0, \,	\sigs=0, \, q=0, \,  \tcr{q^\dag=1}$
+\item Region 4: $x \in [5,6), \quad \tcb{\siga=0.1}, \, 		\tcb{\sigs=0.9}, \, \tcb{q=1}, \, q^\dag=0$
+\item Region 5: $x \in [6,8], \quad \tcb{\siga=0.1}, \, 		\tcb{\sigs=0.9}, \, q=0, \, q^\dag=0$
+\end{itemize} 
+\end{block}
+\begin{minipage}{.45\textwidth}
+$\qoi=$ total flux within the void region $x \in [3,5)$. 
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=0.9\linewidth]{phi_reed.png}
+\label{fig:phi_reed}
+\end{figure}
+\end{minipage}
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Polynomial Chaos Expansion (PCE)}
+\begin{flushleft}
+We consider a PCE of the Eddington Tensor across our computational domain $x$, with uncertain parameters $\xi$
+\begin{equation}
+\Edd(x,\vec{\xi}) = \sum \Edd_i(x)P(\vec{\xi}) \quad
+\end{equation}
+For the Reed system  $\vec{\xi} \in \mathbb{R}^8$. With coefficients found we could approximate $\delta \Edd$
+\vspace{3mm}
+
+This PCE expansion was performed using UQ-Lab \cite{UQLab}
+\begin{itemize}
+ \item Standard Deviation 10\% of nominal
+ \item Maximum Polynomial Degree=2
+ \item Varied Number of Sample Points
+\end{itemize}
+\vspace{3mm}
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{PCE Results}
+\begin{flushleft}
+$\delta \Edd$ was estimated and $\delta \qoi$ predicted using VET adjoint. Number of sample points in PCE varied
+\begin{figure}[H]
+\centering
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E8_nsamples.png}
+  \caption{$\delta E$}
+  \label{fig:E8n}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E8_dqoi.png}
+  \caption{$\delta \qoi$}
+  \label{fig:E8dqoi}
+  \end{subfigure}%
+  %\label{fig:E2n}
+\end{figure} 
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{WAIT!}
+\begin{flushleft}
+This is stupid!
+\begin{itemize}
+\item Each $\Edd$ sample in PCE takes a transport solve
+\item We could just expand $\phi$ and avoid adjoints all together
+\end{itemize}
+But what if we could reduce the cost of our $\Edd$ expansion...
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Sobol Indices}
+\begin{flushleft}
+Lets take a look at Sobol indices of the PCE expansion with a $\qoi$ of $\lVert \delta \Edd \rVert$
+\vspace{3mm}
+
+\begin{minipage}{.65\textwidth}
+\begin{itemize}
+\item Just $\xi_4$ and $\xi_7$ contribute to the vast majority of the variance
+\item Corresponds to $\siga$ to the left of void and $\sigs$ to the right of void
+\end{itemize}
+\end{minipage}
+\begin{minipage}{.30\textwidth}
+\begin{table}[H]
+\footnotesize
+\centering
+  \begin{tabular}{| l | r | }
+    \hline
+           & $S$\\ \hline
+   $\xi_1$ & 0.00152535\\  \hline
+   $\xi_2$ & 0\\  \hline
+   $\xi_3$ & 0 \\  \hline
+   $\xi_4$ & \tcb{0.659784} \\  \hline
+   $\xi_5$ & 0.00162217\\  \hline
+   $\xi_6$ & 0.00710227\\  \hline
+   $\xi_7$ & \tcb{0.282522} \\  \hline
+   $\xi_8$ & 0.00170134 \\  \hline
+    \end{tabular}
+\end{table}
+\end{minipage}
+Now we instead consider a PCE expansion of $\Edd$, but with $\vec{\xi} \in \mathbb{R}^2$. This hopefully reduces the total number of samples required.
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{PCE Results (reduced $\vec{\xi}$)}
+\begin{flushleft}
+$\delta \Edd$ and $\delta \qoi$ predictions using reduced $\vec{\xi} \in \mathbb{R}^2$ PCE model
+\begin{figure}[H]
+\centering
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E2_nsamples.png}
+  \caption{$\delta E$}
+  \label{fig:E8n}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+  \includegraphics[width=0.98 \linewidth]{E2_dqoi.png}
+  \caption{$\delta \qoi$}
+  \label{fig:E8dqoi}
+  \end{subfigure}%
+  %\label{fig:E2n}
+\end{figure} 
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Wrap-Up}	% define sections here, it is possible to get section slides automatically, but this is not enabled
+\subsection{}	% we have to keep these to get the navigation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{Takeaways}
+\begin{flushleft}
+\begin{block}{Observations}
+\begin{itemize}
+\item The PCE expansion showed stronger agreement than the previous $\delta \Edd=0$ approximation
+\item Reducing the PCE to $\vec{\xi} \in 2$ helped reduce overall PCE computation time will still providing an improved $\delta \qoi$
+\item Still need to compete with simple linear approximation
+\end{itemize}
+\end{block}
+
+\begin{block}{Possible Further Work}
+\begin{itemize}
+\item Consider scenarios where $\xi$'s may more strongly interact with eachother
+\item Test with different PCE settings in UQLab
+\item Consider extending to higher spacial dimensions
+\end{itemize}
+\end{block}
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]\frametitle{References}
+\begin{flushleft}
+\bibliography{QoI_MS} 
+\bibliographystyle{ieeetr}
+\end{flushleft}
+\end{frame}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}[t]\frametitle{BLANK SLIDE}
+%\begin{flushleft}
+%
+%\end{flushleft}
+%\end{frame}
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}[t]\frametitle{BLANK SLIDE}
+%\begin{flushleft}
+%
+%\end{flushleft}
+%\end{frame}
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
